@@ -7,52 +7,46 @@ let m0Slider, m1Slider, m3Slider, m4Slider, m5Slider, m6Slider, m7Slider, smooth
 let peakOn = false;
 let p = 0.04;
 
-/* const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
 // get the audio element
-const audioElement = document.querySelector('audio');
+var audioElement = document.querySelector('audio');
+
 // pass it into the audio context
-const track = audioCtx.createMediaElementSource(audioElement); */
+var track = audioContext.createMediaElementSource(audioElement);
 
-function centerCanvas() {
-  let x = (windowWidth - width) / 2;
-  let y = (windowHeight - height) / 2;
-  cnv.position(x, y);
-}
-
-function windowResized() {
-  //resizeCanvas(windowWidth/3, windowHeight/1.5);
-  resizeCanvas(windowWidth, windowHeight);
-  centerCanvas();
-  centerSliders();
-  easycam = createEasyCam();
-}
-function centerSliders() {
-  m0Slider.position(20, 20);
-  m1Slider.position(20, 50);
-  m2Slider.position(20, 80);
-  m3Slider.position(20, 110);
-  m4Slider.position(20, 140);
-  m5Slider.position(20, 170);
-  m6Slider.position(20, 200);
-  m7Slider.position(20, 230);
-  smoothSlider.position(width-smoothSlider.width-20, height-30);
-  strenghtSliderm0.position(width-strenghtSliderm0.width-20, 20);
-  strenghtSliderm2.position(width-strenghtSliderm2.width-20, 80);
-  strenghtSliderm4.position(width-strenghtSliderm2.width-20, 140);
-  strenghtSliderm6.position(width-strenghtSliderm2.width-20, 200);
-  button.position(width - button.width-20, height-100);  
-}
-
-function preload(){
-  audio = createAudio('http://a2r.twenty4seven.cc:8000/puredata.ogg'); //MediaElement in WebAudio?
-}
 
 function setup() {
   setAttributes("antialias", true);
   //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
+
+  var state = {
+    distance : 600,
+    center   : [0, 0, 0],
+    rotation : [0, 8.312, 0, 1],
+  };
+   
+  easycam = new Dw.EasyCam(this._renderer);
+  easycam.state_reset = state;   // state to use on reset (double-click/tap)
+  easycam.setState(state, 1800); // now animate to that state
+  // the simplest method to enable the camera
+  //easycam = createEasyCam();
+  // suppress right-click context menu
+  document.oncontextmenu = function() { return false; }
+  centerCanvas();
   colorMode(HSB);
+
+  // Audio Analyse
+  //audio = createAudio('http://a2r.twenty4seven.cc:8000/puredata.ogg'); //MediaElement in WebAudio?
+  mic = new p5.AudioIn();
+  peakDetect = new p5.PeakDetect(33,90,0.35,40);
+  //console.log(mic.getSources());
+  mic.start();
+  getAudioContext().resume();
+  fft = new p5.FFT();
+  fft.setInput(mic);
+  //fft.setInput(audio)
+  //audio.autoplay(true);
+
   // Slider
   m0Slider = createSlider(-300, 300, 30); 
   m1Slider = createSlider(0, 8, 2);
@@ -69,28 +63,8 @@ function setup() {
   strenghtSliderm6 = createSlider(-120, 120, 33);
   button = createButton('PeakDetect');
   butCol = color(0, 255, 255);
-  button.style('background-color', butCol);
-  
+  button.style('background-color', butCol)
   centerSliders()
-  centerCanvas();
-  
-  // simple Kamera ohne Rechtsklick
-  easycam = createEasyCam();
-  document.oncontextmenu = function() { return false; }
-
-  // Audio Analyse
-
-  console.log(audio)
-  //mic = new p5.AudioIn();
-  //console.log(mic.getSources());
-  //mic.start();
-  //Peaks
-  peakDetect = new p5.PeakDetect(33,90,0.35,40);
-  fft = new p5.FFT();
-  fft.setInput(audio);
-  //fft.setInput(mic)
-  audio.play();
-  //audioElement.play(true);  //
 }
 
 function draw() {
@@ -179,8 +153,7 @@ function sphaere(m,p) {
       let v2 = shape[i + 1][j % total];
       //stroke(0)
       vertex(v2.x, v2.y, v2.z);
-      // Farben
-      col = map(dist(v2.x,v2.y,v2.z,0,0,0),20,height/2,0,255);
+      col = map(dist(v2.x,v2.y,v2.z,0,0,0),20,height/2,0,200);
     }
     endShape();
   }
@@ -190,5 +163,33 @@ function touchStarted() {
   getAudioContext().resume();
 }
 
+function centerCanvas() {
+  let x = (windowWidth - width) / 2;
+  let y = (windowHeight - height) / 2;
+  cnv.position(x, y);
+}
 
+function windowResized() {
+  //resizeCanvas(windowWidth/3, windowHeight/1.5);
+  resizeCanvas(windowWidth, windowHeight);
+  centerCanvas();
+  centerSliders();
+  easycam = createEasyCam();
+}
+function centerSliders() {
+  m0Slider.position(20, 20);
+  m1Slider.position(20, 50);
+  m2Slider.position(20, 80);
+  m3Slider.position(20, 110);
+  m4Slider.position(20, 140);
+  m5Slider.position(20, 170);
+  m6Slider.position(20, 200);
+  m7Slider.position(20, 230);
+  smoothSlider.position(width-smoothSlider.width-20, height-30);
+  strenghtSliderm0.position(width-strenghtSliderm0.width-20, 20);
+  strenghtSliderm2.position(width-strenghtSliderm2.width-20, 80);
+  strenghtSliderm4.position(width-strenghtSliderm2.width-20, 140);
+  strenghtSliderm6.position(width-strenghtSliderm2.width-20, 200);
+  button.position(width - button.width-20, height-100);  
+}
 
