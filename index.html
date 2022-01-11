@@ -6,10 +6,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SphericalHarmonics</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
     body {
-      padding-left: 2px;
-      padding-top: 5px;
-      margin: 0;
+      font-family: 'Audiowide', cursive;
+      font-size: 1em;
+      background: transparent;
+      user-select: none;
+      /* For Chrome and Opera */
+      -ms-user-select: none;
+      /* For Internet Edge and Explorer*/
+      -webkit-user-select: none;
+      /* For Safari */
+      -moz-user-select: none;
+      /* For Firefox */
+      -khtml-user-select: none;
+      /* Konqueror HTML */
+    }
+
+    .button {
+      font-family: 'Audiowide', cursive;
+      font-size: 1em;
+      text-align: center;
+      color: black;
+      border: 2px solid white;
+      border-radius: 5px;
+    }
+
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-gap: 0.3em;
+    }
+
+    .wrapper>div {
+      background: transparent;
+      padding: 3px;
+      margin-bottom: 0.3em;
+      text-align: center;
+      color: white;
+      border: 2px solid white;
+      border-radius: 5px;
+    }
+
+    .wrapper>img {
+      width: 100%;
+      height: 30px;
+
+    }
+
+    .wrapper2 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 0.3em;
+    }
+
+    .wrapper2>div {
+      background: transparent;
+      padding: 3px;
+      text-align: center;
+      color: white;
+      border: 2px solid white;
+      border-radius: 5px;
     }
   </style>
   <!-- <audio src="http://a2r.twenty4seven.cc:8000/puredata.ogg" crossorigin="anonymous"></audio> -->
@@ -20,6 +78,24 @@
 </head>
 
 <body>
+  <div class="wrapper">
+    <img src="a2r.jpg" alt="">
+    <div id="m0">m0</div>
+    <div id="m1">m1</div>
+    <div id="m2">m2</div>
+    <div id="m3">m3</div>
+    <div id="m4">m4</div>
+    <div id="m5">m5</div>
+    <div id="m6">m6</div>
+    <div id="m7">m7</div>
+  </div>
+  <div class="wrapper2">
+    <div id="sM0">m0 Freq.Anteil</div>
+    <div id="sM2">m2 Freq.Anteil</div>
+    <div id="sM4">m4 Freq.Anteil</div>
+    <div id="sM6">m6 Freq.Anteil</div>
+  </div>
+
   <main>
   </main>
 </body>

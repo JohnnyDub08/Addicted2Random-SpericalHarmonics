@@ -1,21 +1,35 @@
-let cnv, mic, fft, peakDetect, amplitude;
+let cnv, mic, audio, fft, peakDetect, amplitude;
 let easycam;
 let shape = [];
+let particles = [];
 const total = 55;
 let col = 0;
-let m0Slider, m0,
-  m1Slider, m1,
-  m2Slider, m2,
-  m3Slider, m3,
-  m4Slider, m4,
-  m5Slider, m5,
-  m6Slider, m6,
-  m7Slider, m7,
-  smoothSlider, smoothValue,
-  strenghtSliderm0, strenghtValuem0,
-  strenghtSliderm2, strenghtValuem2,
-  strenghtSliderm4, strenghtValuem4,
-  strenghtSliderm6, strenghtValuem6,
+let m0Slider,
+  m0,
+  m1Slider,
+  m1,
+  m2Slider,
+  m2,
+  m3Slider,
+  m3,
+  m4Slider,
+  m4,
+  m5Slider,
+  m5,
+  m6Slider,
+  m6,
+  m7Slider,
+  m7,
+  smoothSlider,
+  smoothValue,
+  strenghtSliderm0,
+  strenghtValuem0,
+  strenghtSliderm2,
+  strenghtValuem2,
+  strenghtSliderm4,
+  strenghtValuem4,
+  strenghtSliderm6,
+  strenghtValuem6,
   button,
   button2,
   button3,
@@ -24,78 +38,87 @@ let m0Slider, m0,
 let sourceIsStream = true;
 let peakOn = false;
 let sSize = 0.2;
-
-/* const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-// get the audio element
-const audioElement = document.querySelector('audio');
-// pass it into the audio context
-const audio = audioCtx.createMediaElementSource(audioElement); */
+let offSet = 50;
+let grid = false;
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
   let y = (windowHeight - height) / 2;
   cnv.position(x, y);
 }
-
 function windowResized() {
   //resizeCanvas(windowWidth/3, windowHeight/1.5);
   resizeCanvas(windowWidth, windowHeight);
   centerCanvas();
   centerSliders();
-  easycam = createEasyCam();
+  particles.splice(0, particles.length);
+  for (let i = 0; i < 377; i++) {
+    particles.push(
+      createVector(
+        random(-width * 1.5, width * 1.5),
+        random(-width * 1.5, width * 1.5),
+        random(-width * 1.5, width * 1.5)
+      )
+    );
+  }
 }
 function centerSliders() {
-  m0Slider.position(10, 20);
-  m1Slider.position(10, 50);
-  m2Slider.position(10, 80);
-  m3Slider.position(10, 110);
-  m4Slider.position(10, 140);
-  m5Slider.position(10, 170);
-  m6Slider.position(10, 200);
-  m7Slider.position(10, 230);
+  m0Slider.position(10, offSet + 30);
+  m1Slider.position(10, offSet + 50);
+  m2Slider.position(10, offSet + 70);
+  m3Slider.position(10, offSet + 90);
+  m4Slider.position(10, offSet + 110);
+  m5Slider.position(10, offSet + 130);
+  m6Slider.position(10, offSet + 150);
+  m7Slider.position(10, offSet + 170);
   smoothSlider.position(width - smoothSlider.width - 10, height - 30);
-  strenghtSliderm0.position(width - strenghtSliderm0.width-10, 20);
-  strenghtSliderm2.position(width - strenghtSliderm2.width-10, 80);
-  strenghtSliderm4.position(width - strenghtSliderm2.width-10, 140);
-  strenghtSliderm6.position(width - strenghtSliderm2.width-10, 200);
-  button.position(width - button.width -  10, height - 100);
-  button2.position(width - button.width - 10, height - 130);
-  button3.position(width - button.width - 10, height - 160);
-  button4.position(width - button.width - 10, height - 190);
+  strenghtSliderm0.position(width - strenghtSliderm0.width - 10, offSet + 30);
+  strenghtSliderm2.position(width - strenghtSliderm2.width - 10, offSet + 70);
+  strenghtSliderm4.position(width - strenghtSliderm2.width - 10, offSet + 110);
+  strenghtSliderm6.position(width - strenghtSliderm2.width - 10, offSet + 150);
+  button.position(10, height - 30);
+  button2.position(10, height - 60);
+  button3.position(10, height - 90);
+  button4.position(10, height - 120);
 }
 
 function setup() {
   setAttributes("antialias", true);
   //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
+  cnv.style("z-index", -1);
   colorMode(HSB);
   // Slider
-  m0Slider = createSlider(-9, 9, 0, 0.01); 
-  m1Slider = createSlider(0, 9, 2);
-  m2Slider = createSlider(-9, 9, 3, 0.01); 
+  m0Slider = createSlider(-9, 9, -9, 0.01);
+  m1Slider = createSlider(0, 9, 1);
+  m2Slider = createSlider(-9, 9, 0, 0.01);
   m3Slider = createSlider(0, 9, 2);
-  m4Slider = createSlider(-9, 9, 8, 0.01); 
-  m5Slider = createSlider(0, 9, 5);
-  m6Slider = createSlider(0, 9, 3, 0.01); 
-  m7Slider = createSlider(0, 9, 8);
-  smoothSlider = createSlider(0.7, 1, 0.85, 0.001);
-  strenghtSliderm0 = createSlider(-18, 18, 1, 0.01);
-  strenghtSliderm2 = createSlider(-18, 18, 1, 0.01);
-  strenghtSliderm4 = createSlider(-18, 18, 1, 0.01);
-  strenghtSliderm6 = createSlider(-18, 18, 1, 0.01);
-  button = createButton("PeakDet. aus");
+  m4Slider = createSlider(-9, 9, -3.5, 0.01);
+  m5Slider = createSlider(0, 9, 1);
+  m6Slider = createSlider(-9, 9, -8.5, 0.01);
+  m7Slider = createSlider(0, 9, 1);
+  smoothSlider = createSlider(0.5, 1, 0.78, 0.001);
+  strenghtSliderm0 = createSlider(-18, 18, 9, 0.01);
+  strenghtSliderm2 = createSlider(-18, 18, 9, 0.01);
+  strenghtSliderm4 = createSlider(-18, 18, 9, 0.01);
+  strenghtSliderm6 = createSlider(-18, 18, 9, 0.01);
+  button = createButton("PeakDetect aus");
   button2 = createButton("AudioSource");
   button3 = createButton("Load");
   button4 = createButton("Save");
   butCol = color(0, 255, 255);
   button.style("background-color", butCol);
-
+  button.elt.className = "button";
+  button2.elt.className = "button";
+  button3.elt.className = "button";
+  button4.elt.className = "button";
   centerSliders();
   centerCanvas();
 
   // simple Kamera ohne Rechtsklick
-  easycam = createEasyCam(this._renderer, { distance: 1600, center: [0, 0, 0] });
+  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
+  easycam.setDistanceMin(300);
+  easycam.setDistanceMax(2000);
   document.oncontextmenu = function () {
     return false;
   };
@@ -112,7 +135,41 @@ function setup() {
 
   //console.log(mic.getSources());
   //mic.start();
-  //fft.setInput(mic)/*  */ 
+  //fft.setInput(mic)/*  */
+  for (let i = 0; i < 377; i++) {
+    particles.push(
+      createVector(
+        random(-width * 1.5, width * 1.5),
+        random(-width * 1.5, width * 1.5),
+        random(-width * 1.5, width * 1.5)
+      )
+    );
+  }
+}
+
+function htmlHandler() {
+  document.getElementById("m0").innerHTML = "m0=" + m0;
+  document.getElementById("m1").innerHTML = "m1=" + m1;
+  document.getElementById("m2").innerHTML = "m2=" + m2;
+  document.getElementById("m3").innerHTML = "m3=" + m3;
+  document.getElementById("m4").innerHTML = "m4=" + m4;
+  document.getElementById("m5").innerHTML = "m5=" + m5;
+  document.getElementById("m6").innerHTML = "m6=" + m6;
+  document.getElementById("m7").innerHTML = "m7=" + m7;
+  document.getElementById("sM0").innerHTML = "m0St.=" + strenghtValuem0;
+  document.getElementById("sM2").innerHTML = "m2St.=" + strenghtValuem2;
+  document.getElementById("sM4").innerHTML = "m4St.=" + strenghtValuem4;
+  document.getElementById("sM6").innerHTML = "m6St.=" + strenghtValuem6;
+}
+
+function spektrum(spectrum) {
+  beginShape();
+  for (i = 0; i < spectrum.length; i++) {
+    let x = map(log(i), 0, log(spectrum.length), 0, width);
+    stroke(0);
+    vertex(x - width / 2, map(spectrum[i], 0, 255, height / 2, 0)); // vorher i statt x
+  }
+  endShape();
 }
 
 function draw() {
@@ -130,11 +187,19 @@ function draw() {
   strenghtValuem4 = strenghtSliderm4.value();
   strenghtValuem6 = strenghtSliderm6.value();
   butCol = peakOn ? color(0, 255, 255) : color(127, 255, 255);
-
-  button.mousePressed(() => {peaks()});
-  button2.mousePressed(() => {switchSource()});
-  button3.mousePressed(() => {getPreset()});
-  button4.mousePressed(() => {setPreset()});
+  htmlHandler();
+  button.mousePressed(() => {
+    peaks();
+  });
+  button2.mousePressed(() => {
+    switchSource();
+  });
+  button3.mousePressed(() => {
+    getPreset();
+  });
+  button4.mousePressed(() => {
+    setPreset();
+  });
 
   // Audio Spektrum
   let spectrum = fft.analyze(); // .analyze muss laufen
@@ -152,32 +217,34 @@ function draw() {
   // Peaks
   if (peakOn) peakDetect.update(fft);
   if (peakDetect.isDetected) {
-    sSize = lerp(sSize, 0.4, 0.4);
-  }  else if (amplitude.volume <= 0.1 && sourceIsStream) {
-    sSize = lerp(sSize, 0.0, 0.3);
-  }  else {
-    sSize = lerp(sSize, 0.16, 0.1);
+    sSize = lerp(sSize, 2, 0.3);
+  } else {
+    sSize = lerp(sSize, 1, 0.1);
   }
 
-  // Spektrum Animation
-/*   beginShape();
-    for (i = 0; i < spectrum.length; i++) {
-      let x = map(log(i), 0, log(spectrum.length), 0, width);
-      stroke(0);
-      vertex(x-width/2, map(spectrum[i], 0, 255, height/2, 0)); // vorher i statt x
-    }
-  endShape();   */    
+  let mov6 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem6);
+  let mov0 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem0);
+  let mov2 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem2);
+  let mov4 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem4);
+  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
+  //bandValues(mov0,mov2,mov4,mov6,bands2[0] + bands2[1],bands2[2] + bands2[3],bands2[4] + bands2[5],bands2[6] + bands2[7] + bands2[8])
+  //logValues();
 
-  let mov = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
-  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
-  let mov3= map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4);
-  let mov4 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6);
-  let m = [m0 + mov4, m1, m2 + mov, m3, m4 + mov2, m5, m6 + mov3, m7];
-  //bandValues(mov,mov2,mov3,mov4,bands2[0] + bands2[1],bands2[2] + bands2[3],bands2[4] + bands2[5],bands2[6] + bands2[7] + bands2[8])
-  logValues();
+  // Szene
+  background(0);
+  for (p of particles) {
+    stroke(255, 3);
+    strokeWeight(0.99);
+    point(p.x, p.y, p.z);
+  }
 
-  background(255);
+  noStroke();
+  colorMode(HSB);
+  lichter();
   sphaere(m, sSize);
+
+  // Spektrum Animation
+  //spektrum(spectrum)
 }
 
 function sphaere(m, sSize) {
@@ -197,22 +264,22 @@ function sphaere(m, sSize) {
       let y = r * cos(phi);
       let z = r * sin(phi) * sin(theta);
 
-      shape[i][j] = createVector(x, y, z).mult(height * sSize); // amplitude.volume
+      shape[i][j] = createVector(x, y, z).mult(60 * sSize); // amplitude.volume
     }
   }
-  noStroke();
+
   for (let i = 0; i < total; i++) {
+    let v1, v2;
     beginShape(TRIANGLE_STRIP);
     for (let j = 0; j < total + 1; j++) {
-      let hu = map(col, 0, 255, 255, 0);
-      fill(hu, 255, 255);
-      let v1 = shape[i][j % total];
+      v1 = shape[i][j % total];
+      let v3 = v1;
+      normal(v3);
       vertex(v1.x, v1.y, v1.z);
-      let v2 = shape[i + 1][j % total];
-      //stroke(0)
+      v2 = shape[i + 1][j % total];
+      let v4 = v2;
+      //normal(v4);
       vertex(v2.x, v2.y, v2.z);
-      // Farben
-      col = map(dist(v2.x, v2.y, v2.z, 0, 0, 0), 0, height/2 , 0, 127+(150 * amplitude.volume));
     }
     endShape();
   }
@@ -221,32 +288,32 @@ function sphaere(m, sSize) {
 // Audio an in manchen Browsern
 function touchStarted() {
   getAudioContext().resume();
-} 
+}
 
 function peaks() {
   peakOn = !peakOn;
-  button.elt.innerHTML = (peakOn) ? 'PeakDetect an' : 'PeakDet. aus'
+  button.elt.innerHTML = peakOn ? "PeakDetect an" : "PeakDetect aus";
   button.style("background-color", butCol);
 }
 
 function switchSource() {
   if (sourceIsStream) {
-    button2.elt.innerHTML = 'Mic/External'
+    button2.elt.innerHTML = "Mic/External";
     audio.stop();
     mic = new p5.AudioIn();
     mic.start();
     fft.setInput(mic);
-    amplitude = new p5.Amplitude();
-    amplitude.setInput(mic);
+    /*     amplitude = new p5.Amplitude();
+    amplitude.setInput(mic); */
     sourceIsStream = !sourceIsStream;
   } else {
-    button2.elt.innerHTML = 'A2Random'
+    button2.elt.innerHTML = "A2Random";
     mic.stop();
     audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
     audio.play();
     fft.setInput(audio);
-    amplitude = new p5.Amplitude();
-    amplitude.setInput(audio);
+    /*     amplitude = new p5.Amplitude();
+    amplitude.setInput(audio); */
     sourceIsStream = !sourceIsStream;
   }
 }
@@ -265,29 +332,29 @@ function setPreset() {
   localStorage.setItem("sM0", strenghtSliderm0.value());
   localStorage.setItem("sM2", strenghtSliderm2.value());
   localStorage.setItem("sM4", strenghtSliderm4.value());
-  localStorage.setItem("sM6", strenghtSliderm6.value()); 
-  console.log("Gespeichert" + "/n" + localStorage)
+  localStorage.setItem("sM6", strenghtSliderm6.value());
+  console.log("Gespeichert" + "\n" + localStorage);
 }
 
 function getPreset() {
-  m0Slider.elt.value = localStorage.getItem("m0")
-  m1Slider.elt.value = localStorage.getItem("m1")
-  m2Slider.elt.value = localStorage.getItem("m2")
-  m3Slider.elt.value = localStorage.getItem("m3")
-  m4Slider.elt.value = localStorage.getItem("m4")
-  m5Slider.elt.value = localStorage.getItem("m5")
-  m6Slider.elt.value = localStorage.getItem("m6")
-  m7Slider.elt.value = localStorage.getItem("m7")
-  smoothSlider.elt.value = localStorage.getItem("smooth")
-  strenghtSliderm0.elt.value = localStorage.getItem("sM0")
-  strenghtSliderm2.elt.value = localStorage.getItem("sM2")
-  strenghtSliderm4.elt.value = localStorage.getItem("sM4")
-  strenghtSliderm6.elt.value = localStorage.getItem("sM6")
-  console.log("Geladen" + "/n" + localStorage)
+  m0Slider.elt.value = localStorage.getItem("m0");
+  m1Slider.elt.value = localStorage.getItem("m1");
+  m2Slider.elt.value = localStorage.getItem("m2");
+  m3Slider.elt.value = localStorage.getItem("m3");
+  m4Slider.elt.value = localStorage.getItem("m4");
+  m5Slider.elt.value = localStorage.getItem("m5");
+  m6Slider.elt.value = localStorage.getItem("m6");
+  m7Slider.elt.value = localStorage.getItem("m7");
+  smoothSlider.elt.value = localStorage.getItem("smooth");
+  strenghtSliderm0.elt.value = localStorage.getItem("sM0");
+  strenghtSliderm2.elt.value = localStorage.getItem("sM2");
+  strenghtSliderm4.elt.value = localStorage.getItem("sM4");
+  strenghtSliderm6.elt.value = localStorage.getItem("sM6");
+  console.log("Geladen" + "\n" + localStorage);
 }
 
 function logValues() {
-   console.log(
+  console.log(
     " m0: " + m0 + " strength: " + strenghtValuem0,
     "\n",
     "m1: " + m1,
@@ -304,17 +371,55 @@ function logValues() {
     "\n",
     "m7: " + m7,
     "\n"
-  ); 
+  );
 }
 
-function bandValues(mov,mov2,mov3,mov4,band1,band2,band3,band4) {
+function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
   console.log(
-  " band1: " + mov, + " " + band1 +
-    "\n",
-    "band2: " + mov2, + " " + band2 +
-    "\n",
-    "band3: " + mov3, + " " + band3 +
-    "\n",
-    "band4: " + mov4, + " " + band4 
-  )
+    " band1: " + mov0,
+    +" " + band1 + "\n",
+    "band2: " + mov2,
+    +" " + band2 + "\n",
+    "band3: " + mov4,
+    +" " + band3 + "\n",
+    "band4: " + mov6,
+    +" " + band4
+  );
+}
+
+function lichter() {
+  let angle = frameCount * 0.001;
+  let radius = map(sin(angle * 0.1), -1, 1, 300, 500);
+  let dirX = radius * cos(angle + PI);
+  let dirY = radius * sin(angle + PI);
+  let xLight = radius * cos(angle);
+  let yLight = radius * sin(angle);
+  let col = map(sin(angle), -1, 1, 0, 255);
+  let col2 = map(cos(angle), -1, 1, 0, 255);
+  let col3 = map(sin(angle + PI / 4), -1, 1, 0, 255);
+  let col4 = map(cos(angle + PI / 2), -1, 1, 0, 255);
+  shininess(20);
+  ambientLight(col3, 80, 80);
+  pointLight(col, 255, 255, dirX, dirY, 0);
+  pointLight(col2, 255, 255, xLight, yLight, 0);
+  pointLight(col3, 255, 255, -xLight, 0, -yLight);
+  pointLight(col4, 255, 255, -dirX, 0, -dirY);
+  specularMaterial(100);
+
+  /*  push()
+ translate(dirX,dirY,0)
+ sphere(10)
+ pop() 
+ push()
+ translate(xLight,yLight,0) 
+ sphere(10)
+ pop() 
+ push()
+ translate(xLight,0,yLight) 
+ sphere(10)
+ pop() 
+  push()
+  translate(dirX,0,dirY) 
+  sphere(10)
+  pop()  */
 }
