@@ -34,12 +34,13 @@ let m0Slider,
   button2,
   button3,
   button4,
+  button5,
   butCol;
 let sourceIsStream = true;
 let peakOn = false;
 let sSize = 0.2;
 let offSet = 50;
-let grid = false;
+let showLights = false;
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
@@ -80,12 +81,15 @@ function centerSliders() {
   button2.position(10, height - 60);
   button3.position(10, height - 90);
   button4.position(10, height - 120);
+  button5.position(10, height - 150);
 }
 
 function setup() {
   setAttributes("antialias", true);
+  setAttributes('alpha', false);
   //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
+
   cnv.style("z-index", -1);
   colorMode(HSB);
   // Slider
@@ -106,12 +110,14 @@ function setup() {
   button2 = createButton("AudioSource");
   button3 = createButton("Load");
   button4 = createButton("Save");
+  button5 = createButton("Lichter");
   butCol = color(0, 255, 255);
   button.style("background-color", butCol);
   button.elt.className = "button";
   button2.elt.className = "button";
   button3.elt.className = "button";
   button4.elt.className = "button";
+  button5.elt.className = "button";
   centerSliders();
   centerCanvas();
 
@@ -160,6 +166,18 @@ function htmlHandler() {
   document.getElementById("sM2").innerHTML = "m2St.=" + strenghtValuem2;
   document.getElementById("sM4").innerHTML = "m4St.=" + strenghtValuem4;
   document.getElementById("sM6").innerHTML = "m6St.=" + strenghtValuem6;
+  document.getElementById("m0").addEventListener("click",() => {m0Slider.elt.value = 0});
+  document.getElementById("m1").addEventListener("click",() => {m1Slider.elt.value = 0});
+  document.getElementById("m2").addEventListener("click",() => {m2Slider.elt.value = 0});
+  document.getElementById("m3").addEventListener("click",() => {m3Slider.elt.value = 0});
+  document.getElementById("m4").addEventListener("click",() => {m4Slider.elt.value = 0});
+  document.getElementById("m5").addEventListener("click",() => {m5Slider.elt.value = 0});
+  document.getElementById("m6").addEventListener("click",() => {m6Slider.elt.value = 0});
+  document.getElementById("m7").addEventListener("click",() => {m7Slider.elt.value = 0});
+  document.getElementById("sM0").addEventListener("click",() => {strenghtSliderm0.elt.value = 0});
+  document.getElementById("sM2").addEventListener("click",() => {strenghtSliderm2.elt.value = 0});
+  document.getElementById("sM4").addEventListener("click",() => {strenghtSliderm4.elt.value = 0});
+  document.getElementById("sM6").addEventListener("click",() => {strenghtSliderm6.elt.value = 0});
 }
 
 function spektrum(spectrum) {
@@ -199,6 +217,9 @@ function draw() {
   });
   button4.mousePressed(() => {
     setPreset();
+  });
+  button5.mousePressed(() => {
+    showLights = ! showLights;
   });
 
   // Audio Spektrum
@@ -248,6 +269,7 @@ function draw() {
 }
 
 function sphaere(m, sSize) {
+  noStroke();
   for (let i = 0; i < total + 1; i++) {
     shape[i] = [];
     let phi = map(i, 0, total, 0, PI);
@@ -389,37 +411,61 @@ function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
 
 function lichter() {
   let angle = frameCount * 0.001;
-  let radius = map(sin(angle * 0.1), -1, 1, 300, 500);
+  let angle2 = frameCount * 0.01;
+  let radius = map(sin(angle2 * 0.1), -1, 1, 200, 500);
   let dirX = radius * cos(angle + PI);
   let dirY = radius * sin(angle + PI);
   let xLight = radius * cos(angle);
-  let yLight = radius * sin(angle);
-  let col = map(sin(angle), -1, 1, 0, 255);
-  let col2 = map(cos(angle), -1, 1, 0, 255);
-  let col3 = map(sin(angle + PI / 4), -1, 1, 0, 255);
-  let col4 = map(cos(angle + PI / 2), -1, 1, 0, 255);
-  shininess(20);
-  ambientLight(col3, 80, 80);
-  pointLight(col, 255, 255, dirX, dirY, 0);
-  pointLight(col2, 255, 255, xLight, yLight, 0);
-  pointLight(col3, 255, 255, -xLight, 0, -yLight);
-  pointLight(col4, 255, 255, -dirX, 0, -dirY);
-  specularMaterial(100);
+  let yLight = radius * sin(angle); 
+  let x2Light = radius * cos(angle2);
+  let y2Light = radius * sin(angle2);
+  let col =  map(sin(angle+radians(0)), -1, 1, 0, 255);
+  let col2 = map(sin(angle+radians(30)), -1, 1, 0, 255);
+  let col3 = map(sin(angle+radians(15)), -1, 1, 0, 255);
+  let col4 = map(sin(angle+radians(45)), -1, 1, 0, 255);
 
-  /*  push()
- translate(dirX,dirY,0)
- sphere(10)
- pop() 
- push()
- translate(xLight,yLight,0) 
- sphere(10)
- pop() 
- push()
- translate(xLight,0,yLight) 
- sphere(10)
- pop() 
-  push()
-  translate(dirX,0,dirY) 
-  sphere(10)
-  pop()  */
+  shininess(20);
+  ambientLight(0, 30, 30);
+  pointLight(col, 255, 255, dirX, dirY, x2Light);
+  pointLight(col2, 255, 255, xLight, yLight, y2Light);
+  pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
+  pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
+  specularMaterial(100);
+  if (showLights) {
+  //ambientLight(0);
+  let center = createVector(0,0,0)
+  let alphaV = 3;
+  push();
+  translate(dirX, dirY, x2Light);
+  stroke(col,255,255,alphaV)
+  strokeWeight(5)
+  point(0,0,0);
+  pop();
+  stroke(col,255,255,alphaV)
+  line(center.x,center.y,center.z,dirX, dirY, x2Light);
+  push();
+  translate(xLight, yLight, y2Light);
+  stroke(col2,255,255,alphaV)
+  strokeWeight(5)
+  point(0,0,0);
+  pop();
+  stroke(col2,255,255,alphaV)
+  line(center.x,center.y,center.z,xLight, yLight, y2Light);
+  push();
+  translate(-xLight, -x2Light, -yLight);
+  stroke(col3,255,255,alphaV)
+  strokeWeight(5)
+  point(0,0,0);
+  pop();
+  stroke(col3,255,255,alphaV)
+  line(center.x,center.y,center.z,-xLight, -x2Light, -yLight);
+  push();
+  translate(-dirX, -y2Light, -dirY);
+  stroke(col4,255,255,alphaV)
+  strokeWeight(5)
+  point(0,0,0);
+  pop();
+  stroke(col4,255,255,alphaV)
+  line(center.x,center.y,center.z,-dirX, -y2Light, -dirY);
+  }
 }
