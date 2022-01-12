@@ -69,12 +69,70 @@
       border: 2px solid white;
       border-radius: 5px;
     }
+
+    .sidebar {
+      height: 88%;
+      width: 0;
+      position: fixed;
+      top: 5em;
+      left: 0;
+      background-color: rgb(70, 70, 70);
+      overflow-x: hidden;
+      -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
+      transition: all 0.3s cubic-bezier(0, 0, .58, 1);
+      padding-top: 1em;
+      border-radius: 5px;
+      z-index: 1;
+    }
+
+    .sidebar div {
+      font-family: 'Audiowide', cursive;
+      padding-left: 1em;
+      padding-right: 1em;
+      font-size: 16px;
+      color: ivory;
+      display: flex;
+      transition: 0.5s;
+    }
+
+    .sidebar .sliderText {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-column-gap: 0.2em;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .sidebar .sliderText>p {
+      margin: 0.2em;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 0;
+      right: 21px;
+      font-size: 36px;
+    }
+
+    .openbtn {
+      font-family: 'Audiowide', cursive;
+      font-size: 30px;
+      color: ivory;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+    }
+
+    #main {
+      transition: margin-left 0.3s cubic-bezier(0, 0, .58, 1);
+
+    }
   </style>
   <!-- <audio src="http://a2r.twenty4seven.cc:8000/puredata.ogg" crossorigin="anonymous"></audio> -->
   <script src="js/p5.js"></script>
   <script src="js/p5.sound.js"></script>
   <script src="js/p5.easycam.js"></script>
-  <script src="js/sketch.js"></script>
+  <script src="sketch.js"></script>
 </head>
 
 <body>
@@ -95,6 +153,92 @@
     <div id="sM4">m4 Freq.Anteil</div>
     <div id="sM6">m6 Freq.Anteil</div>
   </div>
+
+
+
+  <div id="mySidebar" class="sidebar">
+    <!--  <div class="closebtn" onclick="closeNav()">×</div> -->
+    <div>Parameter</div>
+    <div class="sliderText">
+      <input type="range" min="-2100" max="2100" value="100" class="slider" id="m0Slider">
+      <p>m0</p>
+      <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
+      <p>m1</p>
+      <input type="range" min="-2100" max="2100" value="100" class="slider" id="m2Slider">
+      <p>m2</p>
+      <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
+      <p>m3</p>
+      <input type="range" min="-2100" max="2100" value="100" class="slider" id="m4Slider">
+      <p>m4</p>
+      <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
+      <p>m5</p>
+      <input type="range" min="-2100" max="2100" value="100" class="slider" id="m6Slider">
+      <p>m6</p>
+      <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
+      <p>m7</p>
+    </div>
+    <div>FFTStrength</div>
+    <div class="sliderText">
+      <input type="range" min="-2100" max="2100" value="0" class="slider" id="strenghtSliderm0">
+      <p>m0</p>
+      <input type="range" min="-2100" max="2100" value="0" class="slider" id="strenghtSliderm2">
+      <p>m2</p>
+      <input type="range" min="-2100" max="2100" value="0" class="slider" id="strenghtSliderm4">
+      <p>m4</p>
+      <input type="range" min="-2100" max="2100" value="0" class="slider" id="strenghtSliderm6">
+      <p>m6</p>
+    </div>
+    <div>FFTSmooth</div>
+    <div class="sliderText">
+      <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
+      <p>smth</p>
+    </div>
+    <div>
+      <input type="checkbox" name="autoMorph" id="morphCheck">
+      <label for="autoMorph">AutoMorph</label>
+    </div>
+    <div class="sliderText">
+      <input type="range" min="10" max="1000" value="100" class="slider" id="morphSlider">
+      <p>speed</p>
+    </div>
+    <div>
+      <input type="checkbox" name="peakDetect" id="peakCheck">
+      <label for="peakDetect">PeakDetect</label>
+    </div>
+    <div>
+      <input type="checkbox" name="lights" id="lightCheck">
+      <label for="lights">ShowLights</label>
+    </div>
+    <div>AudioInput</div>
+    <div><button type="button" id="audioSource">Mic/External</button></div>
+    <div><button type="button" id="saveBtn">SaveValues</button></div>
+    <div><button type="button" id="loadBtn">LoadValues</button></div>
+
+  </div>
+
+  <div id="main">
+    <button class="openbtn" onclick="openNav()">
+      <- </button>
+        <p> </p>
+  </div>
+
+  <script>
+    function openNav() {
+      let barStatus = document.getElementById("mySidebar").style.width;
+      if (barStatus != "200px") {
+        document.getElementById("mySidebar").style.width = "200px";
+        document.getElementById("main").style.marginLeft = "190px";
+        document.getElementById("mySidebar").style.opacity = "85%";
+      } else { closeNav() }
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+      document.getElementById("main").style.marginLeft = "0";
+      document.getElementById("mySidebar").style.opacity = "0%";
+    }
+  </script>
+
 
   <main>
   </main>
