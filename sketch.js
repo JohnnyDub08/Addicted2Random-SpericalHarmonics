@@ -31,6 +31,7 @@ let m0Slider,
   strenghtSliderm6,
   strenghtValuem6,
   peakCheck,
+  rotateCheck,
   audioSourceBtn,
   saveBtn,
   loadBtn,
@@ -42,8 +43,8 @@ let peakOn = false;
 let sSize = 0.2;
 let offSet = 50;
 let showLights = false;
-let autoMorph = false;
 let morphSpeed = 0;
+let rotater = 0;
 
 let myShader;
 let matcap;
@@ -124,19 +125,18 @@ function setup() {
   m7Slider = document.getElementById("m7Slider"); //createSlider(0, 9, 1);
   smoothSlider = document.getElementById("smoothSlider"); //createSlider(0.5, 1, 0.78, 0.001);
   morphSlider = document.getElementById("morphSlider"); //createSlider(0.0001, 0.003, 0.0002, 0.00001);
+  rotateSlider = document.getElementById("rotateSlider");
   strenghtSliderm0 = document.getElementById("strenghtSliderm0"); //createSlider(-21, 21, 9, 0.01);
   strenghtSliderm2 = document.getElementById("strenghtSliderm2"); //createSlider(-21, 21, 9, 0.01);
   strenghtSliderm4 = document.getElementById("strenghtSliderm4"); //createSlider(-21, 21, 9, 0.01);
   strenghtSliderm6 = document.getElementById("strenghtSliderm6"); //createSlider(-21, 21, 9, 0.01);
   peakCheck = document.getElementById("peakCheck");
+  rotateCheck = document.getElementById("rotateCheck");
   audioSourceBtn = document.getElementById("audioSource");
   saveBtn = document.getElementById("saveBtn");
   loadBtn = document.getElementById("loadBtn");
   lightCheck = document.getElementById("lightCheck");
   buttonMorph = document.getElementById("morphCheck");
-  buttonMorph.addEventListener("change", () => {
-    autoMorph = !autoMorph;
-  });
   peakCheck.addEventListener("change", () => {
     peakOn = !peakOn;
   });
@@ -249,23 +249,23 @@ function spektrum(spectrum) {
 }
 
 function draw() {
-  morphSpeed = !autoMorph ? 0 : (morphSpeed += morphSlider.value / 100000);
-  m0 = !autoMorph
+  morphSpeed = !morphCheck.checked ? morphSpeed : (morphSpeed += morphSlider.value / 100000);
+  m0 = !morphCheck.checked
     ? m0Slider.value / 100
     : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000;
   m1 = m1Slider.value;
-  m2 = !autoMorph
+  m2 = !morphCheck.checked
     ? m2Slider.value / 100
     : floor(
         map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
       ) / 1000;
   m3 = m3Slider.value;
-  m4 = !autoMorph
+  m4 = !morphCheck.checked
     ? m4Slider.value / 100
     : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
       1000;
   m5 = m5Slider.value;
-  m6 = !autoMorph
+  m6 = !morphCheck.checked
     ? m6Slider.value / 100
     : floor(
         map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
@@ -323,8 +323,15 @@ function draw() {
 
   // Send the texture to the shader
   //myShader.setUniform("uMatcapTexture", matcap);
+  if (rotateCheck.checked) {
+    rotater+=rotateSlider.value/100000;  
+  }
+  push(); 
+  rotateX(rotater*0.6);
+  rotateY(rotater)
+  rotateZ(-rotater*0.8)
   sphaere(m, sSize);
-
+  pop();
   // Spektrum Animation
   //spektrum(spectrum)
 }
@@ -408,6 +415,10 @@ function setPreset() {
   localStorage.setItem("m6", m6Slider.value);
   localStorage.setItem("m7", m7Slider.value);
   localStorage.setItem("smooth", smoothSlider.value);
+  localStorage.setItem("morphCheck", morphCheck.checked);
+  localStorage.setItem("morph", morphSlider.value);
+  localStorage.setItem("rotateCheck", rotateCheck.checked);
+  localStorage.setItem("rotate", rotateSlider.value);
   localStorage.setItem("sM0", strenghtSliderm0.value);
   localStorage.setItem("sM2", strenghtSliderm2.value);
   localStorage.setItem("sM4", strenghtSliderm4.value);
@@ -425,6 +436,10 @@ function getPreset() {
   m6Slider.value = localStorage.getItem("m6");
   m7Slider.value = localStorage.getItem("m7");
   smoothSlider.value = localStorage.getItem("smooth");
+  morphSlider.value = localStorage.getItem("morph"); 
+  morphCheck.checked = localStorage.getItem("morphCheck")
+  rotateSlider.value = localStorage.getItem("rotate");
+  rotateCheck.checked = localStorage.getItem("rotateCheck");
   strenghtSliderm0.value = localStorage.getItem("sM0");
   strenghtSliderm2.value = localStorage.getItem("sM2");
   strenghtSliderm4.value = localStorage.getItem("sM4");

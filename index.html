@@ -86,9 +86,12 @@
     }
 
     .sidebar div {
+      display: grid;
+      grid-template-rows: auto;
       font-family: 'Audiowide', cursive;
       padding-left: 1em;
       padding-right: 1em;
+      padding-top: 0.5rem;
       font-size: 16px;
       color: ivory;
       display: flex;
@@ -158,7 +161,7 @@
 
   <div id="mySidebar" class="sidebar">
     <!--  <div class="closebtn" onclick="closeNav()">×</div> -->
-    <div>Parameter</div>
+    <div>SphericalHarmonics Parameters</div>
     <div class="sliderText">
       <input type="range" min="-2100" max="2100" value="100" class="slider" id="m0Slider">
       <p>m0</p>
@@ -198,7 +201,15 @@
       <label for="autoMorph">AutoMorph</label>
     </div>
     <div class="sliderText">
-      <input type="range" min="10" max="1000" value="100" class="slider" id="morphSlider">
+      <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
+      <p>speed</p>
+    </div>
+    <div>
+      <input type="checkbox" name="rotate" id="rotateCheck">
+      <label for="rotate">AutoRotate</label>
+    </div>
+    <div class="sliderText">
+      <input type="range" min="10" max="3000" value="100" class="slider" id="rotateSlider">
       <p>speed</p>
     </div>
     <div>
