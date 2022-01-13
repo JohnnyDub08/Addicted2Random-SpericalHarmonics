@@ -18,15 +18,15 @@
       font-size: 0.8em;
       background: transparent;
       user-select: none;
-      /* For Chrome and Opera */
-      -ms-user-select: none;
-      /* For Internet Edge and Explorer*/
+   
+ /*      -ms-user-select: none;
+     
       -webkit-user-select: none;
-      /* For Safari */
+     
       -moz-user-select: none;
-      /* For Firefox */
-      -khtml-user-select: none;
-      /* Konqueror HTML */
+     
+      -khtml-user-select: none; */
+     
     }
 
     .buttons {
@@ -44,7 +44,7 @@
       cursor: pointer;
       background-color: transparent;
       font-family: 'Audiowide', cursive;
-      font-size: 1em;
+      font-size: 16px;
       padding: 5px;
       color: ivory;
       border: 2px solid ivory;
@@ -53,43 +53,51 @@
       /* position: relative; */
     }
 
+    .textinput{
+      cursor: pointer;
+      background-color: transparent;
+      font-family: 'Audiowide', cursive;
+      font-size: 0.9em;
+      margin-top: 1em;
+      color: ivory;
+      border: 2px solid ivory;
+      border-radius: 5px;
+    }
+
     .button:hover {
       border-radius: 10px;
       background-color: rgb(128, 255, 212, 0.1);
     }
 
     .sidebar {
-      height: 100%;
+      height: auto;
       width: 0;
       position: fixed;
       left: 0;
+      top:1rem;
+      bottom: auto;
       background-color: #262126;
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
       transition: all .3s cubic-bezier(0, 0, .58, 1);
-      padding-top: 1em;
-      padding-bottom: 1em;
       border-radius: 15px;
     }
 
     #schrift {
       font-family: 'Audiowide', cursive;
       padding-left: 1em;
-      padding-right: 0.1em;
+      padding-right: 0.5em;
       padding-top: 1em;
-      padding-bottom: 1em;
+      padding-bottom: 0.5em;
       font-size: 20px;
       color: ivory;
 
       transition: 0.5s;
     }
-    .sidebar.sliderText>h4{
-      padding: 5em;
-    }
 
     .sidebar .sliderText {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 2fr 1.2fr;
       grid-column-gap: 0.3em;
       grid-auto-rows: auto;
       font-size: 12px;
@@ -109,7 +117,7 @@
 
     .openbtn {
       font-family: 'Audiowide', cursive;
-      font-size: 30px;
+      font-size: 2rem;
       color: ivory;
       cursor: pointer;
       background-color: transparent;
@@ -194,11 +202,11 @@
       </h4>
     </div>
     <div class="sliderText">
-      <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderX">
+      <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderX">
       <p id="x">X</p>
-      <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderY">
+      <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderY">
       <p id="y">Y</p>
-      <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderZ">
+      <input type="range" min="-1000" max="1000" value="-100" class="slider" id="rotateSliderZ">
       <p id="z">Z</p>
     </div>
     <div>
@@ -209,9 +217,18 @@
       <input type="checkbox" name="lights" id="lightCheck">
       <label for="lights">ShowLights</label>
     </div>
+    <div>
+      <input type="checkbox" name="res" id="resCheck">
+      <label for="res">HighResolution</label>
+    </div>
+    <div>
+      <input type="text" value="Enter Server Adress" id="server" class="textinput">
+    </div>
+
+    
    
   </div>
-    <div class="buttons">
+    <div class="buttons">  
       <button type="button" class="button" id="audioSource">Mic/External</button>
       <button type="button" class="button" id="resetBtn">Reset</button>
       <button type="button" class="button" id="loadBtn">LoadValues</button>
