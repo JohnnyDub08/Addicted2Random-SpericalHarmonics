@@ -8,10 +8,11 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 
-    *{
+    * {
       margin: 0;
       padding: 0;
     }
+
     body {
       font-family: 'Audiowide', cursive;
       font-size: 0.8em;
@@ -28,95 +29,82 @@
       /* Konqueror HTML */
     }
 
+    .buttons {
+      display: grid;  
+      grid-template-columns: 1fr 1fr;
+      grid-column-gap: 0.3em;
+      grid-auto-rows: auto;
+     
+      padding: 1em;
+      font-size: 12px;
+      text-align: left;
+    }
+
     .button {
       cursor: pointer;
       background-color: transparent;
       font-family: 'Audiowide', cursive;
       font-size: 1em;
       padding: 5px;
-      flex-flow: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
       color: ivory;
       border: 2px solid ivory;
       border-radius: 5px;
-      transition: all 100ms ease; 
-      position: relative;
+      transition: all 100ms ease;
+      /* position: relative; */
     }
+
     .button:hover {
       border-radius: 10px;
-    }
-
-    .wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      column-gap: 0.5em;
-      row-gap: 0.5em;
-    }
-
-    .wrapper>div {
-      background: transparent;
-      padding: 0.5em;
-      text-align: justify;
-      color: ivory;
-      border: 2px solid ivory;
-      border-radius: 5px;
+      background-color: rgb(128, 255, 212, 0.1);
     }
 
     .sidebar {
-      height: 88%; 
+      height: 100%;
       width: 0;
-      position: absolute;
-      margin-top: 0.5em;
+      position: fixed;
       left: 0;
       background-color: #262126;
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
-      transition: all 0.3s cubic-bezier(0, 0, .58, 1);
-      padding-top: 0.3em;
-      padding-bottom: 0.3em;
-      border-radius: 5px;
-      z-index: 1;
+      transition: all .3s cubic-bezier(0, 0, .58, 1);
+      padding-top: 1em;
+      padding-bottom: 1em;
+      border-radius: 15px;
     }
 
-    .sidebar div {
-      display: grid;
-      grid-template-rows: auto;
+    #schrift {
       font-family: 'Audiowide', cursive;
       padding-left: 1em;
-      padding-right: 1em;
-      padding-top: 0.5rem;
-      font-size: 16px;
+      padding-right: 0.1em;
+      padding-top: 1em;
+      padding-bottom: 1em;
+      font-size: 20px;
       color: ivory;
-      display: flex;
+
       transition: 0.5s;
+    }
+    .sidebar.sliderText>h4{
+      padding: 5em;
     }
 
     .sidebar .sliderText {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-column-gap: 0.2em;
+      grid-template-columns: 2fr 1fr;
+      grid-column-gap: 0.3em;
+      grid-auto-rows: auto;
       font-size: 12px;
-      text-align: center;
+      text-align: left;
+
     }
+
+/*     @media only screen and (max-width: 768px) {
+      .sidebar .sliderText {
+        grid-template-columns: 2fr 2.1fr;
+      }
+    } */
 
     .sidebar .sliderText>p {
-      margin: 0.2em;
-    }
-    .sidebar>img {
-      margin: 0px;
-      padding-top: 0px;
-      width: 100px;
-      height: 30px;
-    }
-
-    .sidebar .closebtn {
-      position: absolute;
-      top: 0;
-      right: 21px;
-      font-size: 36px;
+      margin: 0.3em 0.5em 0.3em;
     }
 
     .openbtn {
@@ -125,12 +113,22 @@
       color: ivory;
       cursor: pointer;
       background-color: transparent;
-      border: none;  
+      opacity: 33%;
+      border: none;
+      transition: margin-left 0.3s cubic-bezier(0, 0, .58, 1);
     }
 
-    #main {
-      transition: margin-left 0.3s cubic-bezier(0, 0, .58, 1);
+    .slider {
+      width: 100%;
+    }
 
+    .image {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;     
+      height: 6.18%;
+      width: auto;
+      z-index: 0;
     }
   </style>
   <!-- <audio src="http://a2r.twenty4seven.cc:8000/puredata.ogg" crossorigin="anonymous"></audio> -->
@@ -141,89 +139,67 @@
 </head>
 
 <body>
-  <div class="wrapper">
-    
-    <div id="m0">m0</div>
-    <div id="m1">m1</div>
-    <div id="m2">m2</div>
-    <div id="m3">m3</div>
-    <div id="m4">m4</div>
-    <div id="m5">m5</div>
-    <div id="m6">m6</div>
-    <div id="m7">m7</div>
-
-    <div id="sM0">m0 Freq.Anteil</div>
-    <div id="sM2">m2 Freq.Anteil</div>
-    <div id="sM4">m4 Freq.Anteil</div>
-    <div id="sM6">m6 Freq.Anteil</div>
-  </div>
-
-  <div id="rightSidebar" class="sidebar">
-    
-  </div>
-
-
+  <img src="a2r.png" alt="" class="image">
   <div id="leftSidebar" class="sidebar">
-    <!--  <div class="closebtn" onclick="closeNav()">×</div> -->
-    <!-- <img src="a2r.jpg" alt=""> -->
-    <div>SphericalHarmonics</div>
+      <div id="schrift">
+    <div><h3>SphericalHarmonics</h3></div>
     <div class="sliderText">
       <input type="range" min="-2100" max="2100" value="0" class="slider" id="m0Slider">
-      <p>m0</p>
+      <p id="m0">m0</p>
       <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
-      <p>m1</p>
+      <p id="m1">m1</p>
       <input type="range" min="-2100" max="2100" value="0" class="slider" id="m2Slider">
-      <p>m2</p>
+      <p id="m2">m2</p>
       <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
-      <p>m3</p>
+      <p id="m3">m3</p>
       <input type="range" min="-2100" max="2100" value="0" class="slider" id="m4Slider">
-      <p>m4</p>
+      <p id="m4">m4</p>
       <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
-      <p>m5</p>
+      <p id="m5">m5</p>
       <input type="range" min="-2100" max="2100" value="0" class="slider" id="m6Slider">
-      <p>m6</p>
+      <p id="m6">m6</p>
       <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
-      <p>m7</p>
-    </div>
-    <div>FFTStrength</div>
-    <div class="sliderText">
-      <input type="range" min="-2100" max="2100" value="1200" class="slider" id="strenghtSliderm0">
-      <p>m0</p>
-      <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm2">
-      <p>m2</p>
-      <input type="range" min="-900" max="900" value="600" class="slider" id="strenghtSliderm4">
-      <p>m4</p>
-      <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm6">
-      <p>m6</p>
-    </div>
-    <div>FFTSmooth</div>
-    <div class="sliderText">
-      <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
-      <p>smth</p>
+      <p id="m7">m7</p>
     </div>
     <div>
+      <h4>
       <input type="checkbox" name="autoMorph" id="morphCheck">
       <label for="autoMorph">AutoMorph</label>
+    </h4>
     </div>
     <div class="sliderText">
       <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
-      <p>speed</p>
+      <p id="speed">speed</p>
+    </div>
+    <div><h4>FFTStrength</h4></div>
+    <div class="sliderText">
+      <input type="range" min="-2100" max="2100" value="1200" class="slider" id="strenghtSliderm0">
+      <p id="sM0">m0</p>
+      <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm2">
+      <p id="sM2">m2</p>
+      <input type="range" min="-900" max="900" value="600" class="slider" id="strenghtSliderm4">
+      <p id="sM4">m4</p>
+      <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm6">
+      <p id="sM6">m6</p>
+    </div>
+    <div><h4>FFTSmooth</h4></div>
+    <div class="sliderText">
+      <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
+      <p id="smth">smth</p>
     </div>
     <div>
+      <h4>
       <input type="checkbox" name="rotate" id="rotateCheck">
       <label for="rotate">AutoRotate</label>
+      </h4>
     </div>
     <div class="sliderText">
       <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderX">
-      <p>X</p>
-    </div>
-    <div class="sliderText">
+      <p id="x">X</p>
       <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderY">
-      <p>Y</p>
-    </div>
-    <div class="sliderText">
+      <p id="y">Y</p>
       <input type="range" min="-2000" max="2000" value="100" class="slider" id="rotateSliderZ">
-      <p>Z</p>
+      <p id="z">Z</p>
     </div>
     <div>
       <input type="checkbox" name="peakDetect" id="peakCheck">
@@ -233,35 +209,41 @@
       <input type="checkbox" name="lights" id="lightCheck">
       <label for="lights">ShowLights</label>
     </div>
-    <div>AudioInput</div>
-    <div><button type="button" class="button" id="audioSource">Mic/External</button></div>
-    <div><button type="button" class="button" id="saveBtn">SaveValues</button></div>
-    <div><button type="button" class="button" id="loadBtn">LoadValues</button></div>
+   
+  </div>
+    <div class="buttons">
+      <button type="button" class="button" id="audioSource">Mic/External</button>
+      <button type="button" class="button" id="resetBtn">Reset</button>
+      <button type="button" class="button" id="loadBtn">LoadValues</button>
+      <button type="button" class="button" id="saveBtn">SaveValues</button>
+    </div>
 
   </div>
 
-  <div id="main">
+  <div>
     <button class="openbtn" id="arrow" onclick="openNav()">
       -> </button>
-        <p> </p>
   </div>
 
   <script>
     function openNav() {
       let barStatus = document.getElementById("leftSidebar").style.width;
-      if (barStatus != "200px") {
-        document.getElementById("leftSidebar").style.width = "200px";
-        document.getElementById("main").style.marginLeft = "200px";
+      let widthRight = "303px";//"38.2%"
+      if (barStatus != widthRight) {
+        document.getElementById("leftSidebar").style.width = widthRight;
+        document.getElementById("arrow").style.marginLeft = widthRight;
         document.getElementById("leftSidebar").style.opacity = "85%";
         document.getElementById("arrow").innerHTML = "<-";
+        document.getElementById("arrow").style.opacity = "100%";
       } else { closeNav() }
     }
 
     function closeNav() {
       document.getElementById("leftSidebar").style.width = "0";
-      document.getElementById("main").style.marginLeft = "0";
+      document.getElementById("arrow").style.marginLeft = "0";
       document.getElementById("leftSidebar").style.opacity = "0%";
       document.getElementById("arrow").innerHTML = "->";
+      document.getElementById("arrow").style.opacity = "33%";
     }
   </script>
 

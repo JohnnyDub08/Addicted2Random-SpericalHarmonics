@@ -1,4 +1,4 @@
-let cnv, mic, audio, fft, peakDetect, amplitude;
+let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
 let easycam;
 let shape = [];
 let particles = [];
@@ -36,7 +36,8 @@ let m0Slider,
   saveBtn,
   loadBtn,
   lightCheck,
-  buttonMorph,
+  morphBtn,
+  resetBtn,
   morphSlider,
   rotateSliderX,
   rotateSliderY,
@@ -73,7 +74,6 @@ function windowResized() {
   //resizeCanvas(windowWidth/3, windowHeight/1.5);
   resizeCanvas(windowWidth, windowHeight);
   centerCanvas();
-  centerSliders();
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
   easycam.setDistanceMax(2000);
@@ -88,36 +88,7 @@ function windowResized() {
     );
   }
 }
-function centerSliders() {
-  //m0Slider.position(10, offSet + 30);
-  /*  m1Slider.position(10, offSet + 50);
-  m2Slider.position(10, offSet + 70);
-  m3Slider.position(10, offSet + 90);
-  m4Slider.position(10, offSet + 110);
-  m5Slider.position(10, offSet + 130);
-  m6Slider.position(10, offSet + 150);
-  m7Slider.position(10, offSet + 170); */
-  //smoothSlider.position(width - smoothSlider.width - 10, height - 30);
-  /*   strenghtSliderm0.position(width - strenghtSliderm0.width - 10, offSet + 30);
-  strenghtSliderm2.position(width - strenghtSliderm2.width - 10, offSet + 70);
-  strenghtSliderm4.position(width - strenghtSliderm2.width - 10, offSet + 110);
-  strenghtSliderm6.position(width - strenghtSliderm2.width - 10, offSet + 150); */
-  //peakCheck.position(10, height - 30);
-  //audioSourceBtn.position(10, height - 60);
-  //lightCheck.position(10, height - 150);
-  //buttonMorph.position(width - buttonMorph.width-50, height - 70);
-  //morphSlider.position(width - smoothSlider.width - 10, height - 100);
-}
-
-function setup() {
-  setAttributes("antialias", true);
-  setAttributes("alpha", false);
-  //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
-  cnv = createCanvas(windowWidth, windowHeight, WEBGL);
-
-  cnv.style("z-index", -1);
-  colorMode(HSB);
-  // Slider
+function htmlEvents() {
   m0Slider = document.getElementById("m0Slider"); //createSlider(-21, 21, 0, 0.01);
   m1Slider = document.getElementById("m1Slider"); //createSlider(0, 9, 1);
   m2Slider = document.getElementById("m2Slider"); //createSlider(-21, 21, 0, 0.01);
@@ -140,8 +111,9 @@ function setup() {
   audioSourceBtn = document.getElementById("audioSource");
   saveBtn = document.getElementById("saveBtn");
   loadBtn = document.getElementById("loadBtn");
+  resetBtn = document.getElementById("resetBtn");
   lightCheck = document.getElementById("lightCheck");
-  buttonMorph = document.getElementById("morphCheck");
+  morphBtn = document.getElementById("morphCheck");
   peakCheck.addEventListener("change", () => {
     peakOn = !peakOn;
   });
@@ -156,6 +128,25 @@ function setup() {
   });
   loadBtn.addEventListener("click", () => {
     getPreset();
+  });
+  resetBtn.addEventListener("click", () => {
+    m0Slider.value = 0;
+    m1Slider.value = 1;
+    m2Slider.value = 0;
+    m3Slider.value = 1;
+    m4Slider.value = 0;
+    m5Slider.value = 1;
+    m6Slider.value = 0;
+    m7Slider.value = 1;
+    strenghtSliderm0.value = 0;
+    strenghtSliderm2.value = 0;
+    strenghtSliderm4.value = 0;
+    strenghtSliderm6.value = 0;
+    rotateSliderX.value = 0;
+    rotateSliderY.value = 0;
+    rotateSliderZ.value = 0;
+    morphCheck.checked = false;
+    rotateCheck.checked = false;
   });
   document.getElementById("m0").addEventListener("click", () => {
     m0Slider.value = 0;
@@ -193,30 +184,17 @@ function setup() {
   document.getElementById("sM6").addEventListener("click", () => {
     strenghtSliderm6.value = 0;
   });
-  centerSliders();
-  centerCanvas();
-
-  // simple Kamera ohne Rechtsklick
-  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
-  easycam.setDistanceMin(300);
-  easycam.setDistanceMax(2000);
-  document.oncontextmenu = function () {
-    return false;
-  };
-
-  // Audio Analyse
-  fft = new p5.FFT();
-  mic = new p5.AudioIn();
-  amplitude = new p5.Amplitude();
-  peakDetect = new p5.PeakDetect(33, 90, 0.35, 40);
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //("https://ice2.somafm.com/groovesalad-128-aac")
-  fft.setInput(mic);
-  //amplitude.setInput(mic);
-  //audio.play();
-
-  //console.log(mic.getSources());
-  mic.start();
-
+  document.getElementById("x").addEventListener("click", () => {
+    rotateSliderX.value = 0;
+  });
+  document.getElementById("y").addEventListener("click", () => {
+    rotateSliderY.value = 0;
+  });
+  document.getElementById("z").addEventListener("click", () => {
+    rotateSliderZ.value = 0;
+  });
+}
+function setStars() {
   for (let i = 0; i < 377; i++) {
     particles.push(
       createVector(
@@ -228,6 +206,45 @@ function setup() {
   }
 }
 
+function setup() {
+  setAttributes("antialias", true);
+  setAttributes("alpha", false);
+  //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
+  cnv = createCanvas(windowWidth, windowHeight, WEBGL);
+  cnv.style("z-index", -2);
+  colorMode(HSB);
+  // Slider
+  htmlEvents();
+
+  centerCanvas();
+
+  // simple Kamera ohne Rechtsklick
+  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
+  easycam.setDistanceMin(300);
+  easycam.setDistanceMax(2000);
+  document.oncontextmenu = function () {
+    return false;
+  };
+
+  //Sterne
+  setStars();
+
+  // Audio Analyse
+  fft = new p5.FFT();
+  mic = new p5.AudioIn();
+  amplitude = new p5.Amplitude();
+  peakDetect = new p5.PeakDetect(33, 90, 0.35, 40);
+  //audio = createAudio("https://ice6.somafm.com/defcon-128-mp3"); //("https://ice6.somafm.com/vaporwaves-128-aac")//("https://ice4.somafm.com/dronezone-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //("https://ice2.somafm.com/groovesalad-128-aac")
+  fft.setInput(mic);
+  //amplitude.setInput(mic);
+  //audio.play();
+
+  //console.log(mic.getSources());
+  mic.start();
+
+
+}
+
 function htmlHandler() {
   document.getElementById("m0").innerHTML = "m0=" + m0;
   document.getElementById("m1").innerHTML = "m1=" + m1;
@@ -237,10 +254,15 @@ function htmlHandler() {
   document.getElementById("m5").innerHTML = "m5=" + m5;
   document.getElementById("m6").innerHTML = "m6=" + m6;
   document.getElementById("m7").innerHTML = "m7=" + m7;
-  document.getElementById("sM0").innerHTML = "m0St.=" + strenghtValuem0;
-  document.getElementById("sM2").innerHTML = "m2St.=" + strenghtValuem2;
-  document.getElementById("sM4").innerHTML = "m4St.=" + strenghtValuem4;
-  document.getElementById("sM6").innerHTML = "m6St.=" + strenghtValuem6;
+  document.getElementById("sM0").innerHTML = "m0S=" + strenghtValuem0;
+  document.getElementById("sM2").innerHTML = "m2S=" + strenghtValuem2;
+  document.getElementById("sM4").innerHTML = "m4S=" + strenghtValuem4;
+  document.getElementById("sM6").innerHTML = "m6S=" + strenghtValuem6;
+  document.getElementById("speed").innerHTML = morphSlider.value / 1000;
+  document.getElementById("smth").innerHTML = smoothValue;
+  document.getElementById("x").innerHTML = "X=" + rotateSliderX.value / 1000;
+  document.getElementById("y").innerHTML = "Y=" + rotateSliderY.value / 1000;
+  document.getElementById("z").innerHTML = "Z=" + rotateSliderZ.value / 1000;
 }
 
 function spektrum(spectrum) {
@@ -253,39 +275,46 @@ function spektrum(spectrum) {
   endShape();
 }
 
+function sliderLogic() {
+  morphSpeed = !morphCheck.checked
+  ? morphSpeed
+  : (morphSpeed += morphSlider.value / 100000);
+m0 = !morphCheck.checked
+  ? m0Slider.value / 100
+  : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000;
+m1 = m1Slider.value;
+m2 = !morphCheck.checked
+  ? m2Slider.value / 100
+  : floor(
+      map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
+    ) / 1000;
+m3 = m3Slider.value;
+m4 = !morphCheck.checked
+  ? m4Slider.value / 100
+  : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
+    1000;
+m5 = m5Slider.value;
+m6 = !morphCheck.checked
+  ? m6Slider.value / 100
+  : floor(
+      map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
+        1000
+    ) / 1000;
+m7 = m7Slider.value;
+smoothValue = smoothSlider.value / 100;
+strenghtValuem0 = strenghtSliderm0.value / 100;
+strenghtValuem2 = strenghtSliderm2.value / 100;
+strenghtValuem4 = strenghtSliderm4.value / 100;
+strenghtValuem6 = strenghtSliderm6.value / 100;
+}
+
 function draw() {
-  morphSpeed = !morphCheck.checked ? morphSpeed : (morphSpeed += morphSlider.value / 100000);
-  m0 = !morphCheck.checked
-    ? m0Slider.value / 100
-    : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000;
-  m1 = m1Slider.value;
-  m2 = !morphCheck.checked
-    ? m2Slider.value / 100
-    : floor(
-        map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
-      ) / 1000;
-  m3 = m3Slider.value;
-  m4 = !morphCheck.checked
-    ? m4Slider.value / 100
-    : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
-      1000;
-  m5 = m5Slider.value;
-  m6 = !morphCheck.checked
-    ? m6Slider.value / 100
-    : floor(
-        map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
-          1000
-      ) / 1000;
-  m7 = m7Slider.value;
-  smoothValue = smoothSlider.value / 100;
-  strenghtValuem0 = strenghtSliderm0.value / 100;
-  strenghtValuem2 = strenghtSliderm2.value / 100;
-  strenghtValuem4 = strenghtSliderm4.value / 100;
-  strenghtValuem6 = strenghtSliderm6.value / 100;
+
+  sliderLogic()
   htmlHandler();
 
   // Audio Spektrum
-  let spectrum = fft.analyze(); // .analyze muss laufen
+  spectrum = fft.analyze(); // .analyze muss laufen
   fft.smooth(smoothValue);
   amplitude.smooth(0.8);
 
@@ -313,34 +342,30 @@ function draw() {
   //bandValues(mov0,mov2,mov4,mov6,bands2[0] + bands2[1],bands2[2] + bands2[3],bands2[4] + bands2[5],bands2[6] + bands2[7] + bands2[8])
   //logValues();
 
+  // Kamera
+  if (rotateCheck.checked) {
+    easycam.rotateX(rotateSliderX.value / 100000);
+    easycam.rotateY(rotateSliderY.value / 100000);
+    easycam.rotateZ(rotateSliderZ.value / 100000);
+  }
+
   // Szene
   background(0);
+  //Sterne
   for (p of particles) {
     stroke(255, 0.5);
     strokeWeight(1.33);
     point(p.x, p.y, p.z);
   }
-
-  noStroke();
-  colorMode(HSB);
+  // Lichter
   lichter();
+  
   //shader(myShader);
-
   // Send the texture to the shader
   //myShader.setUniform("uMatcapTexture", matcap);
-  if (rotateCheck.checked) {
-    easycam.rotateX(rotateSliderX.value/100000);
-    easycam.rotateY(rotateSliderY.value/100000);
-    easycam.rotateZ(rotateSliderZ.value/100000); 
-  } /* else {
-    rotateSliderX.value = 0;
-    rotateSliderY.value = 0;
-    rotateSliderZ.value = 0;
-  } */
-  //push(); 
 
   sphaere(m, sSize);
-  //pop();
+  
   // Spektrum Animation
   //spektrum(spectrum)
 }
@@ -404,7 +429,7 @@ function switchSource() {
   } else {
     audioSourceBtn.innerHTML = "A2Random";
     mic.stop();
-    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
+    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3"); //("https://ice6.somafm.com/vaporwaves-128-aac")//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
     audio.play();
     fft.setInput(audio);
     /*     amplitude = new p5.Amplitude();
@@ -448,18 +473,19 @@ function getPreset() {
   m6Slider.value = localStorage.getItem("m6");
   m7Slider.value = localStorage.getItem("m7");
   smoothSlider.value = localStorage.getItem("smooth");
-  morphSlider.value = localStorage.getItem("morph"); 
-  morphCheck.checked = (localStorage.getItem("morphCheck") == "true") ? true : false; 
+  morphSlider.value = localStorage.getItem("morph");
+  morphCheck.checked =
+    localStorage.getItem("morphCheck") == "true" ? true : false;
   rotateSliderX.value = localStorage.getItem("rotateX");
   rotateSliderY.value = localStorage.getItem("rotateY");
   rotateSliderZ.value = localStorage.getItem("rotateZ");
-  rotateCheck.checked = (localStorage.getItem("rotateCheck") == "true")? true : false;
+  rotateCheck.checked =
+    localStorage.getItem("rotateCheck") == "true" ? true : false;
   strenghtSliderm0.value = localStorage.getItem("sM0");
   strenghtSliderm2.value = localStorage.getItem("sM2");
   strenghtSliderm4.value = localStorage.getItem("sM4");
   strenghtSliderm6.value = localStorage.getItem("sM6");
   console.log("Geladen" + "\n" + localStorage.getItem("morphCheck"));
-
 }
 
 function logValues() {
