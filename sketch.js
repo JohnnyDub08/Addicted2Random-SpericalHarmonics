@@ -37,7 +37,10 @@ let m0Slider,
   loadBtn,
   lightCheck,
   buttonMorph,
-  morphSlider;
+  morphSlider,
+  rotateSliderX,
+  rotateSliderY,
+  rotateSliderZ;
 let sourceIsStream = false;
 let peakOn = false;
 let sSize = 0.2;
@@ -49,7 +52,7 @@ let rotater = 0;
 let myShader;
 let matcap;
 
-function preload() {
+/* function preload() {
   // a shader is composed of two parts, a vertex shader, and a fragment shader
   // the vertex shader prepares the vertices and geometry to be drawn
   // the fragment shader renders the actual pixel colors
@@ -59,7 +62,7 @@ function preload() {
   myShader = loadShader("shader.vert", "shader.frag");
 
   matcap = loadImage("a2r.jpg");
-}
+} */
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
@@ -125,7 +128,9 @@ function setup() {
   m7Slider = document.getElementById("m7Slider"); //createSlider(0, 9, 1);
   smoothSlider = document.getElementById("smoothSlider"); //createSlider(0.5, 1, 0.78, 0.001);
   morphSlider = document.getElementById("morphSlider"); //createSlider(0.0001, 0.003, 0.0002, 0.00001);
-  rotateSlider = document.getElementById("rotateSlider");
+  rotateSliderX = document.getElementById("rotateSliderX");
+  rotateSliderY = document.getElementById("rotateSliderY");
+  rotateSliderZ = document.getElementById("rotateSliderZ");
   strenghtSliderm0 = document.getElementById("strenghtSliderm0"); //createSlider(-21, 21, 9, 0.01);
   strenghtSliderm2 = document.getElementById("strenghtSliderm2"); //createSlider(-21, 21, 9, 0.01);
   strenghtSliderm4 = document.getElementById("strenghtSliderm4"); //createSlider(-21, 21, 9, 0.01);
@@ -204,7 +209,7 @@ function setup() {
   mic = new p5.AudioIn();
   amplitude = new p5.Amplitude();
   peakDetect = new p5.PeakDetect(33, 90, 0.35, 40);
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //("https://ice2.somafm.com/groovesalad-128-aac")
+  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //("https://ice2.somafm.com/groovesalad-128-aac")
   fft.setInput(mic);
   //amplitude.setInput(mic);
   //audio.play();
@@ -324,12 +329,16 @@ function draw() {
   // Send the texture to the shader
   //myShader.setUniform("uMatcapTexture", matcap);
   if (rotateCheck.checked) {
-    rotater=rotateSlider.value/100000;  
-  } else {rotater = 0}
+    easycam.rotateX(rotateSliderX.value/100000);
+    easycam.rotateY(rotateSliderY.value/100000);
+    easycam.rotateZ(rotateSliderZ.value/100000); 
+  } /* else {
+    rotateSliderX.value = 0;
+    rotateSliderY.value = 0;
+    rotateSliderZ.value = 0;
+  } */
   //push(); 
-  easycam.rotateX(-rotater*1.2);
-  easycam.rotateY(rotater*0.9);
-  easycam.rotateZ(-rotater*0.6);
+
   sphaere(m, sSize);
   //pop();
   // Spektrum Animation
@@ -395,7 +404,7 @@ function switchSource() {
   } else {
     audioSourceBtn.innerHTML = "A2Random";
     mic.stop();
-    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
     audio.play();
     fft.setInput(audio);
     /*     amplitude = new p5.Amplitude();
@@ -418,7 +427,9 @@ function setPreset() {
   localStorage.setItem("morphCheck", morphCheck.checked);
   localStorage.setItem("morph", morphSlider.value);
   localStorage.setItem("rotateCheck", rotateCheck.checked);
-  localStorage.setItem("rotate", rotateSlider.value);
+  localStorage.setItem("rotateX", rotateSliderX.value);
+  localStorage.setItem("rotateY", rotateSliderY.value);
+  localStorage.setItem("rotateZ", rotateSliderZ.value);
   localStorage.setItem("sM0", strenghtSliderm0.value);
   localStorage.setItem("sM2", strenghtSliderm2.value);
   localStorage.setItem("sM4", strenghtSliderm4.value);
@@ -439,7 +450,9 @@ function getPreset() {
   smoothSlider.value = localStorage.getItem("smooth");
   morphSlider.value = localStorage.getItem("morph"); 
   morphCheck.checked = (localStorage.getItem("morphCheck") == "true") ? true : false; 
-  rotateSlider.value = localStorage.getItem("rotate");
+  rotateSliderX.value = localStorage.getItem("rotateX");
+  rotateSliderY.value = localStorage.getItem("rotateY");
+  rotateSliderZ.value = localStorage.getItem("rotateZ");
   rotateCheck.checked = (localStorage.getItem("rotateCheck") == "true")? true : false;
   strenghtSliderm0.value = localStorage.getItem("sM0");
   strenghtSliderm2.value = localStorage.getItem("sM2");
