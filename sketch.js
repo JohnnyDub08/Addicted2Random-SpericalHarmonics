@@ -204,7 +204,7 @@ function setup() {
   mic = new p5.AudioIn();
   amplitude = new p5.Amplitude();
   peakDetect = new p5.PeakDetect(33, 90, 0.35, 40);
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //("https://ice2.somafm.com/groovesalad-128-aac")
   fft.setInput(mic);
   //amplitude.setInput(mic);
   //audio.play();
@@ -295,7 +295,7 @@ function draw() {
   // Peaks
   if (peakOn) peakDetect.update(fft);
   if (peakDetect.isDetected) {
-    sSize = lerp(sSize, 2, 0.3);
+    sSize = lerp(sSize, 2, 0.5);
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
@@ -324,14 +324,14 @@ function draw() {
   // Send the texture to the shader
   //myShader.setUniform("uMatcapTexture", matcap);
   if (rotateCheck.checked) {
-    rotater+=rotateSlider.value/100000;  
-  }
-  push(); 
-  rotateX(rotater*0.6);
-  rotateY(rotater)
-  rotateZ(-rotater*0.8)
+    rotater=rotateSlider.value/100000;  
+  } else {rotater = 0}
+  //push(); 
+  easycam.rotateX(-rotater*1.2);
+  easycam.rotateY(rotater*0.9);
+  easycam.rotateZ(-rotater*0.6);
   sphaere(m, sSize);
-  pop();
+  //pop();
   // Spektrum Animation
   //spektrum(spectrum)
 }
@@ -427,6 +427,7 @@ function setPreset() {
 }
 
 function getPreset() {
+  console.log("VorDemLaden" + "\n" + localStorage.getItem("morphCheck"));
   m0Slider.value = localStorage.getItem("m0");
   m1Slider.value = localStorage.getItem("m1");
   m2Slider.value = localStorage.getItem("m2");
@@ -437,14 +438,15 @@ function getPreset() {
   m7Slider.value = localStorage.getItem("m7");
   smoothSlider.value = localStorage.getItem("smooth");
   morphSlider.value = localStorage.getItem("morph"); 
-  morphCheck.checked = localStorage.getItem("morphCheck")
+  morphCheck.checked = (localStorage.getItem("morphCheck") == "true") ? true : false; 
   rotateSlider.value = localStorage.getItem("rotate");
-  rotateCheck.checked = localStorage.getItem("rotateCheck");
+  rotateCheck.checked = (localStorage.getItem("rotateCheck") == "true")? true : false;
   strenghtSliderm0.value = localStorage.getItem("sM0");
   strenghtSliderm2.value = localStorage.getItem("sM2");
   strenghtSliderm4.value = localStorage.getItem("sM4");
   strenghtSliderm6.value = localStorage.getItem("sM6");
-  console.log("Geladen" + "\n" + localStorage);
+  console.log("Geladen" + "\n" + localStorage.getItem("morphCheck"));
+
 }
 
 function logValues() {
