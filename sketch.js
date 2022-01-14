@@ -32,6 +32,7 @@ let m0Slider,
   strenghtValuem6,
   peakCheck,
   rotateCheck,
+  spaceCheck,
   audioSourceBtn,
   saveBtn,
   loadBtn,
@@ -39,6 +40,7 @@ let m0Slider,
   morphBtn,
   resetBtn,
   morphSlider,
+  spaceSlider,
   rotateSliderX,
   rotateSliderY,
   rotateSliderZ;
@@ -97,7 +99,8 @@ function htmlEvents() {
   m6Slider = document.getElementById("m6Slider"); //createSlider(-21, 21, 0, 0.01);
   m7Slider = document.getElementById("m7Slider"); //createSlider(0, 9, 1);
   smoothSlider = document.getElementById("smoothSlider"); //createSlider(0.5, 1, 0.78, 0.001);
-  morphSlider = document.getElementById("morphSlider"); //createSlider(0.0001, 0.003, 0.0002, 0.00001);
+  morphSlider = document.getElementById("morphSlider");
+  spaceSlider = document.getElementById("spaceSlider"); //createSlider(0.0001, 0.003, 0.0002, 0.00001);
   rotateSliderX = document.getElementById("rotateSliderX");
   rotateSliderY = document.getElementById("rotateSliderY");
   rotateSliderZ = document.getElementById("rotateSliderZ");
@@ -113,10 +116,11 @@ function htmlEvents() {
   resetBtn = document.getElementById("resetBtn");
   lightCheck = document.getElementById("lightCheck");
   resCheck = document.getElementById("resCheck");
+  spaceCheck = document.getElementById("spaceCheck");
   morphBtn = document.getElementById("morphCheck");
   serverAdress = document.getElementById("server");
   serverAdress.addEventListener("keydown", (x) => {
-  /*   if (!x) { var x = window.event; }
+    /*   if (!x) { var x = window.event; }
     x.preventDefault();  */
     if (x.keyCode === 13) {
       audioSourceBtn.innerHTML = "CustomServer";
@@ -152,11 +156,13 @@ function htmlEvents() {
     rotateSliderX.value = 0;
     rotateSliderY.value = 0;
     rotateSliderZ.value = 0;
+    spaceSlider.value = 0;
     morphCheck.checked = false;
     rotateCheck.checked = false;
     lightCheck.checked = false;
     peakCheck.checked = false;
     resCheck.checked = false;
+    spaceCheck.checked = false;
   });
   document.getElementById("m0").addEventListener("click", () => {
     m0Slider.value = 0;
@@ -203,7 +209,11 @@ function htmlEvents() {
   document.getElementById("z").addEventListener("click", () => {
     rotateSliderZ.value = 0;
   });
+  document.getElementById("travelSpeed").addEventListener("click", () => {
+    spaceSlider.value = 0;
+  });
 }
+
 function setStars() {
   for (let i = 0; i < 377; i++) {
     particles.push(
@@ -231,7 +241,7 @@ function setup() {
   // simple Kamera ohne Rechtsklick
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
-  easycam.setDistanceMax(2000);
+  easycam.setDistanceMax(2400);
   document.oncontextmenu = function () {
     return false;
   };
@@ -243,7 +253,7 @@ function setup() {
   fft = new p5.FFT();
   mic = new p5.AudioIn();
   amplitude = new p5.Amplitude();
-  peakDetect = new p5.PeakDetect(33, 90, 0.35, 40);
+  peakDetect = new p5.PeakDetect(33, 90, 0.5, 80);
   audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(mic);
   //amplitude.setInput(mic);
@@ -267,6 +277,7 @@ function htmlHandler() {
   document.getElementById("sM4").innerHTML = "m4S=" + strenghtValuem4;
   document.getElementById("sM6").innerHTML = "m6S=" + strenghtValuem6;
   document.getElementById("speed").innerHTML = morphSlider.value / 1000;
+  document.getElementById("travelSpeed").innerHTML = "Warp " + spaceSlider.value / 1000;
   document.getElementById("smth").innerHTML = smoothValue;
   document.getElementById("x").innerHTML = "X=" + rotateSliderX.value / 1000;
   document.getElementById("y").innerHTML = "Y=" + rotateSliderY.value / 1000;
@@ -360,8 +371,13 @@ function draw() {
   background(0);
   //Sterne
   for (p of particles) {
-    stroke(255, 0.5);
-    strokeWeight(1.33);
+    let al = map(dist(0, 0, 0, p.x, p.y, p.z), 0, height * 2, 1, 0.01);
+    stroke(255, al);
+    strokeWeight(2.33);
+    if (spaceCheck.checked) {
+      p.add(createVector(0, spaceSlider.value / 1000, 0));
+    }
+    if (p.y > height * 2) p.y = -height * 2;
     point(p.x, p.y, p.z);
   }
   // Lichter
@@ -437,7 +453,7 @@ function switchSource() {
   } else {
     audioSourceBtn.innerHTML = "A2Random";
     audio.stop();
-    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
+    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
     audio.play();
     fft.setInput(audio);
     /*     amplitude = new p5.Amplitude();
@@ -459,6 +475,8 @@ function setPreset() {
   localStorage.setItem("smooth", smoothSlider.value);
   localStorage.setItem("morphCheck", morphCheck.checked);
   localStorage.setItem("morph", morphSlider.value);
+  localStorage.setItem("spaceCheck", spaceCheck.checked);
+  localStorage.setItem("travelSpeed", spaceSlider.value);
   localStorage.setItem("rotateCheck", rotateCheck.checked);
   localStorage.setItem("resCheck", resCheck.checked);
   localStorage.setItem("lightCheck", lightCheck.checked);
@@ -485,6 +503,7 @@ function getPreset() {
   m7Slider.value = localStorage.getItem("m7");
   smoothSlider.value = localStorage.getItem("smooth");
   morphSlider.value = localStorage.getItem("morph");
+  spaceSlider.value = localStorage.getItem("travelSpeed");
   morphCheck.checked =
     localStorage.getItem("morphCheck") == "true" ? true : false;
   rotateSliderX.value = localStorage.getItem("rotateX");
@@ -496,6 +515,8 @@ function getPreset() {
     localStorage.getItem("lightCheck") == "true" ? true : false;
   peakCheck.checked =
     localStorage.getItem("peakCheck") == "true" ? true : false;
+    spaceCheck.checked =
+    localStorage.getItem("spaceCheck") == "true" ? true : false;
   resCheck.checked = localStorage.getItem("resCheck") == "true" ? true : false;
   strenghtSliderm0.value = localStorage.getItem("sM0");
   strenghtSliderm2.value = localStorage.getItem("sM2");
