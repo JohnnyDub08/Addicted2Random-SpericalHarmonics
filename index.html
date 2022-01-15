@@ -16,26 +16,26 @@
     body {
       font-family: 'Audiowide', cursive;
       font-size: 0.8em;
-      background: transparent;
+      background: black;
       user-select: none;
-   
- /*      -ms-user-select: none;
+
+      /*      -ms-user-select: none;
      
       -webkit-user-select: none;
      
       -moz-user-select: none;
      
       -khtml-user-select: none; */
-     
+
     }
 
     .buttons {
-      display: grid;  
+      display: grid;
       grid-template-columns: 1fr 1fr;
       grid-column-gap: 0.3em;
       grid-auto-rows: auto;
-     
-      padding: 1em;
+
+      padding: 0.5em;
       font-size: 12px;
       text-align: left;
     }
@@ -51,20 +51,25 @@
       border-radius: 5px;
       transition: all 100ms ease;
       /* position: relative; */
+    } 
+
+    .button:hover {
+      border-radius: 10px;
+      background-color: rgb(128, 255, 212, 0.1);
     }
 
-    .textinput{
+    .textinput {
       cursor: pointer;
       background-color: transparent;
       font-family: 'Audiowide', cursive;
       font-size: 0.9em;
-      margin-top: 1em;
+      margin-top: 0.5em;
       color: ivory;
       border: 2px solid ivory;
       border-radius: 5px;
     }
 
-    .button:hover {
+    .textinput:hover {
       border-radius: 10px;
       background-color: rgb(128, 255, 212, 0.1);
     }
@@ -104,7 +109,7 @@
 
     }
 
-/*     @media only screen and (max-width: 768px) {
+    /*     @media only screen and (max-width: 768px) {
       .sidebar .sliderText {
         grid-template-columns: 2fr 2.1fr;
       }
@@ -132,7 +137,7 @@
     .image {
       position: absolute;
       top: 1rem;
-      right: 1rem;     
+      right: 1rem;
       height: 6.18%;
       width: auto;
       z-index: 0;
@@ -146,100 +151,109 @@
 </head>
 
 <body>
-  <img src="a2r.png" alt="" class="image">
+  <!-- <img src="a2r.png" alt="" class="image"> -->
   <div id="leftSidebar" class="sidebar">
-      <div id="schrift">
-    <div><h3>SphericalHarmonics</h3></div>
-    <div class="sliderText">
-      <input type="range" min="-2100" max="2100" value="0" class="slider" id="m0Slider">
-      <p id="m0">m0</p>
-      <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
-      <p id="m1">m1</p>
-      <input type="range" min="-2100" max="2100" value="0" class="slider" id="m2Slider">
-      <p id="m2">m2</p>
-      <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
-      <p id="m3">m3</p>
-      <input type="range" min="-2100" max="2100" value="0" class="slider" id="m4Slider">
-      <p id="m4">m4</p>
-      <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
-      <p id="m5">m5</p>
-      <input type="range" min="-2100" max="2100" value="0" class="slider" id="m6Slider">
-      <p id="m6">m6</p>
-      <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
-      <p id="m7">m7</p>
-    </div>
-    <div>
-      <h4>
-      <input type="checkbox" name="autoMorph" id="morphCheck">
-      <label for="autoMorph">AutoMorph</label>
-    </h4>
-    </div>
-    <div class="sliderText">
-      <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
-      <p id="speed">speed</p>
-    </div>
-    <div><h4>FFTStrength</h4></div>
-    <div class="sliderText">
-      <input type="range" min="-2100" max="2100" value="1200" class="slider" id="strenghtSliderm0">
-      <p id="sM0">m0</p>
-      <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm2">
-      <p id="sM2">m2</p>
-      <input type="range" min="-900" max="900" value="600" class="slider" id="strenghtSliderm4">
-      <p id="sM4">m4</p>
-      <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm6">
-      <p id="sM6">m6</p>
-    </div>
-    <div><h4>FFTSmooth</h4></div>
-    <div class="sliderText">
-      <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
-      <p id="smth">smth</p>
-    </div>
+    <div id="schrift">
+      <div>
+        <h3>SphericalHarmonics</h3>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="-2100" max="2100" value="-1200" class="slider" id="m0Slider">
+        <p id="m0">m0</p>
+        <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
+        <p id="m1">m1</p>
+        <input type="range" min="-2100" max="2100" value="-900" class="slider" id="m2Slider">
+        <p id="m2">m2</p>
+        <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
+        <p id="m3">m3</p>
+        <input type="range" min="-2100" max="2100" value="-600" class="slider" id="m4Slider">
+        <p id="m4">m4</p>
+        <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
+        <p id="m5">m5</p>
+        <input type="range" min="-2100" max="2100" value="-300" class="slider" id="m6Slider">
+        <p id="m6">m6</p>
+        <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
+        <p id="m7">m7</p>
+      </div>
+      <div>
+        <h4>
+          <input type="checkbox" name="autoMorph" id="morphCheck">
+          <label for="autoMorph">AutoMorph</label>
+        </h4>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
+        <p id="speed">speed</p>
+      </div>
+      <div>
+        <h4>FFTStrength</h4>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="-2100" max="2100" value="1200" class="slider" id="strenghtSliderm0">
+        <p id="sM0">m0</p>
+        <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm2">
+        <p id="sM2">m2</p>
+        <input type="range" min="-900" max="900" value="600" class="slider" id="strenghtSliderm4">
+        <p id="sM4">m4</p>
+        <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm6">
+        <p id="sM6">m6</p>
+      </div>
+      <div>
+        <h4>FFTSmooth</h4>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
+        <p id="smth">smth</p>
+      </div>
 
-    <div>
-      <h4>
-      <input type="checkbox" name="spaceTravel" id="spaceCheck">
-      <label for="spaceTravel">SpaceTravel</label>
-    </h4>
-    </div>
-    <div class="sliderText">
-      <input type="range" min="1000" max="50000" value="5000" class="slider" id="spaceSlider">
-      <p id="travelSpeed">speed</p>
-    </div>
+      <div>
+        <h4>
+          <input type="checkbox" name="spaceTravel" id="spaceCheck">
+          <label for="spaceTravel">SpaceTravel</label>
+        </h4>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="1000" max="50000" value="5000" class="slider" id="spaceSlider">
+        <p id="travelSpeed">speed</p>
+      </div>
 
-    <div>
-      <h4>
-      <input type="checkbox" name="rotate" id="rotateCheck">
-      <label for="rotate">AutoRotate</label>
-      </h4>
-    </div>
-    <div class="sliderText">
-      <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderX">
-      <p id="x">X</p>
-      <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderY">
-      <p id="y">Y</p>
-      <input type="range" min="-1000" max="1000" value="-100" class="slider" id="rotateSliderZ">
-      <p id="z">Z</p>
-    </div>
-    <div>
-      <input type="checkbox" name="peakDetect" id="peakCheck">
-      <label for="peakDetect">PeakDetect</label>
-    </div>
-    <div>
-      <input type="checkbox" name="lights" id="lightCheck">
-      <label for="lights">ShowLights</label>
-    </div>
-    <div>
-      <input type="checkbox" name="res" id="resCheck">
-      <label for="res">HighResolution</label>
-    </div>
-    <div>
-      <input type="text" value="Enter Server Adress" id="server" class="textinput">
-    </div>
+      <div>
+        <h4>
+          <input type="checkbox" name="rotate" id="rotateCheck">
+          <label for="rotate">AutoRotate</label>
+        </h4>
+      </div>
+      <div class="sliderText">
+        <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderX">
+        <p id="x">X</p>
+        <input type="range" min="-1000" max="1000" value="100" class="slider" id="rotateSliderY">
+        <p id="y">Y</p>
+        <input type="range" min="-1000" max="1000" value="-100" class="slider" id="rotateSliderZ">
+        <p id="z">Z</p>
+      </div>
+      <div>
+        <input type="checkbox" name="peakDetect" id="peakCheck">
+        <label for="peakDetect">PeakDetect</label>
+      </div>
+      <div>
+        <input type="checkbox" name="lights" id="lightCheck">
+        <label for="lights">ShowLights</label>
+      </div>
+      <div>
+        <input type="checkbox" name="res" id="resCheck">
+        <label for="res">HighResolution</label>
+      </div>
+      <div class="textinput" id="dropZone">
+        <p>Drag AudioFile here</p>
+      </div>
+      <div>
+        <input type="text" value="Enter Server Adress" id="server" class="textinput">
+      </div>
 
-    
-   
-  </div>
-    <div class="buttons">  
+
+
+    </div>
+    <div class="buttons">
       <button type="button" class="button" id="audioSource">Mic/External</button>
       <button type="button" class="button" id="resetBtn">Reset</button>
       <button type="button" class="button" id="loadBtn">LoadValues</button>
