@@ -54,15 +54,20 @@ let counter;
 let ampHistory = [];
 let lerpSpace;
 let planetMode = false;
-let rotationState;
+let rotationState = 0;
 let planetTex;
+let planetSize;
+let planetDist = 0;
+let maxDistCam = 3500;
+let planetX;
+let planetY;
 let peakCounter = 0;
 
 let myShader;
 let matcap;
 
 function preload() {
-  planetTex = loadImage("eartlike3.jpeg");
+  planetTex = loadImage("moon_tex.png");
 }
 
 function centerCanvas() {
@@ -117,6 +122,7 @@ function setup() {
   planetCheckBox = createCheckbox("planetMode", false);
   planetCheckBox.position(width - 100, 30);
   planetCheckBox.changed(changePlanetMode);
+  planetSize = 1;
 
   //console.log(mic.getSources());
   //mic.start();
@@ -143,7 +149,7 @@ function spektrum(spectrum) {
   endShape();
 }
 function changePlanetMode() {
-  frameCount = 0;
+  //frameCount = 0;
   planetMode = !planetMode;
   
 }
@@ -230,30 +236,39 @@ function draw() {
   background(0);
 
   // Lichter
-  if (!planetMode) {
-    lichter();
-  } else {
-    lichter2();
-  }
+  lichter();
+ 
 
   push();
-  rotationState = (frameCount * 0.002) % TWO_PI;
+  //rotationState = (frameCount * 0.002) % TWO_PI;
   console.log("rotationState = " + rotationState)
-  if (planetMode) { 
-    rotateZ(rotationState);
+  if (planetMode) {
+    rotationState = lerp(rotationState,(frameCount * 0.002),0.01); // % TWO_PI wegen drehung rausgenommen
+    if (rotationState > TWO_PI * 2) {frameCount = 0}
+    
+  } else {
+    //frameCount = 0;
+    rotationState = lerp(rotationState,0,0.3);
+  }
+ 
+    rotateZ(rotationState); // Deduggen
 
     // Spektrum Animation
     //spektrum(spectrum)
-  }
+  
   sphaere(m, sSize);
   pop();
-
-  push();
-  if (planetMode) {
-    let x = 2500 * cos(rotationState);
-    let y = 2500 * sin(rotationState);
-    translate(x, y, 0);
+  if (!planetMode) {
+  
   }
+  push();
+
+  
+  planetX = planetDist * cos(rotationState);
+  planetY = planetDist * sin(rotationState);
+    
+  
+  translate(planetX, planetY, 0);
   //Sterne
   for (p of particles) {
     let al = map(dist(0, 0, 0, p.x, p.y, p.z), 0, height * 3, 1, 0.01);
@@ -264,7 +279,6 @@ function draw() {
     } else {
       lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
     }
-
     p.add(lerpSpace);
     if (p.y > height * 3) {
       p.y = -height * 3;
@@ -273,18 +287,23 @@ function draw() {
     point(p.x, p.y, p.z);
   }
   noStroke();
-  if (planetMode) {
-    //texture(planetTex);
-    //push()
-    //rotateX(PI/2);
-
-    specularMaterial(255, 255, 255);
-
-    sphere(1500);
-    //pop()
+  let planetCol = map(sin(frameCount*0.001),-1,1,0,255)
+  specularMaterial(255, 255, planetCol);
+  sphere(planetSize);
+  if (planetMode) {  
+    planetDist = lerp(planetDist,3500,0.01);
+    planetSize = lerp(planetSize, 2500, 0.01) 
+    easycam.setDistanceMax(maxDistCam);
+    //maxDistCam = lerp(maxDistCam,900,0.01);    
+  }
+  else{
+    planetDist = lerp(planetDist,0,0.01);
+    planetSize = lerp(planetSize, 0, 0.1);
+    easycam.setDistanceMax(maxDistCam);
+    //maxDistCam = lerp(maxDistCam,3500,0.01);
+   
   }
   pop();
-
   if (!planetMode) {
     if (spaceCheck.checked) {
       showTrail();
@@ -748,7 +767,7 @@ function lichter2() {
   directionalLight(255, 0, 0, -1, 1, 0);
   directionalLight(255, 0, 0, 1, 1, 0);
   directionalLight(255, 0, 0, -1, -1, 0);
-  directionalLight(255, 255, 100, 1, -1, 0);
+  directionalLight(255, 0, 255, 1, -1, 0);
   pointLight(col, 255, 255, dirX, dirY, x2Light);
   pointLight(col2, 255, 255, xLight, yLight, y2Light);
   pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
