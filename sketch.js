@@ -52,21 +52,18 @@ let rotater = 0;
 let streamAdress;
 let counter;
 let ampHistory = [];
+let lerpSpace;
+let planetMode = false;
+let rotationState;
+let planetTex;
+let peakCounter = 0;
 
 let myShader;
 let matcap;
 
-/* function preload() {
-  // a shader is composed of two parts, a vertex shader, and a fragment shader
-  // the vertex shader prepares the vertices and geometry to be drawn
-  // the fragment shader renders the actual pixel colors
-  // loadShader() is asynchronous so it needs to be in preload
-  // loadShader() first takes the filename of a vertex shader, and then a frag shader
-  // these file types are usually .vert and .frag, but you can actually use anything. .glsl is another common one
-  myShader = loadShader("shader.vert", "shader.frag");
-
-  matcap = loadImage("a2r.jpg");
-} */
+function preload() {
+  planetTex = loadImage("eartlike3.jpeg");
+}
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
@@ -89,6 +86,7 @@ function setup() {
   //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
   cnv.style("z-index", -1);
+  textureWrap(MIRROR); //CLAMP, REPEAT, or MIRROR
   colorMode(HSB);
   centerCanvas();
 
@@ -105,6 +103,7 @@ function setup() {
 
   //Sterne
   setStars();
+  lerpSpace = createVector(0, 0, 0);
 
   // Audio Analyse
   fft = new p5.FFT();
@@ -115,6 +114,9 @@ function setup() {
   fft.setInput(audio);
   amplitude.setInput(audio);
   audio.play();
+  planetCheckBox = createCheckbox("planetMode", false);
+  planetCheckBox.position(width - 100, 30);
+  planetCheckBox.changed(changePlanetMode);
 
   //console.log(mic.getSources());
   //mic.start();
@@ -140,14 +142,19 @@ function spektrum(spectrum) {
   }
   endShape();
 }
+function changePlanetMode() {
+  frameCount = 0;
+  planetMode = !planetMode;
+  
+}
 
 function showTrail() {
   let a = amplitude.getLevel();
   ampHistory.push(a);
-  
+
   //fill(255, 0.2);
   noStroke();
-  specularMaterial(100, 0.2)
+  specularMaterial(100, 0.2);
   //stroke(255);
   let maxArray = 150;
   let dis = 50;
@@ -157,9 +164,9 @@ function showTrail() {
   for (let i = 0; i < ampHistory.length; i++) {
     let amp = floor(
       map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000)
-    ); 
-    let al = map(i,0,ampHistory.length,1,0.1);
-    
+    );
+    let al = map(i, 0, ampHistory.length, 1, 0.1);
+
     normal(0, offSet + maxArray * dis - i * dis, amp);
     vertex(0, offSet + maxArray * dis - i * dis, amp);
     normal(amp, offSet + maxArray * dis - i * dis, 0);
@@ -167,7 +174,7 @@ function showTrail() {
     normal(0, offSet + maxArray * dis - i * dis, -amp);
     vertex(0, offSet + maxArray * dis - i * dis, -amp);
     normal(-amp, offSet + maxArray * dis - i * dis, 0);
-    vertex(-amp, offSet + maxArray * dis - i * dis, 0);  
+    vertex(-amp, offSet + maxArray * dis - i * dis, 0);
   }
   vertex(0, offSet + maxArray * dis, 0);
   endShape();
@@ -198,6 +205,8 @@ function draw() {
   if (peakCheck.checked) peakDetect.update(fft);
   if (peakDetect.isDetected) {
     sSize = lerp(sSize, 2, 0.5);
+    peakCounter++;
+    console.log(peakCounter);
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
@@ -219,34 +228,68 @@ function draw() {
 
   // Szene
   background(0);
+
+  // Lichter
+  if (!planetMode) {
+    lichter();
+  } else {
+    lichter2();
+  }
+
+  push();
+  rotationState = (frameCount * 0.002) % TWO_PI;
+  console.log("rotationState = " + rotationState)
+  if (planetMode) { 
+    rotateZ(rotationState);
+
+    // Spektrum Animation
+    //spektrum(spectrum)
+  }
+  sphaere(m, sSize);
+  pop();
+
+  push();
+  if (planetMode) {
+    let x = 2500 * cos(rotationState);
+    let y = 2500 * sin(rotationState);
+    translate(x, y, 0);
+  }
   //Sterne
   for (p of particles) {
     let al = map(dist(0, 0, 0, p.x, p.y, p.z), 0, height * 3, 1, 0.01);
     stroke(255, al);
     strokeWeight(2.33);
-    if (spaceCheck.checked) {
-      p.add(createVector(0, spaceSlider.value / 1000, 0));
+    if (spaceCheck.checked && !planetMode) {
+      lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.0002);
+    } else {
+      lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
     }
+
+    p.add(lerpSpace);
     if (p.y > height * 3) {
       p.y = -height * 3;
       p.x = random(-height * 3, height * 3);
     }
     point(p.x, p.y, p.z);
   }
-  // Lichter
-  lichter();
-
-  //shader(myShader);
-  // Send the texture to the shader
-  //myShader.setUniform("uMatcapTexture", matcap);
-
-  sphaere(m, sSize);
-  if (spaceCheck.checked) {
-    showTrail();
-  }
   noStroke();
-  // Spektrum Animation
-  //spektrum(spectrum)
+  if (planetMode) {
+    //texture(planetTex);
+    //push()
+    //rotateX(PI/2);
+
+    specularMaterial(255, 255, 255);
+
+    sphere(1500);
+    //pop()
+  }
+  pop();
+
+  if (!planetMode) {
+    if (spaceCheck.checked) {
+      showTrail();
+    }
+  }
 }
 
 function sphaere(m, sSize) {
@@ -642,6 +685,70 @@ function lichter() {
   directionalLight(col2, 255, 100, 1, 1, 0);
   directionalLight(col3, 255, 100, -1, -1, 0);
   directionalLight(col4, 255, 100, 1, -1, 0);
+  pointLight(col, 255, 255, dirX, dirY, x2Light);
+  pointLight(col2, 255, 255, xLight, yLight, y2Light);
+  pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
+  pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
+  let alphaV = 0.96;
+  specularMaterial(90, alphaV);
+  if (lightCheck.checked) {
+    //ambientLight(0);
+    let center = createVector(0, 0, 0);
+
+    push();
+    translate(dirX, dirY, x2Light);
+    stroke(col, 255, 255, alphaV);
+    strokeWeight(5);
+    point(0, 0, 0);
+    pop();
+    stroke(col, 255, 255, alphaV);
+    line(center.x, center.y, center.z, dirX, dirY, x2Light);
+    push();
+    translate(xLight, yLight, y2Light);
+    stroke(col2, 255, 255, alphaV);
+    strokeWeight(5);
+    point(0, 0, 0);
+    pop();
+    stroke(col2, 255, 255, alphaV);
+    line(center.x, center.y, center.z, xLight, yLight, y2Light);
+    push();
+    translate(-xLight, -x2Light, -yLight);
+    stroke(col3, 255, 255, alphaV);
+    strokeWeight(5);
+    point(0, 0, 0);
+    pop();
+    stroke(col3, 255, 255, alphaV);
+    line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
+    push();
+    translate(-dirX, -y2Light, -dirY);
+    stroke(col4, 255, 255, alphaV);
+    strokeWeight(5);
+    point(0, 0, 0);
+    pop();
+    stroke(col4, 255, 255, alphaV);
+    line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
+  }
+}
+function lichter2() {
+  let angle = frameCount * 0.001;
+  let angle2 = frameCount * 0.01;
+  let radius = map(sin(angle2), -1, 1, 200, 500);
+  let dirX = radius * cos(angle + PI);
+  let dirY = radius * sin(angle + PI);
+  let xLight = radius * cos(angle);
+  let yLight = radius * sin(angle);
+  let x2Light = radius * cos(angle2);
+  let y2Light = radius * sin(angle2);
+  let col = map(sin(angle + radians(0)), -1, 1, 0, 255);
+  let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+  let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
+  let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
+
+  shininess(25);
+  directionalLight(255, 0, 0, -1, 1, 0);
+  directionalLight(255, 0, 0, 1, 1, 0);
+  directionalLight(255, 0, 0, -1, -1, 0);
+  directionalLight(255, 255, 100, 1, -1, 0);
   pointLight(col, 255, 255, dirX, dirY, x2Light);
   pointLight(col2, 255, 255, xLight, yLight, y2Light);
   pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
