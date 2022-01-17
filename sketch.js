@@ -59,7 +59,7 @@ let rotationState = 0;
 let planetTex;
 let planetSize = 0;
 let planetDist = 0;
-let maxDistCam = 3500;
+let maxDistCam = 3000;
 let planetX;
 let planetY;
 let planetRotationIterater = 0;
@@ -70,6 +70,8 @@ let col2 = 0 ; // Globale Farbe
 
 let myShader;
 let matcap;
+let lightVec;
+let lightVecTemp;
 
 /* function preload() {
   tex = loadImage("moon_tex.png");
@@ -85,9 +87,13 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   centerCanvas();
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
+  easycam.setRotation([0, 0, 0, 0],3000);
   easycam.setDistanceMin(300);
   easycam.setDistanceMax(3000);
   setStars();
+  planetCheckBox.position(width - 100, 30);
+  easycam.setRotation([0, 0, 1, 0],6000);
+  easycam.setDistance(2000, 3000)  
 }
 
 function setup() {
@@ -107,14 +113,18 @@ function setup() {
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
   easycam.setDistanceMax(3000);
+  easycam.setRotation([0, 0, 1, 0],6000);
+  easycam.setDistance(2000, 3000);  
   document.oncontextmenu = function () {
     return false;
   };
-  console.log(easycam.getViewport());
+  document.getElementById("spaceCheck").checked = true;
 
   //Sterne
   setStars();
   lerpSpace = createVector(0, 0, 0);
+  lightVec = createVector(0,0,0);
+  lightVecTemp = createVector(0,0,0);
 
   // Audio Analyse
   fft = new p5.FFT();
@@ -134,18 +144,6 @@ function setup() {
   //console.log(mic.getSources());
   //mic.start();
 }
-
-/* function bpmDetect() {
-  if (millis() % 10000 > 9980) {
-  let framesPerPeak = 60 / (counter / 60 ); 
-  peakDetect = new p5.PeakDetect(60, 120, 0.8, framesPerPeak);
-    counter = 1;}
-  if (amplitude.volNorm > 0.8 && frameCount % 2 === 0) {
-    counter++;
-
-  }
-  console.log(counter);
-} */
 function spektrum(spectrum) {
   beginShape();
   for (i = 0; i < spectrum.length; i++) {
@@ -160,6 +158,16 @@ function changePlanetMode() {
   planetMode = !planetMode;
   m = millis();
   setStars();
+  if (planetMode) {easycam.setRotation([0.5, 0, 0.5, 0],5000);
+    rotateSliderX.value = 200;
+    rotateCheck.checked = true; 
+    easycam.setDistance(950, 5000) 
+    spaceCheck.checked = true; 
+  } else {
+    easycam.setDistance(3000, 3000)  
+    easycam.setRotation([-0.5, 1, -0.5, 0],5000);
+  }
+  
 }
 
 function showTrail() {
@@ -173,7 +181,7 @@ function showTrail() {
   noStroke();
   specularMaterial(100, 0.3);
 
-  beginShape(TRIANGLE_FAN);
+  beginShape(); //TRIANGLE_FAN
   
   vertex(1, offSet - 200, 0);
   vertex(0, offSet - 200, 1);
@@ -220,11 +228,20 @@ function draw() {
 
   // Peaks
   if (peakCheck.checked) peakDetect.update(fft);
+  
   if (peakDetect.isDetected) {
     sSize = lerp(sSize, 2, 0.5);
+    lightVecTemp = createVector(random(-10,10)/10,random(-10,10)/10,random(-10,10)/10);
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
+ 
+  //Lichtsucher
+  lightVec.x = lerp(lightVec.x,lightVecTemp.x,0.1);
+  lightVec.y = lerp(lightVec.y,lightVecTemp.y,0.1);
+  lightVec.z = lerp(lightVec.z,lightVecTemp.z,0.1);
+  //if (frameCount%20==19) {lightVecTemp = lightVec}
+
 
   let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
   let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
@@ -243,17 +260,14 @@ function draw() {
 
   // Szene
   background(0);
-
-  // Lichter
-  lichter();
+  lichter2();
+  
 
   push();
 
   planetX = planetDist * cos(rotationState);
   planetY = planetDist * sin(rotationState);
-  console.log("EC:" + easycam.getRotation())
   
-
   translate(planetX, planetY, 0);
   if(planetMode) rotateX(frameCount*0.0003%TWO_PI)
   //Sterne
@@ -286,15 +300,20 @@ function draw() {
     point(p.x, p.y, p.z);
   }
   noStroke();
-  let planetCol = map(sin(frameCount * 0.001), -1, 1, 0, 255);
+  let planetCol = map(amplitude.getLevel(), 0, 1, 0, 255);
   let dark = map(planetRotationIterater%TWO_PI+TWO_PI,0,TWO_PI+TWO_PI,0,255)
-  specularMaterial(220, 255, dark);
+  
+  specularMaterial(255, dark, planetCol);
   //stroke(col2,255,255);
   //texture(tex)
-  sphere(planetSize,20,20);
+  let pump;
   if (planetMode) {
-    planetDist = lerp(planetDist, 3500, 0.01);
-    planetSize = lerp(planetSize, 2500, 0.01);
+  pump = amplitude.getLevel()*200;}
+  else {pump = 0;}
+  sphere(planetSize+pump,30,30);
+  if (planetMode) {
+    planetDist = lerp(planetDist, 3500, 0.02);
+    planetSize = lerp(planetSize, 2500, 0.02);
     easycam.setDistanceMax(maxDistCam);
     maxDistCam = lerp(maxDistCam,950,0.01);
   } else {
@@ -331,6 +350,8 @@ function draw() {
 
   sphaere(m, sSize);
   pop();
+    // Lichter
+  
   if (!planetMode) {
     if (spaceCheck.checked) {
       showTrail();
@@ -794,15 +815,19 @@ function lichter2() {
   let x2Light = radius * cos(angle2);
   let y2Light = radius * sin(angle2);
   let col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-  let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+  let col2 = map(sin(angle + radians(15)), -1, 1, 0, 255);
   let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
-  let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
+  let col4 = map(sin(angle + radians(45)), -1, 1, 0, 255);
 
   shininess(25);
-  directionalLight(255, 0, 0, -1, 1, 0);
+/*   directionalLight(255, 0, 0, -1, 1, 0);
   directionalLight(255, 0, 0, 1, 1, 0);
   directionalLight(255, 0, 0, -1, -1, 0);
-  directionalLight(255, 0, 255, 1, -1, 0);
+  directionalLight(255, 0, 255, 1, -1, 0); */
+  directionalLight(255, 196, 100, -lightVec.y, lightVec.x, lightVec.z);
+  directionalLight(255, 128, 100, lightVec.z, -lightVec.y, -lightVec.x);
+  directionalLight(255, 64, 100, lightVec.z, lightVec.x, -lightVec.y);
+  directionalLight(255, 32, 100, -lightVec.x, lightVec.y, lightVec.z);
   pointLight(col, 255, 255, dirX, dirY, x2Light);
   pointLight(col2, 255, 255, xLight, yLight, y2Light);
   pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
@@ -815,36 +840,37 @@ function lichter2() {
 
     push();
     translate(dirX, dirY, x2Light);
-    stroke(col, 255, 255, alphaV);
+    stroke(col, 255, 255/* , alphaV */);
     strokeWeight(5);
     point(0, 0, 0);
     pop();
-    stroke(col, 255, 255, alphaV);
+    stroke(col, 255, 255/* , alphaV */);
     line(center.x, center.y, center.z, dirX, dirY, x2Light);
     push();
     translate(xLight, yLight, y2Light);
-    stroke(col2, 255, 255, alphaV);
+    stroke(col2, 255, 255/* , alphaV */);
     strokeWeight(5);
     point(0, 0, 0);
     pop();
-    stroke(col2, 255, 255, alphaV);
+    stroke(col2, 255, 255/* , alphaV */);
     line(center.x, center.y, center.z, xLight, yLight, y2Light);
     push();
     translate(-xLight, -x2Light, -yLight);
-    stroke(col3, 255, 255, alphaV);
+    stroke(col3, 255, 255/* , alphaV */);
     strokeWeight(5);
     point(0, 0, 0);
     pop();
-    stroke(col3, 255, 255, alphaV);
+    stroke(col3, 255, 255/* , alphaV */);
     line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
     push();
     translate(-dirX, -y2Light, -dirY);
-    stroke(col4, 255, 255, alphaV);
+    stroke(col4, 255, 255/* , alphaV */);
     strokeWeight(5);
     point(0, 0, 0);
     pop();
-    stroke(col4, 255, 255, alphaV);
+    stroke(col4, 255, 255/* , alphaV */);
     line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
   }
+  
 }
 //Hilfe, Liebe Hoffnung, Dankbar, Dankbarkeit
