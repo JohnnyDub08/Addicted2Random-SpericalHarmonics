@@ -71,9 +71,9 @@ let col2 = 0 ; // Globale Farbe
 let myShader;
 let matcap;
 
-function preload() {
+/* function preload() {
   tex = loadImage("moon_tex.png");
-}
+} */
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
