@@ -2,6 +2,7 @@ let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
 let easycam;
 let shape = [];
 let particles = [];
+let partOffset = [];
 let total = 50;
 let m0Slider,
   m0,
@@ -56,18 +57,22 @@ let lerpSpace;
 let planetMode = false;
 let rotationState = 0;
 let planetTex;
-let planetSize;
+let planetSize = 0;
 let planetDist = 0;
 let maxDistCam = 3500;
 let planetX;
 let planetY;
-let peakCounter = 0;
+let planetRotationIterater = 0;
+let al; // Alpha
+let m; //millis()
+let switchCounter = 0;
+let col2 = 0 ; // Globale Farbe
 
 let myShader;
 let matcap;
 
 function preload() {
-  planetTex = loadImage("moon_tex.png");
+  tex = loadImage("moon_tex.png");
 }
 
 function centerCanvas() {
@@ -105,6 +110,7 @@ function setup() {
   document.oncontextmenu = function () {
     return false;
   };
+  console.log(easycam.getViewport());
 
   //Sterne
   setStars();
@@ -115,14 +121,15 @@ function setup() {
   mic = new p5.AudioIn();
   amplitude = new p5.Amplitude();
   peakDetect = new p5.PeakDetect(33, 96, 0.5, 30);
-  audio = createAudio("https://ice2.somafm.com/groovesalad-128-aac"); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  audio = createAudio("https://ice2.somafm.com/fluid-128-aac"); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(audio);
   amplitude.setInput(audio);
   audio.play();
+
+  // PlanetDebug
   planetCheckBox = createCheckbox("planetMode", false);
   planetCheckBox.position(width - 100, 30);
   planetCheckBox.changed(changePlanetMode);
-  planetSize = 1;
 
   //console.log(mic.getSources());
   //mic.start();
@@ -151,28 +158,33 @@ function spektrum(spectrum) {
 function changePlanetMode() {
   //frameCount = 0;
   planetMode = !planetMode;
-  
+  m = millis();
+  setStars();
 }
 
 function showTrail() {
   let a = amplitude.getLevel();
   ampHistory.push(a);
 
-  //fill(255, 0.2);
+  let maxArray = 50;
+  let dis = 50 + spaceSlider.value/ 1000;
+  let offSet = 450;
+
   noStroke();
-  specularMaterial(100, 0.2);
-  //stroke(255);
-  let maxArray = 150;
-  let dis = 50;
-  let offSet = 350;
-  beginShape();
-  vertex(0, offSet - 100, 0);
+  specularMaterial(100, 0.3);
+
+  beginShape(TRIANGLE_FAN);
+  
+  vertex(1, offSet - 200, 0);
+  vertex(0, offSet - 200, 1);
+  vertex(-1, offSet - 200, 0);
+  vertex(0, offSet - 200, -1);
   for (let i = 0; i < ampHistory.length; i++) {
     let amp = floor(
-      map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000)
+      map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
     );
-    let al = map(i, 0, ampHistory.length, 1, 0.1);
-
+/*     let al = map(i, 0, ampHistory.length, 1, 1);
+    specularMaterial(100,al) */
     normal(0, offSet + maxArray * dis - i * dis, amp);
     vertex(0, offSet + maxArray * dis - i * dis, amp);
     normal(amp, offSet + maxArray * dis - i * dis, 0);
@@ -182,7 +194,7 @@ function showTrail() {
     normal(-amp, offSet + maxArray * dis - i * dis, 0);
     vertex(-amp, offSet + maxArray * dis - i * dis, 0);
   }
-  vertex(0, offSet + maxArray * dis, 0);
+  //vertex(0, offSet + maxArray * dis, 0);
   endShape();
   if (ampHistory.length > maxArray) {
     ampHistory.splice(0, 1);
@@ -197,7 +209,6 @@ function draw() {
   spectrum = fft.analyze(); // .analyze muss laufen
   fft.smooth(smoothValue);
   //amplitude.smooth(0.8);
-  //console.log(amplitude.volNorm)
 
   // Bänder der Analyse
   let oBands = fft.getOctaveBands(1, 90);
@@ -211,8 +222,6 @@ function draw() {
   if (peakCheck.checked) peakDetect.update(fft);
   if (peakDetect.isDetected) {
     sSize = lerp(sSize, 2, 0.5);
-    peakCounter++;
-    console.log(peakCounter);
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
@@ -237,78 +246,102 @@ function draw() {
 
   // Lichter
   lichter();
- 
 
   push();
-  //rotationState = (frameCount * 0.002) % TWO_PI;
-  console.log("rotationState = " + rotationState)
-  if (planetMode) {
-    rotationState = lerp(rotationState,(frameCount * 0.002),0.01); // % TWO_PI wegen drehung rausgenommen
-    if (rotationState > TWO_PI * 2) {frameCount = 0}
-    
-  } else {
-    //frameCount = 0;
-    rotationState = lerp(rotationState,0,0.3);
-  }
- 
-    rotateZ(rotationState); // Deduggen
 
-    // Spektrum Animation
-    //spektrum(spectrum)
-  
-  sphaere(m, sSize);
-  pop();
-  if (!planetMode) {
-  
-  }
-  push();
-
-  
   planetX = planetDist * cos(rotationState);
   planetY = planetDist * sin(rotationState);
-    
+  console.log("EC:" + easycam.getRotation())
   
+
   translate(planetX, planetY, 0);
+  if(planetMode) rotateX(frameCount*0.0003%TWO_PI)
   //Sterne
   for (p of particles) {
-    let al = map(dist(0, 0, 0, p.x, p.y, p.z), 0, height * 3, 1, 0.01);
-    stroke(255, al);
-    strokeWeight(2.33);
     if (spaceCheck.checked && !planetMode) {
-      lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.0002);
+      lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.002);   // WarpBremse
     } else {
       lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
+    };
+    if (planetMode) {
+      let getAround = createVector(0, 0, 0)
+        .sub(p)
+        .normalize()
+        .mult(planetSize * 2.5);
+      p.add(getAround);
+      al = map(dist(0, 0, 0, planetX, planetY, 0), 0, planetSize*2, 1, 0.01);
+    } else {
+      p.add(lerpSpace);
+      let space = (width + height) / 2;
+      if (p.y > space * 2) {
+        p.y = -space * 2;
+        p.x = random(-space * 2, space * 2);       
+      }
+      al = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0.01);
     }
-    p.add(lerpSpace);
-    if (p.y > height * 3) {
-      p.y = -height * 3;
-      p.x = random(-height * 3, height * 3);
-    }
+    
+
+    stroke(255, al);
+    strokeWeight(2.33);
     point(p.x, p.y, p.z);
   }
   noStroke();
-  let planetCol = map(sin(frameCount*0.001),-1,1,0,255)
-  specularMaterial(255, 255, planetCol);
-  sphere(planetSize);
-  if (planetMode) {  
-    planetDist = lerp(planetDist,3500,0.01);
-    planetSize = lerp(planetSize, 2500, 0.01) 
+  let planetCol = map(sin(frameCount * 0.001), -1, 1, 0, 255);
+  let dark = map(planetRotationIterater%TWO_PI+TWO_PI,0,TWO_PI+TWO_PI,0,255)
+  specularMaterial(220, 255, dark);
+  //stroke(col2,255,255);
+  //texture(tex)
+  sphere(planetSize,20,20);
+  if (planetMode) {
+    planetDist = lerp(planetDist, 3500, 0.01);
+    planetSize = lerp(planetSize, 2500, 0.01);
     easycam.setDistanceMax(maxDistCam);
-    //maxDistCam = lerp(maxDistCam,900,0.01);    
-  }
-  else{
-    planetDist = lerp(planetDist,0,0.01);
-    planetSize = lerp(planetSize, 0, 0.1);
+    maxDistCam = lerp(maxDistCam,950,0.01);
+  } else {
+    planetDist = lerp(planetDist, 0, 0.01);
+    planetSize = lerp(planetSize, 0, 0.07);
     easycam.setDistanceMax(maxDistCam);
-    //maxDistCam = lerp(maxDistCam,3500,0.01);
-   
+    maxDistCam = lerp(maxDistCam,3000,0.01);
   }
+  pop();
+  push();
+  if (planetMode) {
+    switchCounter += millis() / 1000; // Mit switch lösen um verschiedene States zu haben!!!!
+    planetRotationIterater = (frameCount * 0.002) % TWO_PI;
+    //console.log("planetRotationIterater " + planetRotationIterater);
+    if (switchCounter < 10000) {
+      rotationState = lerp(
+        rotationState,
+        planetRotationIterater,
+        switchCounter * 0.00005
+      );
+      console.log(switchCounter);
+    } else {
+      rotationState = planetRotationIterater;
+    }
+  } else {
+    switchCounter = 0;
+    planetRotationIterater = 0;
+    rotationState = lerp(rotationState, 0, 0.1);
+    if (rotationState < 0.1) rotationState = 0; // Drehung des Schiffs beim Abflug
+  }
+  rotateZ(rotationState);
+  // Spektrum Animation
+  //spektrum(spectrum)
+
+  sphaere(m, sSize);
   pop();
   if (!planetMode) {
     if (spaceCheck.checked) {
       showTrail();
     }
   }
+}
+
+function stopFuncAfter(del) {  // Beim change m = millis
+  if (del + m < millis()) {
+    return true;
+  } else return false;
 }
 
 function sphaere(m, sSize) {
@@ -332,7 +365,7 @@ function sphaere(m, sSize) {
       let y = r * cos(phi);
       let z = r * sin(phi) * sin(theta);
 
-      shape[i][j] = createVector(x, y, z).mult(60 * sSize); // amplitude.volume
+      shape[i][j] = createVector(x, y, z).mult(60 * sSize);
     }
   }
 
@@ -381,7 +414,7 @@ function getAudioFile(file) {
   audio = createAudio(file.data);
   audio.play();
   fft.setInput(audio);
-  amplitude = new p5.Amplitude();
+  //amplitude = new p5.Amplitude();
   amplitude.setInput(audio);
   audioSourceBtn.innerHTML = "AudioFile";
 }
@@ -555,16 +588,17 @@ function switchSource() {
     mic = new p5.AudioIn();
     mic.start();
     fft.setInput(mic);
-    amplitude = new p5.Amplitude();
+    //amplitude = new p5.Amplitude();
     amplitude.setInput(mic);
     sourceIsStream = !sourceIsStream;
   } else {
     audioSourceBtn.innerHTML = "A2Random";
+    mic.stop();
     audio.stop();
     audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
     audio.play();
     fft.setInput(audio);
-    amplitude = new p5.Amplitude();
+    //amplitude = new p5.Amplitude();
     amplitude.setInput(audio);
     sourceIsStream = !sourceIsStream;
   }
@@ -577,12 +611,13 @@ function touchStarted() {
 
 function setStars() {
   particles.splice(0, particles.length);
-  for (let i = 0; i < 377; i++) {
+  let space = (width + height) / 2;
+  for (let i = 0; i < 377; i++) {  
     particles.push(
       createVector(
-        random(-height * 3, height * 3),
-        random(-height * 3, height * 3),
-        random(-height * 3, height * 3)
+        random(-space * 2, space * 2),
+        random(-space * 2, space * 2),
+        random(-space * 2, space * 2)
       )
     );
   }
@@ -695,7 +730,7 @@ function lichter() {
   let x2Light = radius * cos(angle2);
   let y2Light = radius * sin(angle2);
   let col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-  let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+  col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
   let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
   let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
 
@@ -812,3 +847,4 @@ function lichter2() {
     line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
   }
 }
+//Hilfe, Liebe Hoffnung, Dankbar, Dankbarkeit
