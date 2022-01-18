@@ -272,6 +272,7 @@
   </div>
 
   <script>
+    var sidebar = false;
     function openNav() {
       let barStatus = document.getElementById("leftSidebar").style.width;
       let widthRight = "303px";//"38.2%"
@@ -281,6 +282,7 @@
         document.getElementById("leftSidebar").style.opacity = "85%";
         document.getElementById("arrow").innerHTML = "<-";
         document.getElementById("arrow").style.opacity = "100%";
+        sidebar = true;
       } else { closeNav() }
     }
 
@@ -290,6 +292,7 @@
       document.getElementById("leftSidebar").style.opacity = "0%";
       document.getElementById("arrow").innerHTML = "->";
       document.getElementById("arrow").style.opacity = "33%";
+      sidebar = false;
     }
   </script>
 

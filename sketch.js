@@ -68,7 +68,7 @@ let pump; // Planet pumpt zum Peak
 let alSterne; // Alpha
 let mil; //millis()
 let col = 0;
-let col5 = 0 ; // Globale Farben
+let col5 = 0; // Globale Farben
 
 let myShader;
 let matcap;
@@ -76,6 +76,9 @@ let lightVec;
 let lightVecTemp;
 let pg;
 let l = 0; // LichtArray
+
+// SoundStuff
+let reverb;
 
 /* function preload() {
   tex = loadImage("moon_tex.png");
@@ -93,9 +96,9 @@ function windowResized() {
   setStars();
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
-  easycam.setDistanceMax(3000); 
-  easycam.setRotation([0, -0.5, 0, 0],6000);
-  easycam.setDistance(2000, 3000)  
+  easycam.setDistanceMax(3000);
+  easycam.setRotation([0, -0.5, 0, 0], 6000);
+  easycam.setDistance(2000, 3000);
   planetCheckBox.position(width - 100, 30);
   lichtCheckBox.position(width - 100, 60);
 }
@@ -112,23 +115,22 @@ function setup() {
   //pg = createGraphics(256, 256, WEBGL);   // Textur
   //textureWrap(REPEAT); //CLAMP, REPEAT, or MIRROR
 
-
   // get GUI/Slider ids
   htmlEvents();
 
   // simple Kamera ohne Rechtsklick
   var state = {
-    distance : 900,
-    center   : [0, 0, 0],
-    rotation : [0.5, 1, 0.5, 0],
+    distance: 900,
+    center: [0, 0, 0],
+    rotation: [0.5, 1, 0.5, 0],
   };
-  
+
   easycam = new Dw.EasyCam(this._renderer, state);
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
   easycam.setDistanceMax(3000);
-  easycam.setRotation([1, -0.5, -1, 0],6000);
-  easycam.setDistance(1000, 6000);  
+  easycam.setRotation([1, -0.5, -1, 0], 6000);
+  easycam.setDistance(1000, 6000);
   document.oncontextmenu = function () {
     return false;
   };
@@ -136,9 +138,9 @@ function setup() {
 
   //Sterne
   setStars();
-  lerpSpace = createVector(0, 0, 0);    // LightShow
-  lightVec = createVector(0,0,0);
-  lightVecTemp = createVector(0,0,0);
+  lerpSpace = createVector(0, 0, 0); // LightShow
+  lightVec = createVector(0, 0, 0);
+  lightVecTemp = createVector(0, 0, 0);
 
   // Audio Analyse
   fft = new p5.FFT();
@@ -149,6 +151,14 @@ function setup() {
   fft.setInput(audio);
   amplitude.setInput(audio);
   audio.play();
+
+  // Audio Effekte
+  //reverb = new p5.Reverb();
+  //audio.disconnect();
+  /*  reverb.process(audio, 3, 0.0);
+  reverb.amp(1) */
+  //reverb.drywet(0.33);
+  //reverb.set(6,0.33)
 
   // PlanetDebug
   planetCheckBox = createCheckbox("planetMode", false);
@@ -164,36 +174,36 @@ function setup() {
 function spektrum(spectrum) {
   pg.setAttributes("antialias", true);
   pg.background(255);
-  let amount = 12
-  let factor = pg.height/amount;
+  let amount = 12;
+  let factor = pg.height / amount;
   pg.strokeWeight(1);
-  for (j = 1; j < amount+1; j++) {
+  for (j = 1; j < amount + 1; j++) {
     pg.beginShape();
-    for (i = 0; i < spectrum.length/2; i++) {
-      pg.vertex(i, map(spectrum[i], 0, 255, factor*j, factor*(j-1)));
+    for (i = 0; i < spectrum.length / 2; i++) {
+      pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
     }
     pg.endShape();
-  } 
+  }
 }
 function changePlanetMode() {
   mil = millis();
   planetMode = !planetMode;
   setStars();
   if (planetMode) {
-    easycam.setRotation([0.5, 0, 0.5, 0],3000);
+    easycam.setRotation([0.5, 0, 0.5, 0], 3000);
     rotateSliderX.value = 200;
-    rotateCheck.checked = true; 
-    easycam.setDistance(950, 3000) 
-    spaceCheck.checked = true; 
+    rotateCheck.checked = true;
+    easycam.setDistance(950, 3000);
+    spaceCheck.checked = true;
   } else {
-    easycam.setDistance(1500, 3000)  
-    easycam.setRotation([-0.5, 1, -0.5, 0],3000);
-  } 
+    easycam.setDistance(1500, 3000);
+    easycam.setRotation([-0.5, 1, -0.5, 0], 3000);
+  }
 }
 function changeLichtMode() {
   l++;
   l %= 2;
-  console.log(l)
+  console.log(l);
 }
 
 function showTrail() {
@@ -201,14 +211,14 @@ function showTrail() {
   ampHistory.push(a);
 
   let maxArray = 50;
-  let dis = 50 + spaceSlider.value/ 1000;
+  let dis = 50 + spaceSlider.value / 1000;
   let offSet = 450;
 
   noStroke();
   specularMaterial(100, 0.3);
 
   beginShape(); //TRIANGLE_FAN
-  
+
   vertex(1, offSet - 200, 0);
   vertex(0, offSet - 200, 1);
   vertex(-1, offSet - 200, 0);
@@ -217,7 +227,7 @@ function showTrail() {
     let amp = floor(
       map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
     );
-/*     let al = map(i, 0, ampHistory.length, 1, 1);
+    /*     let al = map(i, 0, ampHistory.length, 1, 1);
     specularMaterial(100,al) */
     normal(0, offSet + maxArray * dis - i * dis, amp);
     vertex(0, offSet + maxArray * dis - i * dis, amp);
@@ -236,6 +246,7 @@ function showTrail() {
 }
 
 function draw() {
+  console.log(getFrameRate())
   // Disco Mode auf Peak legen
   //l = floor(frameCount*0.02 % 2);
   sliderLogic();
@@ -258,15 +269,19 @@ function draw() {
   if (peakCheck.checked) peakDetect.update(fft);
   if (peakDetect.isDetected) {
     sSize = lerp(sSize, 2, 0.5);
-    lightVecTemp = createVector(random(-10,10)/10,random(-10,10)/10,random(-10,10)/10);
+    lightVecTemp = createVector(
+      random(-10, 10) / 10,
+      random(-10, 10) / 10,
+      random(-10, 10) / 10
+    );
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
- 
+
   //Lichtsucher
-  lightVec.x = lerp(lightVec.x,lightVecTemp.x,0.1);
-  lightVec.y = lerp(lightVec.y,lightVecTemp.y,0.1);
-  lightVec.z = lerp(lightVec.z,lightVecTemp.z,0.1);
+  lightVec.x = lerp(lightVec.x, lightVecTemp.x, 0.1);
+  lightVec.y = lerp(lightVec.y, lightVecTemp.y, 0.1);
+  lightVec.z = lerp(lightVec.z, lightVecTemp.z, 0.1);
 
   let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
   let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
@@ -286,119 +301,125 @@ function draw() {
   // Szene
   background(0);
   
-  rotationState = frameCount*0.002%TWO_PI;
-  planetX = planetDist * cos(rotationState)+0.000001;  //NaN Hack
-  planetY = planetDist * sin(rotationState)+0.000001;
-  
+  rotationState = (frameCount * 0.002) % TWO_PI;
+  planetX = planetDist * cos(rotationState) + 0.000001; //NaN Hack
+  planetY = planetDist * sin(rotationState) + 0.000001;
 
   // Lichter
-  lichtMode[l]()
+  lichtMode[l]();
 
   // Planet
-  
+
   push();
-  let centerVec = createVector(1,0,0);
-  let planetVec = createVector(planetX,planetY,0)
+  let centerVec = createVector(1, 0, 0);
+  let planetVec = createVector(planetX, planetY, 0);
   shapeRot = centerVec.angleBetween(planetVec);
- 
-  if (planetMode) { 
+
+  if (planetMode) {
     if (stopFuncAfter(6000)) {
-    rotateShape = lerp(rotateShape,shapeRot,0.03)}
-    else {
+      rotateShape = lerp(rotateShape, shapeRot, 0.03);
+    } else {
       rotateShape = shapeRot;
     }
-  }
-  else {
-    rotateShape = lerp(rotateShape,0,0.01)
+  } else {
+    rotateShape = lerp(rotateShape, 0, 0.01);
   }
   //console.log(rotateShape)
-  rotateZ(rotateShape);  //rotationState
-/*   console.log(rotateShape);
+  rotateZ(rotateShape); //rotationState
+  /*   console.log(rotateShape);
   console.log(shapeRot) */
   sphaere(m, sSize);
   pop();
-   
+
   if (!planetMode) {
     if (spaceCheck.checked) {
-      push()
+      push();
       rotateZ(rotateShape);
       showTrail();
-      pop()
+      pop();
     }
   }
-   //Sterne
-   push()
-   translate(planetX, planetY, 0); 
- 
-     for (p of particles) {
-       if (spaceCheck.checked && !planetMode) {
-         lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.002);   // WarpBremse
-       } else {
-         lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
-       };
-       if (planetMode) {
-         let getAround = createVector(0, 0, 0)
-           .sub(p)
-           .normalize()
-           .mult(planetSize * 2.5);
-         p.add(getAround);
-         alSterne = map(dist(0, 0, 0, planetX, planetY, 0), 0, planetSize*2, 1, 0.01);
-       } else {
-         p.add(lerpSpace);
-         let space = (width + height) / 2;
-         if (p.y > space * 2) {
-           p.y = -space * 2;
-           p.x = random(-space * 2, space * 2);       
-         }
-         alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0.1);
-       }
-       stroke(255, alSterne);
-       strokeWeight(2.33);
-       point(p.x, p.y, p.z);
-     }
-   pop()
-
-   //Planet
+  //Sterne
   push();
   translate(planetX, planetY, 0);
-  rotateY(PI) // Drehung um eigene Achse
+
+  for (p of particles) {
+    if (spaceCheck.checked && !planetMode) {
+      lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.002); // WarpBremse
+    } else {
+      lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
+    }
+    if (planetMode) {
+      let getAround = createVector(0, 0, 0)
+        .sub(p)
+        .normalize()
+        .mult(planetSize * 2.5);
+      p.add(getAround);
+      alSterne = map(
+        dist(0, 0, 0, planetX, planetY, 0),
+        0,
+        planetSize * 2,
+        1,
+        0.01
+      );
+    } else {
+      p.add(lerpSpace);
+      let space = (width + height) / 2;
+      if (p.y > space * 2) {
+        p.y = -space * 2;
+        p.x = random(-space * 2, space * 2);
+      }
+      alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0.1);
+    }
+    stroke(255, alSterne);
+    strokeWeight(2.33);
+    point(p.x, p.y, p.z);
+  }
+  pop();
+
+  //Planet
+  push();
+  translate(planetX, planetY, 0);
+  rotateY(PI); // Drehung um eigene Achse
   //rotateX(PI) //WegenTextur
 
   let ampMe = amplitude.getLevel();
   let dark = 0;
   let planetCol = 0;
   if (planetMode && planetSize > 1200) {
-  pump = ampMe*200;
-  dark = map(rotationState,0,TWO_PI,0,200)
-  planetCol = map(ampMe, 0, 1, 0, 200);
-}
-  else {pump = 0;}
+    pump = ampMe * 200;
+    dark = map(rotationState, 0, TWO_PI, 0, 200);
+    planetCol = map(ampMe, 0, 1, 0, 200);
+  } else {
+    pump = 0;
+  }
 
   noStroke();
-  if (l == 1)specularMaterial(col5, 255, planetCol+55);
-  else {ambientMaterial(col5,255,planetCol+55);}
+  if (l == 1) specularMaterial(col5, 255, planetCol + 55);
+  else {
+    ambientMaterial(col5, 255, planetCol + 55);
+  }
   /*   spektrum(spectrum)
   texture(pg); */
-  
-  
-  
-  sphere(planetSize+pump,24,24);
+
+  sphere(planetSize + pump, 24, 24);
 
   if (planetMode) {
-    planetDist = lerp(planetDist, 3500, 0.005);
-    planetSize = lerp(planetSize, 2500, 0.005);
+    planetDist = lerp(planetDist, 3500, 0.01);
+    planetSize = lerp(planetSize, 2500, 0.01);
     easycam.setDistanceMax(maxDistCam);
-    maxDistCam = lerp(maxDistCam,950,0.005);
+    maxDistCam = lerp(maxDistCam, 950, 0.01);
   } else {
     planetDist = lerp(planetDist, 0, 0.01);
     planetSize = lerp(planetSize, 0, 0.07);
     easycam.setDistanceMax(maxDistCam);
-    maxDistCam = lerp(maxDistCam,3000,0.01);
+    maxDistCam = lerp(maxDistCam, 3000, 0.01);
   }
   pop();
 }
 
-function stopFuncAfter(del) {  // Beim change m = millis
+function stopFuncAfter(del) {
+  // Beim change m = millis
   if (del + mil > millis()) {
     return true;
   } else return false;
@@ -428,7 +449,7 @@ function sphaere(m, sSize) {
       shape[i][j] = createVector(x, y, z).mult(60 * sSize);
     }
   }
-  specularMaterial(90, 0.96); 
+  specularMaterial(90, 0.96);
 
   for (let i = 0; i < total; i++) {
     let v1, v2;
@@ -448,146 +469,145 @@ function sphaere(m, sSize) {
 }
 
 let lichtMode = [
-function lichter() {
-  let angle = frameCount * 0.001;
-  let angle2 = frameCount * 0.01;
-  let radius = map(sin(angle2), -1, 1, 200, 500);
-  let dirX = radius * cos(angle + PI);
-  let dirY = radius * sin(angle + PI);
-  let xLight = radius * cos(angle);
-  let yLight = radius * sin(angle);
-  let x2Light = radius * cos(angle2);
-  let y2Light = radius * sin(angle2);
-  col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-  let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
-  let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
-  let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
-  col5 = map(sin(angle + radians(240)), -1, 1, 0, 255);
+  function lichter() {
+    let angle = frameCount * 0.001;
+    let angle2 = frameCount * 0.01;
+    let radius = map(sin(angle2), -1, 1, 200, 500);
+    let dirX = radius * cos(angle + PI);
+    let dirY = radius * sin(angle + PI);
+    let xLight = radius * cos(angle);
+    let yLight = radius * sin(angle);
+    let x2Light = radius * cos(angle2);
+    let y2Light = radius * sin(angle2);
+    col = map(sin(angle + radians(0)), -1, 1, 0, 255);
+    let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
+    let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
+    col5 = map(sin(angle + radians(240)), -1, 1, 0, 255);
 
-  shininess(25);
-  directionalLight(col, 255, 100, -1, 1, 0);
-  directionalLight(col2, 255, 100, 1, 1, 0);
-  directionalLight(col3, 255, 100, -1, -1, 0);
-  directionalLight(col4, 255, 100, 1, -1, 0);
-/*   directionalLight(col, 255, 100, -lightVec.y, lightVec.x, lightVec.z);
+    shininess(25);
+    directionalLight(col, 255, 100, -1, 1, 0);
+    directionalLight(col2, 255, 100, 1, 1, 0);
+    directionalLight(col3, 255, 100, -1, -1, 0);
+    directionalLight(col4, 255, 100, 1, -1, 0);
+    /*   directionalLight(col, 255, 100, -lightVec.y, lightVec.x, lightVec.z);
   directionalLight(col2, 255, 100, lightVec.z, -lightVec.y, -lightVec.x);
   directionalLight(col3, 255, 100, lightVec.z, lightVec.x, -lightVec.y);
   directionalLight(col4, 255, 100, -lightVec.x, lightVec.y, lightVec.z); */
-  pointLight(col, 255, 255, dirX, dirY, x2Light);
-  pointLight(col2, 255, 255, xLight, yLight, y2Light);
-  pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
-  pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
-  let alphaV = 0.96;
-  specularMaterial(90, alphaV);
-  if (lightCheck.checked) {
-    //ambientLight(0);
-    let center = createVector(0, 0, 0);
+    pointLight(col, 255, 255, dirX, dirY, x2Light);
+    pointLight(col2, 255, 255, xLight, yLight, y2Light);
+    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
+    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
+    let alphaV = 0.96;
+    specularMaterial(90, alphaV);
+    if (lightCheck.checked) {
+      //ambientLight(0);
+      let center = createVector(0, 0, 0);
 
-    push();
-    translate(dirX, dirY, x2Light);
-    stroke(col, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col, 255, 255, alphaV);
-    line(center.x, center.y, center.z, dirX, dirY, x2Light);
-    push();
-    translate(xLight, yLight, y2Light);
-    stroke(col2, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col2, 255, 255, alphaV);
-    line(center.x, center.y, center.z, xLight, yLight, y2Light);
-    push();
-    translate(-xLight, -x2Light, -yLight);
-    stroke(col3, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col3, 255, 255, alphaV);
-    line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
-    push();
-    translate(-dirX, -y2Light, -dirY);
-    stroke(col4, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col4, 255, 255, alphaV);
-    line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
-  }
-},
-function lichter2() {
-  let angle = frameCount * 0.001;
-  let angle2 = frameCount * 0.01;
-  let radius = map(sin(angle2), -1, 1, 200, 500);
-  let dirX = radius * cos(angle + PI);
-  let dirY = radius * sin(angle + PI);
-  let xLight = radius * cos(angle);
-  let yLight = radius * sin(angle);
-  let x2Light = radius * cos(angle2);
-  let y2Light = radius * sin(angle2);
-  col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-  let col2 = map(sin(angle + radians(15)), -1, 1, 0, 255);
-  let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
-  let col4 = map(sin(angle + radians(45)), -1, 1, 0, 255);
-  col5 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+      push();
+      translate(dirX, dirY, x2Light);
+      stroke(col, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col, 255, 255, alphaV);
+      line(center.x, center.y, center.z, dirX, dirY, x2Light);
+      push();
+      translate(xLight, yLight, y2Light);
+      stroke(col2, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col2, 255, 255, alphaV);
+      line(center.x, center.y, center.z, xLight, yLight, y2Light);
+      push();
+      translate(-xLight, -x2Light, -yLight);
+      stroke(col3, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col3, 255, 255, alphaV);
+      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
+      push();
+      translate(-dirX, -y2Light, -dirY);
+      stroke(col4, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col4, 255, 255, alphaV);
+      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
+    }
+  },
+  function lichter2() {
+    let angle = frameCount * 0.001;
+    let angle2 = frameCount * 0.01;
+    let radius = map(sin(angle2), -1, 1, 200, 500);
+    let dirX = radius * cos(angle + PI);
+    let dirY = radius * sin(angle + PI);
+    let xLight = radius * cos(angle);
+    let yLight = radius * sin(angle);
+    let x2Light = radius * cos(angle2);
+    let y2Light = radius * sin(angle2);
+    col = map(sin(angle + radians(0)), -1, 1, 0, 255);
+    let col2 = map(sin(angle + radians(15)), -1, 1, 0, 255);
+    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
+    let col4 = map(sin(angle + radians(45)), -1, 1, 0, 255);
+    col5 = map(sin(angle + radians(180)), -1, 1, 0, 255);
 
-  shininess(25);
-/*   directionalLight(255, 0, 0, -1, 1, 0);
+    shininess(25);
+    /*   directionalLight(255, 0, 0, -1, 1, 0);
   directionalLight(255, 0, 0, 1, 1, 0);
   directionalLight(255, 0, 0, -1, -1, 0);
   directionalLight(255, 0, 255, 1, -1, 0); */
-  directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z);
-  directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x);
-  directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y);
-  directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z);
-  pointLight(col, 255, 255, dirX, dirY, x2Light);
-  pointLight(col2, 255, 255, xLight, yLight, y2Light);
-  pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
-  pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
-  let alphaV = 0.96;
-  
-  if (lightCheck.checked) {
-    //ambientLight(0);
-    let center = createVector(0, 0, 0);
+    directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z);
+    directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x);
+    directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y);
+    directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z);
+    pointLight(col, 255, 255, dirX, dirY, x2Light);
+    pointLight(col2, 255, 255, xLight, yLight, y2Light);
+    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
+    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
+    let alphaV = 0.96;
 
-    push();
-    translate(dirX, dirY, x2Light);
-    stroke(col, 255, 255, alphaV );
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col, 255, 255, alphaV);
-    line(center.x, center.y, center.z, dirX, dirY, x2Light);
-    push();
-    translate(xLight, yLight, y2Light);
-    stroke(col2, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col2, 255, 255, alphaV);
-    line(center.x, center.y, center.z, xLight, yLight, y2Light);
-    push();
-    translate(-xLight, -x2Light, -yLight);
-    stroke(col3, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col3, 255, 255, alphaV);
-    line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
-    push();
-    translate(-dirX, -y2Light, -dirY);
-    stroke(col4, 255, 255, alphaV);
-    strokeWeight(5);
-    point(0, 0, 0);
-    pop();
-    stroke(col4, 255, 255, alphaV);
-    line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
-  } 
-  
-}
-]
+    if (lightCheck.checked) {
+      //ambientLight(0);
+      let center = createVector(0, 0, 0);
+
+      push();
+      translate(dirX, dirY, x2Light);
+      stroke(col, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col, 255, 255, alphaV);
+      line(center.x, center.y, center.z, dirX, dirY, x2Light);
+      push();
+      translate(xLight, yLight, y2Light);
+      stroke(col2, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col2, 255, 255, alphaV);
+      line(center.x, center.y, center.z, xLight, yLight, y2Light);
+      push();
+      translate(-xLight, -x2Light, -yLight);
+      stroke(col3, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col3, 255, 255, alphaV);
+      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
+      push();
+      translate(-dirX, -y2Light, -dirY);
+      stroke(col4, 255, 255, alphaV);
+      strokeWeight(5);
+      point(0, 0, 0);
+      pop();
+      stroke(col4, 255, 255, alphaV);
+      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
+    }
+  },
+];
 function htmlHandler() {
   document.getElementById("m0").innerHTML = "m0=" + m0;
   document.getElementById("m1").innerHTML = "m1=" + m1;
@@ -816,7 +836,7 @@ function touchStarted() {
 function setStars() {
   particles.splice(0, particles.length);
   let space = (width + height) / 2;
-  for (let i = 0; i < 377; i++) {  
+  for (let i = 0; i < 377; i++) {
     particles.push(
       createVector(
         random(-space * 2, space * 2),
@@ -926,32 +946,35 @@ function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
 let sketch = function (p) {
   p.setup = function () {
     var canvasp = p.createCanvas(303, 150);
-    canvasp.parent("canvasid")
-  }
-  p.draw = function() {
-    p.background('#262126');
-    p.stroke(255);
-    p.strokeWeight(1);
-    p.noFill();
-    let spectrum = fft.analyze();
-    p.beginShape();
-    for (i = 0; i < spectrum.length; i++) {
-      p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height/2));
+    canvasp.parent("canvasid");
+  };
+  p.draw = function () {
+    if (sidebar) {
+      p.background("#262126");
+      p.noFill();
+      let spectrum = fft.analyze();
+      p.beginShape();
+      for (i = 0; i < spectrum.length; i++) {
+        //let x = map(log(i), 0, log(spectrum.length), 0, p.width);
+        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2+7));
+      }
+      p.endShape();
+      let waveform = fft.waveform();
+      p.strokeWeight(2);
+      p.stroke(255);
+      p.noFill();
+      p.beginShape();
+
+      for (let i = 0; i < waveform.length; i++) {
+        let x = map(i, 0, waveform.length, 0, p.width);
+        let y = map(waveform[i], -1, 1, 0, p.height / 2);
+        p.vertex(x, y);
+      }
+      p.endShape();
     }
-    p.endShape();
-    let waveform = fft.waveform();
-    p.strokeWeight(2);
-    p.beginShape();
-  
-    for (let i = 0; i < waveform.length; i++) {
-      let x = map(i, 0, waveform.length, 0, p.width);
-      let y = map(waveform[i], -1, 1, 0, p.height/2);
-      p.vertex(x, y);
-    }
-    p.endShape();
-  }
+  };
 };
-let node = document.createElement('div');
+let node = document.createElement("div");
 new p5(sketch, node);
 //window.document.getElementsByTagName('body')[0].appendChild(node);
 
