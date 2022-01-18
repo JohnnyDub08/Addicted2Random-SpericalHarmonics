@@ -236,7 +236,8 @@ function showTrail() {
 }
 
 function draw() {
-  l = floor(frameCount*0.02 % 2);
+  // Disco Mode auf Peak legen
+  //l = floor(frameCount*0.02 % 2);
   sliderLogic();
   htmlHandler();
 
