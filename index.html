@@ -2,31 +2,22 @@
 <html lang="de">
 
 <head>
+  <link rel="stylesheet" href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SphericalHarmonics</title>
+  <title>Addicted2Random</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
+    :root {
+      --fore-color: ivory;
+      --universal-margin: .3rem;
+      user-select: none;
+      font-size: 0.9rem;
     }
 
     body {
-      font-family: 'Audiowide', cursive;
-      font-size: 0.8em;
-      background: black;
-      user-select: none;
-
-      /*      -ms-user-select: none;
-     
-      -webkit-user-select: none;
-     
-      -moz-user-select: none;
-     
-      -khtml-user-select: none; */
-
+      background-color: black;
     }
 
     .buttons {
@@ -34,10 +25,14 @@
       grid-template-columns: 1fr 1fr;
       grid-column-gap: 0.3em;
       grid-auto-rows: auto;
-
-      padding: 0.5em;
+      /* padding: 0.5em; */
       font-size: 12px;
       text-align: left;
+    }
+    .buttons #server {
+      border: 2px solid ivory;
+      border-radius: 5px;
+      transition: all 100ms ease;
     }
 
     .button {
@@ -50,23 +45,12 @@
       border: 2px solid ivory;
       border-radius: 5px;
       transition: all 100ms ease;
-      /* position: relative; */
+
     }
 
     .button:hover {
       border-radius: 10px;
       background-color: rgb(128, 255, 212, 0.1);
-    }
-
-    .textinput {
-      cursor: pointer;
-      background-color: transparent;
-      font-family: 'Audiowide', cursive;
-      font-size: 0.9em;
-      margin-top: 0.5em;
-      color: ivory;
-      border: 2px solid ivory;
-      border-radius: 5px;
     }
 
     .textinput:hover {
@@ -80,6 +64,7 @@
       position: fixed;
       left: 0;
       bottom: auto;
+      font-family: 'Audiowide', cursive !important;
       background-color: #262126;
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
@@ -87,18 +72,18 @@
       border-radius: 10px;
     }
 
-    #schrift {
+    .schrift {
       font-family: 'Audiowide', cursive;
-      padding-left: 1em;
-      padding-right: 0.5em;
-      padding-top: 1em;
-      padding-bottom: 0.5em;
-      font-size: 20px;
-      color: ivory;
-
-      transition: 0.5s;
+      text-align: left;
     }
 
+    #drop {
+      border: 2px solid ivory;
+      border-radius: 5px;
+      transition: all 100ms ease;
+    }
+
+    /*     
     .sidebar .sliderText {
       display: grid;
       grid-template-columns: 2fr 1.2fr;
@@ -107,21 +92,22 @@
       font-size: 12px;
       text-align: left;
 
-    }
+    }  */
 
-    /*     @media only screen and (max-width: 768px) {
-      .sidebar .sliderText {
+    @media only screen and (max-width: 768px) {
+      /* .sidebar .sliderText {
         grid-template-columns: 2fr 2.1fr;
-      }
-    } */
+      } */
 
-    .sidebar .sliderText>p {
-      margin: 0.3em 0.5em 0.3em;
     }
+
+    /*    .sidebar .sliderText>p {
+      margin: 0.3em 0.5em 0.3em;
+    } */
 
     .openbtn {
       font-family: 'Audiowide', cursive;
-      font-size: 2rem;
+      font-size: 4rem;
       color: ivory;
       cursor: pointer;
       background-color: transparent;
@@ -134,14 +120,18 @@
       width: 100%;
     }
 
-    .image {
+    #label {
+      text-align: center;
+    }
+
+    /*     .image {
       position: absolute;
       top: 1rem;
       right: 1rem;
       height: 6.18%;
       width: auto;
       z-index: 0;
-    }
+    } */
   </style>
   <!-- <audio src="http://a2r.twenty4seven.cc:8000/puredata.ogg" crossorigin="anonymous"></audio> -->
   <script src="js/p5.js"></script>
@@ -156,115 +146,247 @@
   </script>
   <!-- <img src="a2r.png" alt="" class="image"> -->
   <div id="leftSidebar" class="sidebar">
-    <div id="schrift">
-      <div>
-        <h3>SphericalHarmonics</h3>
+
+    <div class="container">
+      <h1><u class="schrift">Addicted2Random</u></h1>
+      <div id="canvasid"></div>
+      <div class="row">
+        <div class="col-sm-9">
+          <h3 class="schrift">SphericalHarmonics</h3>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="-2100" max="2100" value="-1200" class="slider" id="m0Slider">
-        <p id="m0">m0</p>
-        <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
-        <p id="m1">m1</p>
-        <input type="range" min="-2100" max="2100" value="-900" class="slider" id="m2Slider">
-        <p id="m2">m2</p>
-        <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
-        <p id="m3">m3</p>
-        <input type="range" min="-2100" max="2100" value="-600" class="slider" id="m4Slider">
-        <p id="m4">m4</p>
-        <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
-        <p id="m5">m5</p>
-        <input type="range" min="-2100" max="2100" value="-300" class="slider" id="m6Slider">
-        <p id="m6">m6</p>
-        <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
-        <p id="m7">m7</p>
+
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="-500" class="slider" id="m0Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m0" class="schrift">m0</label>
+        </div>
       </div>
-      <div>
-        <h4>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="9" value="1" class="slider" id="m1Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m1" class="schrift">m1</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="-500" class="slider" id="m2Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m2" class="schrift">m2</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="9" value="1" class="slider" id="m3Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m3" class="schrift">m3</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="-500" class="slider" id="m4Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m4" class="schrift">m4</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="9" value="1" class="slider" id="m5Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m5" class="schrift">m5</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="-300" class="slider" id="m6Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m6" class="schrift">m6</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="9" value="1" class="slider" id="m7Slider">
+        </div>
+        <div class="col-sm-3">
+          <label id="m7" class="schrift">m7</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1">
           <input type="checkbox" name="autoMorph" id="morphCheck">
-          <label for="autoMorph">AutoMorph</label>
-        </h4>
+        </div>
+        <div class="col-sm-11">
+          <label for="autoMorph" class="schrift">AutoMorph</label>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
-        <p id="speed">speed</p>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="1" max="1000" value="100" class="slider" id="morphSlider">
+        </div>
+        <div class="col-sm-3">
+          <label id="speed" class="schrift">speed</label>
+        </div>
       </div>
-      <div>
-        <h4>FFTStrength</h4>
+      <div class="row">
+        <div class="col-sm-9">
+          <h3 class="schrift">FFTStrength</h3>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="-2100" max="2100" value="1200" class="slider" id="strenghtSliderm0">
-        <p id="sM0">m0</p>
-        <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm2">
-        <p id="sM2">m2</p>
-        <input type="range" min="-900" max="900" value="600" class="slider" id="strenghtSliderm4">
-        <p id="sM4">m4</p>
-        <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm6">
-        <p id="sM6">m6</p>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="700" class="slider" id="strenghtSliderm0">
+        </div>
+        <div class="col-sm-3">
+          <label id="sM0" class="schrift">m0</label>
+        </div>
       </div>
-      <div>
-        <h4>FFTSmooth</h4>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-2100" max="2100" value="300" class="slider" id="strenghtSliderm2">
+        </div>
+        <div class="col-sm-3">
+          <label id="sM2" class="schrift">m2</label>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
-        <p id="smth">smth</p>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-900" max="900" value="300" class="slider" id="strenghtSliderm4">
+        </div>
+        <div class="col-sm-3">
+          <label id="sM4" class="schrift">m4</label>
+        </div>
       </div>
-
-      <div>
-        <h4>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-900" max="900" value="200" class="slider" id="strenghtSliderm6">
+        </div>
+        <div class="col-sm-3">
+          <label id="sM6" class="schrift">m6</label>
+        </div>
+      </div>
+      <div class="col-sm-9">
+        <h3 class="schrift">FFTSmooth</h3>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
+        </div>
+        <div class="col-sm-3">
+          <label id="smth" class="schrift">smth</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1">
           <input type="checkbox" name="spaceTravel" id="spaceCheck">
-          <label for="spaceTravel">SpaceTravel</label>
-        </h4>
+        </div>
+        <div class="col-sm-11">
+          <label for="spaceTravel" class="schrift">SpaceTravel</label>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="3000" max="50000" value="20000" class="slider" id="spaceSlider">
-        <p id="travelSpeed">speed</p>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="3000" max="50000" value="20000" class="slider" id="spaceSlider">
+        </div>
+        <div class="col-sm-3">
+          <label id="travelSpeed" class="schrift">speed</label>
+        </div>
       </div>
-
-      <div>
-        <h4>
+      <div class="row">
+        <div class="col-sm-1">
           <input type="checkbox" name="rotate" id="rotateCheck">
-          <label for="rotate">AutoRotate</label>
-        </h4>
+        </div>
+        <div class="col-sm-11">
+          <label for="rotate" class="schrift">AutoRotate</label>
+        </div>
       </div>
-      <div class="sliderText">
-        <input type="range" min="-1000" max="1000" value="200" class="slider" id="rotateSliderX">
-        <p id="x">X</p>
-        <input type="range" min="-1000" max="1000" value="0" class="slider" id="rotateSliderY">
-        <p id="y">Y</p>
-        <input type="range" min="-1000" max="1000" value="0" class="slider" id="rotateSliderZ">
-        <p id="z">Z</p>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-1000" max="1000" value="200" class="slider" id="rotateSliderX">
+        </div>
+        <div class="col-sm-3">
+          <label id="x" class="schrift">X</label>
+        </div>
       </div>
-      <div>
-        <input type="checkbox" name="peakDetect" id="peakCheck">
-        <label for="peakDetect">PeakDetect</label>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-1000" max="1000" value="0" class="slider" id="rotateSliderY">
+        </div>
+        <div class="col-sm-3">
+          <label id="y" class="schrift">Y</label>
+        </div>
       </div>
-      <div>
-        <input type="checkbox" name="lights" id="lightCheck">
-        <label for="lights">ShowLights</label>
-      </div>
-      <div>
-        <input type="checkbox" name="res" id="resCheck">
-        <label for="res">HighResolution</label>
-      </div>
-      <div class="textinput" id="dropZone">
-        <p>Drag AudioFile here</p>
-      </div>
-      <div>
-        <input type="text" value="Enter Server Adress" id="server" class="textinput">
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="-1000" max="1000" value="0" class="slider" id="rotateSliderZ">
+        </div>
+        <div class="col-sm-3">
+          <label id="z" class="schrift">Z</label>
+        </div>
       </div>
 
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="row">
+            <div class="col-sm-2">
+              <input type="checkbox" name="peakDetect" id="peakCheck">
+            </div>
+            <div class="col-sm-10">
+              <label for="peakDetect" class="schrift">PeakDetect</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="row">
+            <div class="col-sm-2">
+              <input type="checkbox" name="lights" id="lightCheck">
+            </div>
+            <div class="col-sm-10">
+              <label for="lights" class="schrift">ShowLights</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="row">
+            <div class="col-sm-2">
+              <input type="checkbox" name="res" id="resCheck">
+            </div>
+            <div class="col-sm-10">
+              <label for="res" class="schrift">HighRes</label>
+            </div>
+          </div>
+        </div>
 
+      </div>
+      <div class="buttons">
+        <button type="button" class="button" id="audioSource">Mic/External</button>
+        <button type="button" class="button" id="resetBtn">Reset</button>
+        <button type="button" class="button" id="loadBtn">LoadValues</button>
+        <button type="button" class="button" id="saveBtn">SaveValues</button>
+      </div>
+      <div class=buttons>
+        <div class="textinput" id="dropZone">
+          <p class="schrift" id="drop">Drag AudioFile here</p>
+        </div>
+        <input type="text" value="Enter Server Adress" id="server">
+      </div>
+     
+        
+    
 
     </div>
-    <div class="buttons">
-      <button type="button" class="button" id="audioSource">Mic/External</button>
-      <button type="button" class="button" id="resetBtn">Reset</button>
-      <button type="button" class="button" id="loadBtn">LoadValues</button>
-      <button type="button" class="button" id="saveBtn">SaveValues</button>
-    </div>
-    <div id="canvasid"></div>
-
   </div>
+
 
   <div>
     <button class="openbtn" id="arrow" onclick="openNav()">
@@ -272,27 +394,41 @@
   </div>
 
   <script>
-    var sidebar = false;
+    var sidebar = false; // Für Audio Visual P5 an aus
+    /*     window.addEventListener('resize', () => resizeFn()); // Fenster Änderung
+    
+        function resizeFn() {
+          let sw = window.innerWidth;
+          if (sidebar) {
+            widthRight = (sw > 768) ? "333px" : "333px" //"61.4%";
+          }
+          else { widthRight = 0; }
+          document.getElementById("leftSidebar").style.width = widthRight;
+          document.getElementById("arrow").style.marginLeft = widthRight;
+        } */
+    let bar = 0;
     function openNav() {
-      let barStatus = document.getElementById("leftSidebar").style.width;
-      let widthRight = "303px";//"38.2%"
-      if (barStatus != widthRight) {
-        document.getElementById("leftSidebar").style.width = widthRight;
-        document.getElementById("arrow").style.marginLeft = widthRight;
-        document.getElementById("leftSidebar").style.opacity = "85%";
-        document.getElementById("arrow").innerHTML = "<-";
-        document.getElementById("arrow").style.opacity = "100%";
-        sidebar = true;
-      } else { closeNav() }
-    }
-
-    function closeNav() {
-      document.getElementById("leftSidebar").style.width = "0";
-      document.getElementById("arrow").style.marginLeft = "0";
-      document.getElementById("leftSidebar").style.opacity = "0%";
-      document.getElementById("arrow").innerHTML = "->";
-      document.getElementById("arrow").style.opacity = "33%";
-      sidebar = false;
+      let sw = window.innerWidth;
+      let widthRight = (sw > 768) ? "333px" : "333px" //"61.4%";
+      switch (bar) {
+        case 0:
+          document.getElementById("leftSidebar").style.width = widthRight;
+          document.getElementById("arrow").style.marginLeft = widthRight;
+          document.getElementById("leftSidebar").style.opacity = "85%";
+          document.getElementById("arrow").innerHTML = "<-";
+          document.getElementById("arrow").style.opacity = "100%";
+          sidebar = true;
+          bar++;
+          break;
+        default:
+          document.getElementById("leftSidebar").style.width = "0";
+          document.getElementById("arrow").style.marginLeft = "0";
+          document.getElementById("leftSidebar").style.opacity = "0%";
+          document.getElementById("arrow").innerHTML = "->";
+          document.getElementById("arrow").style.opacity = "33%";
+          sidebar = false;
+          bar = 0;
+      }
     }
   </script>
 

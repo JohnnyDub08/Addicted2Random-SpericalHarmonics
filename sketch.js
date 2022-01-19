@@ -84,7 +84,7 @@ let planetAmp = false;
 let reverb;
 
 function preload() {
-  tex = loadImage("moon_tex.png");
+  tex = loadImage("moon.jpeg");
 }
 
 function centerCanvas() {
@@ -181,7 +181,7 @@ function setup() {
   lightShowCheckbox = createCheckbox("LightShow", false);
   lightShowCheckbox.position(width - 150, 120);
   lightShowCheckbox.changed(changeLightShow);
-  planetAmpCheckbox = createCheckbox("planetAmp", false);
+  planetAmpCheckbox = createCheckbox("planetTex", false);
   planetAmpCheckbox.position(width - 150, 150);
   planetAmpCheckbox.changed(()=>{planetAmp = !planetAmp});
 
