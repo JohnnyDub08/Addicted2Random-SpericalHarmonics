@@ -84,7 +84,7 @@ let planetAmp = false;
 let reverb;
 
 function preload() {
-  tex = loadImage("moon.jpeg");
+  tex = loadImage("planet4.png");
 }
 
 function centerCanvas() {
@@ -188,39 +188,7 @@ function setup() {
   //console.log(mic.getSources());
   //mic.start();
 }
-/*function spektrum(spectrum) {
-  //pg.setAttributes("antialias", true);
-  pg.background(255);
-  //pg.translate(-(pg.width/2),-(pg.height/2));
-  let amount = 12;
-  let factor = pg.height / amount;
-  pg.strokeWeight(1);
-  for (j = 1; j < amount + 1; j++) {
-    pg.beginShape();
-    for (i = 0; i < spectrum.length; i++) {
-      pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
-    }
-    pg.endShape();
-  } 
 
-  let waveform = fft.waveform();
-  let amount = 12;
-  let factor = pg.height / amount;
-  pg.strokeWeight(1.2);
-  pg.stroke(0);
-  pg.noFill();
-
-  for (j = 1; j < amount + 1; j++) {
-    pg.beginShape();
-
-    for (let i = 0; i < waveform.length; i++) {
-      let x = map(i, 0, waveform.length, 0, pg.width);
-      let y = map(waveform[i], -1, 1, factor * j, factor * (j - 1));
-      pg.vertex(x, y);
-    }
-    pg.endShape();
-  }
-} */
 function changePlanetMode() {
   mil = millis();
   planetMode = !planetMode;
@@ -462,7 +430,7 @@ function draw() {
   let ampMe = amplitude.getLevel();
   let dark = 0;
   let planetCol = 0;
-  if (planetMode && planetSize > 1200) {
+  if (planetMode && planetSize > 1500) {
     pump = ampMe * 200;
     dark = map(rotationState, 0, TWO_PI, 0, 200);
     planetCol = map(ampMe, 0, 1, 0, 200);
@@ -910,7 +878,7 @@ function switchSource() {
   }
 }
 
-// Audio an in manchen Browsern
+// Audio an in manchen Browsern Handy etc
 function touchStarted() {
   getAudioContext().resume();
 }
@@ -1060,5 +1028,38 @@ let sketch = function (p) {
 let node = document.createElement("div");
 new p5(sketch, node);
 //window.document.getElementsByTagName('body')[0].appendChild(node);
+/*function spektrum(spectrum) {
+  //pg.setAttributes("antialias", true);
+  pg.background(255);
+  //pg.translate(-(pg.width/2),-(pg.height/2));
+  let amount = 12;
+  let factor = pg.height / amount;
+  pg.strokeWeight(1);
+  for (j = 1; j < amount + 1; j++) {
+    pg.beginShape();
+    for (i = 0; i < spectrum.length; i++) {
+      pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
+    }
+    pg.endShape();
+  } 
+
+  let waveform = fft.waveform();
+  let amount = 12;
+  let factor = pg.height / amount;
+  pg.strokeWeight(1.2);
+  pg.stroke(0);
+  pg.noFill();
+
+  for (j = 1; j < amount + 1; j++) {
+    pg.beginShape();
+
+    for (let i = 0; i < waveform.length; i++) {
+      let x = map(i, 0, waveform.length, 0, pg.width);
+      let y = map(waveform[i], -1, 1, factor * j, factor * (j - 1));
+      pg.vertex(x, y);
+    }
+    pg.endShape();
+  }
+} */
 
 //Hilfe, Liebe Hoffnung, Dankbar, Dankbarkeit
