@@ -83,9 +83,9 @@ let planetAmp = false;
 // SoundStuff
 let reverb;
 
-/* function preload() {
+function preload() {
   tex = loadImage("moon_tex.png");
-} */
+}
 
 function centerCanvas() {
   let x = (windowWidth - width) / 2;
@@ -118,7 +118,11 @@ function setup() {
   colorMode(HSB);
   centerCanvas();
 
+<<<<<<< HEAD
+  //pg = createGraphics(256, 256); // Textur
+=======
   pg = createGraphics(256, 256); // Textur
+>>>>>>> 0dd9bd3897bceb9a62e5149f89c4cdd4e7bbe529
   //textureWrap(REPEAT); //CLAMP, REPEAT, or MIRROR
 
   // get GUI/Slider ids
@@ -188,12 +192,20 @@ function setup() {
   //console.log(mic.getSources());
   //mic.start();
 }
+<<<<<<< HEAD
+/*function spektrum(spectrum) {
+  //pg.setAttributes("antialias", true);
+  pg.background(255);
+  //pg.translate(-(pg.width/2),-(pg.height/2));
+  let amount = 12;
+=======
 function spektrum(spectrum) {
   //pg.setAttributes("antialias", true);
 
   pg.background(255);
   //pg.translate(-(pg.width/2),-(pg.height/2));
   /*   let amount = 12;
+>>>>>>> 0dd9bd3897bceb9a62e5149f89c4cdd4e7bbe529
   let factor = pg.height / amount;
   pg.strokeWeight(1);
   for (j = 1; j < amount + 1; j++) {
@@ -202,7 +214,12 @@ function spektrum(spectrum) {
       pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
     }
     pg.endShape();
+<<<<<<< HEAD
+  } 
+
+=======
   } */
+>>>>>>> 0dd9bd3897bceb9a62e5149f89c4cdd4e7bbe529
   let waveform = fft.waveform();
   let amount = 12;
   let factor = pg.height / amount;
@@ -220,7 +237,7 @@ function spektrum(spectrum) {
     }
     pg.endShape();
   }
-}
+} */
 function changePlanetMode() {
   mil = millis();
   planetMode = !planetMode;
@@ -456,7 +473,11 @@ function draw() {
   //Planet
   push();
   translate(planetX, planetY, 0);
+<<<<<<< HEAD
+  rotateY(frameCount*0.0001); // Drehung um eigene Achse
+=======
   rotateY(frameCount*0.01); // Drehung um eigene Achse
+>>>>>>> 0dd9bd3897bceb9a62e5149f89c4cdd4e7bbe529
   rotateZ(frameCount*0.00003) //WegenTextur
 
   let ampMe = amplitude.getLevel();
@@ -475,9 +496,15 @@ function draw() {
   else {
     ambientMaterial(col5, 255, planetCol + 55);
   }
+<<<<<<< HEAD
+  if (planetAmp) {
+    //spektrum(spectrum);
+    texture(tex);
+=======
   if (planetAmp && planetMode) {
     spektrum(spectrum);
     texture(pg);
+>>>>>>> 0dd9bd3897bceb9a62e5149f89c4cdd4e7bbe529
   }
 
   sphere(planetSize + pump, 24, 24);
