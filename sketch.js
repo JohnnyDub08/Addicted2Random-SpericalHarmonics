@@ -76,6 +76,9 @@ let lightVec;
 let lightVecTemp;
 let pg;
 let l = 0; // LichtArray
+let ls = 0; // LichtShowArray
+let scheinW = false;
+let planetAmp = false;
 
 // SoundStuff
 let reverb;
@@ -99,12 +102,15 @@ function windowResized() {
   easycam.setDistanceMax(3000);
   easycam.setRotation([0, -0.5, 0, 0], 6000);
   easycam.setDistance(2000, 3000);
-  planetCheckBox.position(width - 100, 30);
-  lichtCheckBox.position(width - 100, 60);
+  planetCheckBox.position(width - 150, 30);
+  lichtCheckBox.position(width - 150, 60);
+  scheinWCheckBox.position(width - 150, 90);
+  lightShowCheckbox.position(width - 150, 120);
+  planetAmpCheckbox.position(width - 150, 150);
 }
 
 function setup() {
-  setAttributes("antialias", true);
+  //setAttributes("antialias", true);
   setAttributes("alpha", false);
   //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
@@ -112,7 +118,7 @@ function setup() {
   colorMode(HSB);
   centerCanvas();
 
-  //pg = createGraphics(256, 256, WEBGL);   // Textur
+  pg = createGraphics(256, 256); // Textur
   //textureWrap(REPEAT); //CLAMP, REPEAT, or MIRROR
 
   // get GUI/Slider ids
@@ -139,7 +145,7 @@ function setup() {
   //Sterne
   setStars();
   lerpSpace = createVector(0, 0, 0); // LightShow
-  lightVec = createVector(0, 0, 0);
+  lightVec = createVector(1, -1, 1);
   lightVecTemp = createVector(0, 0, 0);
 
   // Audio Analyse
@@ -162,25 +168,55 @@ function setup() {
 
   // PlanetDebug
   planetCheckBox = createCheckbox("planetMode", false);
-  planetCheckBox.position(width - 100, 30);
+  planetCheckBox.position(width - 150, 30);
   planetCheckBox.changed(changePlanetMode);
   lichtCheckBox = createCheckbox("Licht", false);
-  lichtCheckBox.position(width - 100, 60);
+  lichtCheckBox.position(width - 150, 60);
   lichtCheckBox.changed(changeLichtMode);
+  scheinWCheckBox = createCheckbox("ScheinW", false);
+  scheinWCheckBox.position(width - 150, 90);
+  scheinWCheckBox.changed(() => {
+    scheinW = !scheinW;
+  });
+  lightShowCheckbox = createCheckbox("LightShow", false);
+  lightShowCheckbox.position(width - 150, 120);
+  lightShowCheckbox.changed(changeLightShow);
+  planetAmpCheckbox = createCheckbox("planetAmp", false);
+  planetAmpCheckbox.position(width - 150, 150);
+  planetAmpCheckbox.changed(()=>{planetAmp = !planetAmp});
 
   //console.log(mic.getSources());
   //mic.start();
 }
 function spektrum(spectrum) {
-  pg.setAttributes("antialias", true);
+  //pg.setAttributes("antialias", true);
+
   pg.background(255);
-  let amount = 12;
+  //pg.translate(-(pg.width/2),-(pg.height/2));
+  /*   let amount = 12;
   let factor = pg.height / amount;
   pg.strokeWeight(1);
   for (j = 1; j < amount + 1; j++) {
     pg.beginShape();
-    for (i = 0; i < spectrum.length / 2; i++) {
+    for (i = 0; i < spectrum.length; i++) {
       pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
+    }
+    pg.endShape();
+  } */
+  let waveform = fft.waveform();
+  let amount = 12;
+  let factor = pg.height / amount;
+  pg.strokeWeight(1.2);
+  pg.stroke(0);
+  pg.noFill();
+
+  for (j = 1; j < amount + 1; j++) {
+    pg.beginShape();
+
+    for (let i = 0; i < waveform.length; i++) {
+      let x = map(i, 0, waveform.length, 0, pg.width);
+      let y = map(waveform[i], -1, 1, factor * j, factor * (j - 1));
+      pg.vertex(x, y);
     }
     pg.endShape();
   }
@@ -203,7 +239,13 @@ function changePlanetMode() {
 function changeLichtMode() {
   l++;
   l %= 2;
-  console.log(l);
+  //console.log(l);
+}
+
+function changeLightShow() {
+  ls++;
+  ls %= 2;
+  mil = millis();
 }
 
 function showTrail() {
@@ -245,20 +287,52 @@ function showTrail() {
   }
 }
 
+let lightShows = [
+  function lightShow() {
+    if (peakDetect.isDetected) {
+      lightVecTemp = createVector(
+        random(-10, 10) / 10,
+        random(-10, 10) / 10,
+        random(-10, 10) / 10
+      );
+    }
+    //Lichtsucher
+    lightVec.x = lerp(lightVec.x, lightVecTemp.x, 0.1);
+    lightVec.y = lerp(lightVec.y, lightVecTemp.y, 0.1);
+    lightVec.z = lerp(lightVec.z, lightVecTemp.z, 0.1);
+  },
+  function lightShow2() {
+    let x = cos(frameCount * 0.1);
+    let y = sin(frameCount * 0.025);
+    let z = sin(frameCount * 0.05);
+    if (stopFuncAfter(1000)) {
+      console.log("LichtTransfer");
+      lightVec.x = lerp(lightVec.x, x, 0.2);
+      lightVec.y = lerp(lightVec.y, y, 0.2);
+      lightVec.z = lerp(lightVec.z, z, 0.2);
+    } else {
+      //LichtKreise
+      lightVec.x = x;
+      lightVec.y = y;
+      lightVec.z = z;
+    }
+  },
+];
+
 function draw() {
-  console.log(getFrameRate())
+  //console.log(getFrameRate())
   // Disco Mode auf Peak legen
   //l = floor(frameCount*0.02 % 2);
   sliderLogic();
   htmlHandler();
 
   // Audio Spektrum
-  spectrum = fft.analyze(); // .analyze muss laufen
+  spectrum = fft.analyze(512); // .analyze muss laufen
   fft.smooth(smoothValue);
-  amplitude.smooth(0.8);
+  //amplitude.smooth(0.8);
 
   // Bänder der Analyse
-  let oBands = fft.getOctaveBands(1, 90);
+  let oBands = fft.getOctaveBands(1, 33);
   //console.log(oBands);
   let bands2 = fft.logAverages(oBands);
   //console.log(bands2);
@@ -266,29 +340,29 @@ function draw() {
   //console.log(bands);
 
   // Peaks
-  if (peakCheck.checked) peakDetect.update(fft);
-  if (peakDetect.isDetected) {
+  peakDetect.update(fft);
+
+  if (peakCheck.checked && peakDetect.isDetected) {
     sSize = lerp(sSize, 2, 0.5);
-    lightVecTemp = createVector(
-      random(-10, 10) / 10,
-      random(-10, 10) / 10,
-      random(-10, 10) / 10
-    );
   } else {
     sSize = lerp(sSize, 1, 0.1);
   }
-
-  //Lichtsucher
-  lightVec.x = lerp(lightVec.x, lightVecTemp.x, 0.1);
-  lightVec.y = lerp(lightVec.y, lightVecTemp.y, 0.1);
-  lightVec.z = lerp(lightVec.z, lightVecTemp.z, 0.1);
 
   let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
   let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
   let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4);
   let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
-  //bandValues(mov0,mov2,mov4,mov6,bands2[0] + bands2[1],bands2[2] + bands2[3],bands2[4] + bands2[5],bands2[6] + bands2[7] + bands2[8])
+  /*   bandValues(
+    mov0,
+    mov2,
+    mov4,
+    mov6,
+    bands2[0] + bands2[1],
+    bands2[2] + bands2[3],
+    bands2[4] + bands2[5],
+    bands2[6] + bands2[7] + bands2[8]
+  ); */
   //logValues();
 
   // Kamera
@@ -300,13 +374,14 @@ function draw() {
 
   // Szene
   background(0);
-  
+
   rotationState = (frameCount * 0.002) % TWO_PI;
   planetX = planetDist * cos(rotationState) + 0.000001; //NaN Hack
   planetY = planetDist * sin(rotationState) + 0.000001;
 
   // Lichter
   lichtMode[l]();
+  lightShows[ls]();
 
   // Planet
 
@@ -315,6 +390,7 @@ function draw() {
   let planetVec = createVector(planetX, planetY, 0);
   shapeRot = centerVec.angleBetween(planetVec);
 
+  // Drehung zum Planeten
   if (planetMode) {
     if (stopFuncAfter(6000)) {
       rotateShape = lerp(rotateShape, shapeRot, 0.03);
@@ -380,8 +456,8 @@ function draw() {
   //Planet
   push();
   translate(planetX, planetY, 0);
-  rotateY(PI); // Drehung um eigene Achse
-  //rotateX(PI) //WegenTextur
+  rotateY(frameCount*0.01); // Drehung um eigene Achse
+  rotateZ(frameCount*0.00003) //WegenTextur
 
   let ampMe = amplitude.getLevel();
   let dark = 0;
@@ -399,8 +475,10 @@ function draw() {
   else {
     ambientMaterial(col5, 255, planetCol + 55);
   }
-  /*   spektrum(spectrum)
-  texture(pg); */
+  if (planetAmp && planetMode) {
+    spektrum(spectrum);
+    texture(pg);
+  }
 
   sphere(planetSize + pump, 24, 24);
 
@@ -486,10 +564,12 @@ let lichtMode = [
     col5 = map(sin(angle + radians(240)), -1, 1, 0, 255);
 
     shininess(25);
-    directionalLight(col, 255, 100, -1, 1, 0);
-    directionalLight(col2, 255, 100, 1, 1, 0);
-    directionalLight(col3, 255, 100, -1, -1, 0);
-    directionalLight(col4, 255, 100, 1, -1, 0);
+    if (scheinW) {
+      directionalLight(col, 255, 100, -1, 1, 0);
+      directionalLight(col2, 255, 100, 1, 1, 0);
+      directionalLight(col3, 255, 100, -1, -1, 0);
+      directionalLight(col4, 255, 100, 1, -1, 0);
+    }
     /*   directionalLight(col, 255, 100, -lightVec.y, lightVec.x, lightVec.z);
   directionalLight(col2, 255, 100, lightVec.z, -lightVec.y, -lightVec.x);
   directionalLight(col3, 255, 100, lightVec.z, lightVec.x, -lightVec.y);
@@ -559,10 +639,12 @@ let lichtMode = [
   directionalLight(255, 0, 0, 1, 1, 0);
   directionalLight(255, 0, 0, -1, -1, 0);
   directionalLight(255, 0, 255, 1, -1, 0); */
-    directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z);
-    directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x);
-    directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y);
-    directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z);
+    if (scheinW) {
+      directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z);
+      directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x);
+      directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y);
+      directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z);
+    }
     pointLight(col, 255, 255, dirX, dirY, x2Light);
     pointLight(col2, 255, 255, xLight, yLight, y2Light);
     pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
@@ -623,7 +705,7 @@ function htmlHandler() {
   document.getElementById("sM6").innerHTML = "m6S=" + strenghtValuem6;
   document.getElementById("speed").innerHTML = morphSlider.value / 1000;
   document.getElementById("travelSpeed").innerHTML =
-    "Warp " + spaceSlider.value / 1000;
+    "Warp" + floor(spaceSlider.value / 1000);
   document.getElementById("smth").innerHTML = smoothValue;
   document.getElementById("x").innerHTML = "X=" + rotateSliderX.value / 1000;
   document.getElementById("y").innerHTML = "Y=" + rotateSliderY.value / 1000;
@@ -945,22 +1027,23 @@ function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
 
 let sketch = function (p) {
   p.setup = function () {
-    var canvasp = p.createCanvas(303, 150);
+    var canvasp = p.createCanvas(312, 117);
     canvasp.parent("canvasid");
   };
   p.draw = function () {
     if (sidebar) {
+      let spectrum = fft.analyze();
       p.background("#262126");
       p.noFill();
-      let spectrum = fft.analyze();
+      p.strokeWeight(1);
       p.beginShape();
-      for (i = 0; i < spectrum.length; i++) {
-        //let x = map(log(i), 0, log(spectrum.length), 0, p.width);
-        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2+7));
+      for (i = 0; i < spectrum.length / 1.1; i++) {
+        //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
+        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7));
       }
       p.endShape();
       let waveform = fft.waveform();
-      p.strokeWeight(2);
+      p.strokeWeight(1.2);
       p.stroke(255);
       p.noFill();
       p.beginShape();
