@@ -2,9 +2,9 @@ let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
 let easycam;
 let shape = [];
 let rotateShape = 0;
-let particles = [];
-let partOffset = [];
 let total = 50;
+let sterne;
+let planet;
 let m0Slider,
   m0,
   m1Slider,
@@ -52,20 +52,12 @@ let offSet = 50;
 let morphSpeed = 0;
 let streamAdress;
 let counter;
+let a; //Amplitude
 let ampHistory = []; // Lautstärke Analyse
-let lerpSpace;
 let planetMode = false;
-let rotationState = 0;
-let planetTex;
-let planetSize = 0;
-let planetDist = 0;
-let planetX;
-let planetY;
 let maxDistCam = 3000;
 
 let shapeRot = 0; // Rotation um PLaneten
-let pump; // Planet pumpt zum Peak
-let alSterne; // Alpha
 let mil; //millis()
 let col = 0;
 let col5 = 0; // Globale Farben
@@ -84,7 +76,15 @@ let planetAmp = false;
 let reverb;
 
 function preload() {
-  tex = loadImage("planet4.png");
+  tex = [
+    loadImage("planet1d.jpeg"),
+    loadImage("moon_tex.jpeg"),
+    loadImage("planet3.png"),
+    loadImage("2-observingsol.jpeg"),
+    loadImage("2k_mercury.jpeg"),
+    loadImage("2k_neptune.jpeg"),
+    loadImage("anshar.jpeg"),
+  ];
 }
 
 function centerCanvas() {
@@ -93,15 +93,18 @@ function centerCanvas() {
   cnv.position(x, y);
 }
 function windowResized() {
-  //resizeCanvas(windowWidth/3, windowHeight/1.5);
   resizeCanvas(windowWidth, windowHeight);
   centerCanvas();
-  setStars();
+  if (!planetMode) sterne.setStars();
+
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300);
   easycam.setDistanceMax(3000);
   easycam.setRotation([0, -0.5, 0, 0], 6000);
   easycam.setDistance(2000, 3000);
+  let eyeZ = height / 2 / tan(PI / 6);
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 75); // Frustum Far Clip eyeZ*50
+
   planetCheckBox.position(width - 150, 30);
   lichtCheckBox.position(width - 150, 60);
   scheinWCheckBox.position(width - 150, 90);
@@ -112,14 +115,10 @@ function windowResized() {
 function setup() {
   //setAttributes("antialias", true);
   setAttributes("alpha", false);
-  //cnv = createCanvas(windowWidth/3, windowHeight/1.5, WEBGL);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL);
   cnv.style("z-index", -1);
   colorMode(HSB);
   centerCanvas();
-
-  //pg = createGraphics(256, 256); // Textur
-  //textureWrap(REPEAT); //CLAMP, REPEAT, or MIRROR
 
   // get GUI/Slider ids
   htmlEvents();
@@ -137,13 +136,17 @@ function setup() {
   easycam.setDistanceMax(3000);
   easycam.setRotation([1, -0.5, -1, 0], 6000);
   easycam.setDistance(1000, 6000);
+
+  let eyeZ = height / 2 / tan(PI / 6);
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 75); // Frustum Far Clip eyeZ*50
+
+  // RightClick aus
   document.oncontextmenu = function () {
     return false;
   };
   document.getElementById("spaceCheck").checked = true;
 
   //Sterne
-  setStars();
   lerpSpace = createVector(0, 0, 0); // LightShow
   lightVec = createVector(1, -1, 1);
   lightVecTemp = createVector(0, 0, 0);
@@ -183,16 +186,126 @@ function setup() {
   lightShowCheckbox.changed(changeLightShow);
   planetAmpCheckbox = createCheckbox("planetTex", false);
   planetAmpCheckbox.position(width - 150, 150);
-  planetAmpCheckbox.changed(()=>{planetAmp = !planetAmp});
+  planetAmpCheckbox.changed(() => {
+    planetAmp = !planetAmp;
+  });
 
+  sterne = new Stars(377);
+  sterne.setStars();
+  planet = new Planet(8500);
   //console.log(mic.getSources());
   //mic.start();
+}
+function draw() {
+  //console.log(getFrameRate())
+  // Disco Mode auf Peak legen
+  //l = floor(frameCount*0.02 % 2);
+  sliderLogic();
+  htmlHandler();
+
+  // Audio Spektrum
+  spectrum = fft.analyze(512); // .analyze muss laufen
+  fft.smooth(smoothValue);
+  a = amplitude.getLevel();
+  amplitude.smooth(0.8);
+
+  // Bänder der Analyse
+  let oBands = fft.getOctaveBands(1, 33);
+  //console.log(oBands);
+  let bands2 = fft.logAverages(oBands);
+  //console.log(bands2);
+  //let bands = fft.linAverages(12);
+  //console.log(bands);
+
+  // Peaks
+  peakDetect.update(fft);
+
+  if (peakCheck.checked && peakDetect.isDetected) {
+    sSize = lerp(sSize, 2, 0.5);
+  } else {
+    sSize = lerp(sSize, 1, 0.1);
+  }
+
+  let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
+  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
+  let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4);
+  let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6);
+  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
+  /*   bandValues(
+    mov0,
+    mov2,
+    mov4,
+    mov6,
+    bands2[0] + bands2[1],
+    bands2[2] + bands2[3],
+    bands2[4] + bands2[5],
+    bands2[6] + bands2[7] + bands2[8]
+  ); */
+  //logValues();
+
+  // Kamera
+  if (rotateCheck.checked) {
+    easycam.rotateX(rotateSliderX.value / 100000);
+    easycam.rotateY(rotateSliderY.value / 100000);
+    easycam.rotateZ(rotateSliderZ.value / 100000);
+  }
+
+  // Szene
+  background(0);
+
+  // Lichter
+  lichtMode[l]();
+  lightShows[ls]();
+
+  // Figur
+
+  push();
+  let centerVec = createVector(1, 0, 0);
+  let planetVec = createVector(planet.planetX, planet.planetY, 0);
+  shapeRot = centerVec.angleBetween(planetVec);
+
+  // Drehung zum Planeten
+  if (planetMode) {
+    if (stopFuncAfter(2000)) {
+      rotateShape = lerp(rotateShape, shapeRot, 0.03);
+    } else {
+      rotateShape = shapeRot;
+    }
+  } else {
+    rotateShape = lerp(rotateShape, 0, 0.01);
+  }
+
+  rotateZ(rotateShape); //rotationState
+
+  sphaere(m, sSize);
+  pop();
+
+  if (!planetMode) {
+    if (spaceCheck.checked) {
+      push();
+      rotateZ(rotateShape);
+      showTrail();
+      pop();
+    }
+  }
+
+  //Sterne
+  sterne.show();
+
+  //Planet
+  planet.show();
 }
 
 function changePlanetMode() {
   mil = millis();
   planetMode = !planetMode;
-  setStars();
+
+  if (!planetMode) {
+    sterne.setStars();
+  } else {
+    sterne.setStarsPlanet();
+  }
+
   if (planetMode) {
     easycam.setRotation([0.5, 0, 0.5, 0], 3000);
     rotateSliderX.value = 200;
@@ -217,7 +330,6 @@ function changeLightShow() {
 }
 
 function showTrail() {
-  let a = amplitude.getLevel();
   ampHistory.push(a);
 
   let maxArray = 50;
@@ -286,183 +398,6 @@ let lightShows = [
     }
   },
 ];
-
-function draw() {
-  //console.log(getFrameRate())
-  // Disco Mode auf Peak legen
-  //l = floor(frameCount*0.02 % 2);
-  sliderLogic();
-  htmlHandler();
-
-  // Audio Spektrum
-  spectrum = fft.analyze(512); // .analyze muss laufen
-  fft.smooth(smoothValue);
-  //amplitude.smooth(0.8);
-
-  // Bänder der Analyse
-  let oBands = fft.getOctaveBands(1, 33);
-  //console.log(oBands);
-  let bands2 = fft.logAverages(oBands);
-  //console.log(bands2);
-  //let bands = fft.linAverages(12);
-  //console.log(bands);
-
-  // Peaks
-  peakDetect.update(fft);
-
-  if (peakCheck.checked && peakDetect.isDetected) {
-    sSize = lerp(sSize, 2, 0.5);
-  } else {
-    sSize = lerp(sSize, 1, 0.1);
-  }
-
-  let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
-  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
-  let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4);
-  let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6);
-  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
-  /*   bandValues(
-    mov0,
-    mov2,
-    mov4,
-    mov6,
-    bands2[0] + bands2[1],
-    bands2[2] + bands2[3],
-    bands2[4] + bands2[5],
-    bands2[6] + bands2[7] + bands2[8]
-  ); */
-  //logValues();
-
-  // Kamera
-  if (rotateCheck.checked) {
-    easycam.rotateX(rotateSliderX.value / 100000);
-    easycam.rotateY(rotateSliderY.value / 100000);
-    easycam.rotateZ(rotateSliderZ.value / 100000);
-  }
-
-  // Szene
-  background(0);
-
-  rotationState = (frameCount * 0.002) % TWO_PI;
-  planetX = planetDist * cos(rotationState) + 0.000001; //NaN Hack
-  planetY = planetDist * sin(rotationState) + 0.000001;
-
-  // Lichter
-  lichtMode[l]();
-  lightShows[ls]();
-
-  // Planet
-
-  push();
-  let centerVec = createVector(1, 0, 0);
-  let planetVec = createVector(planetX, planetY, 0);
-  shapeRot = centerVec.angleBetween(planetVec);
-
-  // Drehung zum Planeten
-  if (planetMode) {
-    if (stopFuncAfter(6000)) {
-      rotateShape = lerp(rotateShape, shapeRot, 0.03);
-    } else {
-      rotateShape = shapeRot;
-    }
-  } else {
-    rotateShape = lerp(rotateShape, 0, 0.01);
-  }
-  //console.log(rotateShape)
-  rotateZ(rotateShape); //rotationState
-  /*   console.log(rotateShape);
-  console.log(shapeRot) */
-  sphaere(m, sSize);
-  pop();
-
-  if (!planetMode) {
-    if (spaceCheck.checked) {
-      push();
-      rotateZ(rotateShape);
-      showTrail();
-      pop();
-    }
-  }
-  //Sterne
-  push();
-  translate(planetX, planetY, 0);
-
-  for (p of particles) {
-    if (spaceCheck.checked && !planetMode) {
-      lerpSpace.y = lerp(lerpSpace.y, spaceSlider.value / 1000, 0.002); // WarpBremse
-    } else {
-      lerpSpace.y = lerp(lerpSpace.y, 0, 0.0001);
-    }
-    if (planetMode) {
-      let getAround = createVector(0, 0, 0)
-        .sub(p)
-        .normalize()
-        .mult(planetSize * 2.5);
-      p.add(getAround);
-      alSterne = map(
-        dist(0, 0, 0, planetX, planetY, 0),
-        0,
-        planetSize * 2,
-        1,
-        0.01
-      );
-    } else {
-      p.add(lerpSpace);
-      let space = (width + height) / 2;
-      if (p.y > space * 2) {
-        p.y = -space * 2;
-        p.x = random(-space * 2, space * 2);
-      }
-      alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0.1);
-    }
-    stroke(255, alSterne);
-    strokeWeight(2.33);
-    point(p.x, p.y, p.z);
-  }
-  pop();
-
-  //Planet
-  push();
-  translate(planetX, planetY, 0);
-  rotateY(frameCount*0.0001); // Drehung um eigene Achse
-  rotateZ(frameCount*0.00003) //WegenTextur
-
-  let ampMe = amplitude.getLevel();
-  let dark = 0;
-  let planetCol = 0;
-  if (planetMode && planetSize > 1500) {
-    pump = ampMe * 200;
-    dark = map(rotationState, 0, TWO_PI, 0, 200);
-    planetCol = map(ampMe, 0, 1, 0, 200);
-  } else {
-    pump = 0;
-  }
-
-  noStroke();
-  if (l == 1) specularMaterial(col5, 255, planetCol + 55);
-  else {
-    ambientMaterial(col5, 255, planetCol + 55);
-  }
-  if (planetAmp) {
-    //spektrum(spectrum);
-    texture(tex);
-  }
-
-  sphere(planetSize + pump, 24, 24);
-
-  if (planetMode) {
-    planetDist = lerp(planetDist, 3500, 0.01);
-    planetSize = lerp(planetSize, 2500, 0.01);
-    easycam.setDistanceMax(maxDistCam);
-    maxDistCam = lerp(maxDistCam, 950, 0.01);
-  } else {
-    planetDist = lerp(planetDist, 0, 0.01);
-    planetSize = lerp(planetSize, 0, 0.07);
-    easycam.setDistanceMax(maxDistCam);
-    maxDistCam = lerp(maxDistCam, 3000, 0.01);
-  }
-  pop();
-}
 
 function stopFuncAfter(del) {
   // Beim change m = millis
@@ -736,7 +671,7 @@ function htmlEvents() {
       audio = createAudio(serverAdress.value); //("https://ice6.somafm.com/vaporwaves-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
       audio.play();
       fft.setInput(audio);
-      amplitude = new p5.Amplitude();
+      //amplitude = new p5.Amplitude();
       amplitude.setInput(audio);
     }
   });
@@ -878,25 +813,6 @@ function switchSource() {
   }
 }
 
-// Audio an in manchen Browsern Handy etc
-function touchStarted() {
-  getAudioContext().resume();
-}
-
-function setStars() {
-  particles.splice(0, particles.length);
-  let space = (width + height) / 2;
-  for (let i = 0; i < 377; i++) {
-    particles.push(
-      createVector(
-        random(-space * 2, space * 2),
-        random(-space * 2, space * 2),
-        random(-space * 2, space * 2)
-      )
-    );
-  }
-}
-
 function setPreset() {
   //localStorage.clear();
   localStorage.setItem("m0", m0Slider.value);
@@ -1028,38 +944,179 @@ let sketch = function (p) {
 let node = document.createElement("div");
 new p5(sketch, node);
 //window.document.getElementsByTagName('body')[0].appendChild(node);
-/*function spektrum(spectrum) {
-  //pg.setAttributes("antialias", true);
-  pg.background(255);
-  //pg.translate(-(pg.width/2),-(pg.height/2));
-  let amount = 12;
-  let factor = pg.height / amount;
-  pg.strokeWeight(1);
-  for (j = 1; j < amount + 1; j++) {
-    pg.beginShape();
-    for (i = 0; i < spectrum.length; i++) {
-      pg.vertex(i, map(spectrum[i], 0, 255, factor * j, factor * (j - 1)));
-    }
-    pg.endShape();
-  } 
 
-  let waveform = fft.waveform();
-  let amount = 12;
-  let factor = pg.height / amount;
-  pg.strokeWeight(1.2);
-  pg.stroke(0);
-  pg.noFill();
-
-  for (j = 1; j < amount + 1; j++) {
-    pg.beginShape();
-
-    for (let i = 0; i < waveform.length; i++) {
-      let x = map(i, 0, waveform.length, 0, pg.width);
-      let y = map(waveform[i], -1, 1, factor * j, factor * (j - 1));
-      pg.vertex(x, y);
-    }
-    pg.endShape();
-  }
-} */
+// Audio an in manchen Browsern Handy etc
+function touchStarted() {
+  getAudioContext().resume();
+}
 
 //Hilfe, Liebe Hoffnung, Dankbar, Dankbarkeit
+
+class Stars {
+  constructor(amount) {
+    this.amount = amount;
+    this.particles = [];
+    this.lerpSpace = createVector(0, 0, 0);
+    this.alSterne = 0;
+    this.pumper = 0;
+  }
+  setStars() {
+    this.particles.splice(0, this.particles.length);
+    let space = (width + height) / 2;
+    for (let i = 0; i < this.amount; i++) {
+      this.particles.push(
+        createVector(
+          random(-space * 2, space * 2),
+          random(-space * 2, space * 2),
+          random(-space * 2, space * 2)
+        )
+      );
+    }
+  }
+  setStarsPlanet() {
+    this.particles.splice(0, this.particles.length);
+    let space = planet.size / 4;
+    for (let i = 0; i < this.amount; i++) {
+      this.particles.push(
+        createVector(
+          random(-space, space),
+          random(-space, space),
+          random(-space, space)
+        )
+      );
+    }
+    for (let i = 0; i < this.particles.length; i++) {
+      let getAround = createVector(0, 0, 0)
+        .sub(this.particles[i])
+        .normalize()
+        .mult(planet.size * random(1.2, 1.618));
+      this.particles[i].add(getAround);
+    }
+  }
+  show() {
+    push();
+    translate(planet.planetX, planet.planetY, 0);
+    for (let p of this.particles) {
+      if (spaceCheck.checked && !planetMode) {
+        this.lerpSpace.y = lerp(
+          this.lerpSpace.y,
+          spaceSlider.value / 1000,
+          0.002
+        ); // WarpBremse
+      } else {
+        this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001);
+      }
+      if (planetMode) {
+        this.pumper = lerp(this.pumper, planet.pump, 0.1);
+        this.alSterne = map(
+          dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z),
+          0,
+          planet.size * 2,
+          1,
+          0
+        );
+        strokeWeight(1 + this.pumper * 0.1); //
+      } else {
+        p.add(this.lerpSpace);
+        let space = (width + height) / 2;
+        if (p.y > space * 2) {
+          p.y = -space * 2;
+          p.x = random(-space * 2, space * 2);
+        }
+        this.alSterne = map(
+          dist(0, 0, 0, p.x, p.y, p.z),
+          0,
+          width + height,
+          1,
+          0
+        );
+        strokeWeight(3.33);
+      }
+      stroke(255, this.alSterne);
+      point(p.x, p.y, p.z);
+    }
+    pop();
+  }
+}
+
+class Planet {
+  constructor(size) {
+    this.size = size;
+    this.dist = size + size * 0.2;
+    this.maxCam = size * 0.5;
+    this.planetSize = 0;
+    this.planetDist = 0;
+    this.maxDistCam = 3000;
+    this.planetX = 0;
+    this.planetY = 0;
+    this.rotationState = 0;
+    this.pump = 0;
+    this.rings = (floor(random(1,12)))
+  }
+
+  show() {
+    if (planetMode) {
+      this.planetDist = lerp(this.planetDist, this.dist, 0.01);
+      this.planetSize = lerp(this.planetSize, this.size, 0.01);
+      this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01);
+      easycam.setDistanceMax(this.maxDistCam);
+    } else {
+      this.planetDist = lerp(this.planetDist, 0, 0.01);
+      this.planetSize = lerp(this.planetSize, 0, 0.07);
+      this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01);
+      easycam.setDistanceMax(this.maxDistCam);
+    }
+
+    this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI;
+    this.planetX = this.planetDist * cos(this.rotationState) + 0.0000000001; //NaN Hack
+    this.planetY = this.planetDist * sin(this.rotationState) + 0.0000000001;
+
+    push();
+    translate(this.planetX, this.planetY, 0);
+    rotateY(frameCount * 0.0001); // Drehung um eigene Achse
+    //rotateZ(frameCount * 0.001); //WegenTextur
+
+    let dark = 0;
+    let planetCol = 0;
+    let ampMe = a;
+    if (
+      planetMode &&
+      this.planetSize > this.planetSize - this.planetSize * 0.8
+    ) {
+      this.pump = ampMe * 200;
+      dark = map(this.rotationState, 0, TWO_PI, 0, 200);
+      planetCol = map(ampMe, 0, 1, 0, 200);
+    } else {
+      this.pump = 0;
+    }
+    if (planetMode) {
+      push();
+      rotateX(PI / 2);
+      stroke(col, 255, 255);
+      for (let i = 3; i < this.rings; i++) {
+        strokeWeight((i + 3) * 3 * ampMe);
+        noFill();
+        circle(0, 0, this.planetSize + i * (planet.size * 0.618));
+      }
+
+      pop();
+    }
+    noStroke();
+    fill(255);
+    if (l == 1) specularMaterial(col5, 255, planetCol + 55);
+    else {
+      ambientMaterial(col5, 255, planetCol + 55);
+    }
+    if (planetAmp) {      
+      noLights();
+      //ambientLight(255);
+      pointLight(0, 0, 255, -1, 1, 0);
+      let textures = floor((frameCount * 0.01) % 3);
+      texture(tex[textures]);
+    }
+    sphere(this.planetSize + this.pump, 24, 24);
+    pop();
+  }
+}
+
+function changeTexture() {}
