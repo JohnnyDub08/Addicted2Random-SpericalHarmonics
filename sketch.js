@@ -1,10 +1,10 @@
-let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
-let easycam;
-let shape = [];
-let rotateShape = 0;
-let total = 50;
-let sterne;
-let planet;
+let cnv, mic, audio, fft, spectrum, peakDetect, amplitude
+let easycam
+let shape = []
+let rotateShape = 0
+let total = 50
+let sterne
+let planet
 let m0Slider,
   m0,
   m1Slider,
@@ -45,121 +45,121 @@ let m0Slider,
   rotateSliderX,
   rotateSliderY,
   rotateSliderZ,
-  dropZone;
-let sourceIsStream = true;
-let sSize = 0.2;
-let offSet = 50;
-let morphSpeed = 0;
-let streamAdress;
-let counter;
-let a; //Amplitude
-let ampHistory = []; // Lautstärke Analyse
-let planetMode = false;
-let maxDistCam = 3000;
+  dropZone
+let sourceIsStream = true
+let sSize = 0.2
+let offSet = 50
+let morphSpeed = 0
+let streamAdress
+let counter
+let a //Amplitude
+let ampHistory = [] // Lautstärke Analyse
+let planetMode = false
+let maxDistCam = 3000
 
-let shapeRot = 0; // Rotation um PLaneten
-let mil; //millis()
-let col = 0;
-let col5 = 0; // Globale Farben
+let shapeRot = 0 // Rotation um PLaneten
+let mil //millis()
+let col = 0
+let col5 = 0 // Globale Farben
 
-let myShader;
-let matcap;
-let lightVec;
-let lightVecTemp;
-let pg;
-let l = 0; // LichtArray
-let ls = 0; // LichtShowArray
-let scheinW = false;
-let planetAmp = false;
+let myShader
+let matcap
+let lightVec
+let lightVecTemp
+let pg
+let l = 0 // LichtArray
+let ls = 0 // LichtShowArray
+let scheinW = false
+let planetAmp = false
 
 // SoundStuff
-let reverb;
+let reverb
 
 function preload() {
   tex = [
-    loadImage("planet1d.jpeg"),
-    loadImage("moon_tex.jpeg"),
-    loadImage("planet3.png"),
-    loadImage("2-observingsol.jpeg"),
-    loadImage("2k_mercury.jpeg"),
-    loadImage("2k_neptune.jpeg"),
-    loadImage("anshar.jpeg"),
-  ];
+    loadImage('planet1d.jpeg'),
+    loadImage('moon_tex.jpeg'),
+    loadImage('planet3.png'),
+    loadImage('2-observingsol.jpeg'),
+    loadImage('2k_mercury.jpeg'),
+    loadImage('2k_neptune.jpeg'),
+    loadImage('anshar.jpeg')
+  ]
 }
 
 function centerCanvas() {
-  let x = (windowWidth - width) / 2;
-  let y = (windowHeight - height) / 2;
-  cnv.position(x, y);
+  let x = (windowWidth - width) / 2
+  let y = (windowHeight - height) / 2
+  cnv.position(x, y)
 }
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  centerCanvas();
-  if (!planetMode) sterne.setStars();
+  resizeCanvas(windowWidth, windowHeight)
+  centerCanvas()
+  if (!planetMode) sterne.setStars()
 
-  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
-  easycam.setDistanceMin(300);
-  easycam.setDistanceMax(3000);
-  easycam.setRotation([0, -0.5, 0, 0], 6000);
-  easycam.setDistance(2000, 3000);
-  let eyeZ = height / 2 / tan(PI / 6);
-  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 75); // Frustum Far Clip eyeZ*50
+  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
+  easycam.setDistanceMin(300)
+  easycam.setDistanceMax(3000)
+  easycam.setRotation([0, -0.5, 0, 0], 6000)
+  easycam.setDistance(2000, 3000)
+  let eyeZ = height / 2 / tan(PI / 6)
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 100) // Frustum Far Clip eyeZ*50
 
-  planetCheckBox.position(width - 150, 30);
-  lichtCheckBox.position(width - 150, 60);
-  scheinWCheckBox.position(width - 150, 90);
-  lightShowCheckbox.position(width - 150, 120);
-  planetAmpCheckbox.position(width - 150, 150);
+  planetCheckBox.position(width - 150, 30)
+  lichtCheckBox.position(width - 150, 60)
+  scheinWCheckBox.position(width - 150, 90)
+  lightShowCheckbox.position(width - 150, 120)
+  planetAmpCheckbox.position(width - 150, 150)
 }
 
 function setup() {
   //setAttributes("antialias", true);
-  setAttributes("alpha", false);
-  cnv = createCanvas(windowWidth, windowHeight, WEBGL);
-  cnv.style("z-index", -1);
-  colorMode(HSB);
-  centerCanvas();
+  setAttributes('alpha', false)
+  cnv = createCanvas(windowWidth, windowHeight, WEBGL)
+  cnv.style('z-index', -1)
+  colorMode(HSB)
+  centerCanvas()
 
   // get GUI/Slider ids
-  htmlEvents();
+  htmlEvents()
 
   // simple Kamera ohne Rechtsklick
   var state = {
     distance: 900,
     center: [0, 0, 0],
-    rotation: [0.5, 1, 0.5, 0],
-  };
+    rotation: [0.5, 1, 0.5, 0]
+  }
 
-  easycam = new Dw.EasyCam(this._renderer, state);
+  easycam = new Dw.EasyCam(this._renderer, state)
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
-  easycam.setDistanceMin(300);
-  easycam.setDistanceMax(3000);
-  easycam.setRotation([1, -0.5, -1, 0], 6000);
-  easycam.setDistance(1000, 6000);
+  easycam.setDistanceMin(300)
+  easycam.setDistanceMax(3000)
+  easycam.setRotation([1, -0.5, -1, 0], 6000)
+  easycam.setDistance(1000, 6000)
 
-  let eyeZ = height / 2 / tan(PI / 6);
-  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 75); // Frustum Far Clip eyeZ*50
+  let eyeZ = height / 2 / tan(PI / 6)
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 100) // Frustum Far Clip eyeZ*50
 
   // RightClick aus
   document.oncontextmenu = function () {
-    return false;
-  };
-  document.getElementById("spaceCheck").checked = true;
+    return false
+  }
+  document.getElementById('spaceCheck').checked = true
 
   //Sterne
-  lerpSpace = createVector(0, 0, 0); // LightShow
-  lightVec = createVector(1, -1, 1);
-  lightVecTemp = createVector(0, 0, 0);
+  lerpSpace = createVector(0, 0, 0) // LightShow
+  lightVec = createVector(1, -1, 1)
+  lightVecTemp = createVector(0, 0, 0)
 
   // Audio Analyse
-  fft = new p5.FFT();
-  mic = new p5.AudioIn();
-  amplitude = new p5.Amplitude();
-  peakDetect = new p5.PeakDetect(33, 96, 0.5, 30);
-  audio = createAudio("https://ice2.somafm.com/defcon-128-aac"); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
-  fft.setInput(audio);
-  amplitude.setInput(audio);
-  audio.play();
+  fft = new p5.FFT()
+  mic = new p5.AudioIn()
+  amplitude = new p5.Amplitude()
+  peakDetect = new p5.PeakDetect(33, 96, 0.5, 30)
+  audio = createAudio('https://ice2.somafm.com/defcon-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  fft.setInput(audio)
+  amplitude.setInput(audio)
+  audio.play()
 
   // Audio Effekte
   //reverb = new p5.Reverb();
@@ -170,29 +170,29 @@ function setup() {
   //reverb.set(6,0.33)
 
   // PlanetDebug
-  planetCheckBox = createCheckbox("planetMode", false);
-  planetCheckBox.position(width - 150, 30);
-  planetCheckBox.changed(changePlanetMode);
-  lichtCheckBox = createCheckbox("Licht", false);
-  lichtCheckBox.position(width - 150, 60);
-  lichtCheckBox.changed(changeLichtMode);
-  scheinWCheckBox = createCheckbox("ScheinW", false);
-  scheinWCheckBox.position(width - 150, 90);
+  planetCheckBox = createCheckbox('planetMode', false)
+  planetCheckBox.position(width - 150, 30)
+  planetCheckBox.changed(changePlanetMode)
+  lichtCheckBox = createCheckbox('Licht', false)
+  lichtCheckBox.position(width - 150, 60)
+  lichtCheckBox.changed(changeLichtMode)
+  scheinWCheckBox = createCheckbox('ScheinW', false)
+  scheinWCheckBox.position(width - 150, 90)
   scheinWCheckBox.changed(() => {
-    scheinW = !scheinW;
-  });
-  lightShowCheckbox = createCheckbox("LightShow", false);
-  lightShowCheckbox.position(width - 150, 120);
-  lightShowCheckbox.changed(changeLightShow);
-  planetAmpCheckbox = createCheckbox("planetTex", false);
-  planetAmpCheckbox.position(width - 150, 150);
+    scheinW = !scheinW
+  })
+  lightShowCheckbox = createCheckbox('LightShow', false)
+  lightShowCheckbox.position(width - 150, 120)
+  lightShowCheckbox.changed(changeLightShow)
+  planetAmpCheckbox = createCheckbox('planetTex', false)
+  planetAmpCheckbox.position(width - 150, 150)
   planetAmpCheckbox.changed(() => {
-    planetAmp = !planetAmp;
-  });
+    planetAmp = !planetAmp
+  })
 
-  sterne = new Stars(377);
-  sterne.setStars();
-  planet = new Planet(8500);
+  sterne = new Stars(377)
+  sterne.setStars()
+  planet = new Planet(floor(random(3000, 8000)));
   //console.log(mic.getSources());
   //mic.start();
 }
@@ -200,37 +200,37 @@ function draw() {
   //console.log(getFrameRate())
   // Disco Mode auf Peak legen
   //l = floor(frameCount*0.02 % 2);
-  sliderLogic();
-  htmlHandler();
+  sliderLogic()
+  htmlHandler()
 
   // Audio Spektrum
-  spectrum = fft.analyze(512); // .analyze muss laufen
-  fft.smooth(smoothValue);
-  a = amplitude.getLevel();
-  amplitude.smooth(0.8);
+  spectrum = fft.analyze(512) // .analyze muss laufen
+  fft.smooth(smoothValue)
+  a = amplitude.getLevel()
+  amplitude.smooth(0.8)
 
   // Bänder der Analyse
-  let oBands = fft.getOctaveBands(1, 33);
+  let oBands = fft.getOctaveBands(1, 33)
   //console.log(oBands);
-  let bands2 = fft.logAverages(oBands);
+  let bands2 = fft.logAverages(oBands)
   //console.log(bands2);
   //let bands = fft.linAverages(12);
   //console.log(bands);
 
   // Peaks
-  peakDetect.update(fft);
+  peakDetect.update(fft)
 
   if (peakCheck.checked && peakDetect.isDetected) {
-    sSize = lerp(sSize, 2, 0.5);
+    sSize = lerp(sSize, 2, 0.5)
   } else {
-    sSize = lerp(sSize, 1, 0.1);
+    sSize = lerp(sSize, 1, 0.1)
   }
 
-  let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0);
-  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2);
-  let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4);
-  let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6);
-  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
+  let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
+  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
+  let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4)
+  let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6)
+  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
   /*   bandValues(
     mov0,
     mov2,
@@ -245,125 +245,175 @@ function draw() {
 
   // Kamera
   if (rotateCheck.checked) {
-    easycam.rotateX(rotateSliderX.value / 100000);
-    easycam.rotateY(rotateSliderY.value / 100000);
-    easycam.rotateZ(rotateSliderZ.value / 100000);
+    easycam.rotateX(rotateSliderX.value / 100000)
+    easycam.rotateY(rotateSliderY.value / 100000)
+    easycam.rotateZ(rotateSliderZ.value / 100000)
   }
 
   // Szene
-  background(0);
+  background(0)
 
   // Lichter
-  lichtMode[l]();
-  lightShows[ls]();
+  lichtMode[l]()
+  lightShows[ls]()
 
   // Figur
 
-  push();
-  let centerVec = createVector(1, 0, 0);
+  push()
+  let centerVec = createVector(1, 0, 0)
   let planetVec = createVector(planet.planetX, planet.planetY, 0);
-  shapeRot = centerVec.angleBetween(planetVec);
+  shapeRot = centerVec.angleBetween(planetVec)
+  //console.log(easycam.getPosition())
+  if (isNaN(shapeRot)){  // Hack wegen verschwinden der Figur
+    shapeRot = 1;
+  }
+
+
 
   // Drehung zum Planeten
   if (planetMode) {
-    if (stopFuncAfter(2000)) {
-      rotateShape = lerp(rotateShape, shapeRot, 0.03);
-    } else {
-      rotateShape = shapeRot;
+     if (stopFuncAfter(3000)) {
+      rotateShape = lerp(rotateShape, shapeRot, 0.03)
+    } else {       
+      rotateShape = shapeRot
     }
   } else {
-    rotateShape = lerp(rotateShape, 0, 0.01);
+    rotateShape = lerp(rotateShape, 0, 0.01)
   }
 
-  rotateZ(rotateShape); //rotationState
+  rotateZ(rotateShape) //rotationState
 
-  sphaere(m, sSize);
-  pop();
+  sphaere(m, sSize)
+  pop()
 
   if (!planetMode) {
     if (spaceCheck.checked) {
-      push();
-      rotateZ(rotateShape);
-      showTrail();
-      pop();
+      push()
+      rotateZ(rotateShape)
+      showTrail()
+      pop()
     }
   }
 
   //Sterne
-  sterne.show();
+  sterne.show()
 
   //Planet
-  planet.show();
+  planet.show()
 }
 
 function changePlanetMode() {
-  mil = millis();
-  planetMode = !planetMode;
+  mil = millis()
+  planetMode = !planetMode
 
   if (!planetMode) {
-    sterne.setStars();
+    sterne.setStars()
   } else {
-    sterne.setStarsPlanet();
+    planet = new Planet(random(2500, 10000));
+    sterne.setStarsPlanet()
   }
 
   if (planetMode) {
-    easycam.setRotation([0.5, 0, 0.5, 0], 3000);
-    rotateSliderX.value = 200;
-    rotateCheck.checked = true;
-    easycam.setDistance(950, 3000);
-    spaceCheck.checked = true;
+    easycam.setRotation([0.5, 0, 0.5, 0], 3000)
+    rotateSliderX.value = planet.size*0.021
+    rotateCheck.checked = true
+    easycam.setDistance(950, 3000)
+    spaceCheck.checked = true
   } else {
-    easycam.setDistance(1500, 3000);
-    easycam.setRotation([-0.5, 1, -0.5, 0], 3000);
+    easycam.setDistance(1500, 3000)
+    easycam.setRotation([-0.5, 1, -0.5, 0], 3000)
   }
 }
 function changeLichtMode() {
-  l++;
-  l %= 2;
+  l++
+  l %= 2
   //console.log(l);
 }
 
 function changeLightShow() {
-  ls++;
-  ls %= 2;
-  mil = millis();
+  ls++
+  ls %= 2
+  mil = millis()
 }
 
+function sphaere(m, sSize) {
+  noStroke()
+  total = resCheck.checked ? 100 : 50
+  /*  stroke(255)
+  strokeWeight(0.5) */
+
+  for (let i = 0; i < total + 1; i++) {
+    shape[i] = []
+    let phi = map(i, 0, total, 0, PI)
+    for (let j = 0; j < total + 1; j++) {
+      let theta = map(j, 0, total, 0, TWO_PI)
+      let r = 0
+
+      r += pow(sin(m[0] * phi), m[1])
+      r += pow(cos(m[2] * phi), m[3])
+      r += pow(sin(m[4] * theta), m[5])
+      r += pow(cos(m[6] * theta), m[7])
+
+      let x = r * sin(phi) * cos(theta)
+      let y = r * cos(phi)
+      let z = r * sin(phi) * sin(theta)
+
+      shape[i][j] = createVector(x, y, z).mult(60 * sSize)
+    }
+  }
+  specularMaterial(90, 0.96)
+
+  for (let i = 0; i < total; i++) {
+    let v1, v2
+    beginShape(TRIANGLE_STRIP)
+    for (let j = 0; j < total + 1; j++) {
+      v1 = shape[i][j % total]
+      let v3 = v1
+      normal(v3)
+      vertex(v1.x, v1.y, v1.z)
+      v2 = shape[i + 1][j % total]
+      let v4 = v2
+      //normal(v4);
+      vertex(v2.x, v2.y, v2.z)
+    }
+    endShape()
+  }
+}
 function showTrail() {
-  ampHistory.push(a);
+  ampHistory.push(a)
 
-  let maxArray = 50;
-  let dis = 50 + spaceSlider.value / 1000;
-  let offSet = 450;
+  let maxArray = 50
+  let dis = 50 + spaceSlider.value / 1000
+  let offSet = 450
 
-  noStroke();
-  specularMaterial(100, 0.3);
+  noStroke()
+  specularMaterial(100, 0.3)
 
-  beginShape(); //TRIANGLE_FAN
+  beginShape() //TRIANGLE_FAN
 
-  vertex(1, offSet - 200, 0);
-  vertex(0, offSet - 200, 1);
-  vertex(-1, offSet - 200, 0);
-  vertex(0, offSet - 200, -1);
+  vertex(1, offSet - 200, 0)
+  vertex(0, offSet - 200, 1)
+  vertex(-1, offSet - 200, 0)
+  vertex(0, offSet - 200, -1)
   for (let i = 0; i < ampHistory.length; i++) {
     let amp = floor(
       map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
-    );
+    )
     /*     let al = map(i, 0, ampHistory.length, 1, 1);
     specularMaterial(100,al) */
-    normal(0, offSet + maxArray * dis - i * dis, amp);
-    vertex(0, offSet + maxArray * dis - i * dis, amp);
-    normal(amp, offSet + maxArray * dis - i * dis, 0);
-    vertex(amp, offSet + maxArray * dis - i * dis, 0);
-    normal(0, offSet + maxArray * dis - i * dis, -amp);
-    vertex(0, offSet + maxArray * dis - i * dis, -amp);
-    normal(-amp, offSet + maxArray * dis - i * dis, 0);
-    vertex(-amp, offSet + maxArray * dis - i * dis, 0);
+    normal(0, offSet + maxArray * dis - i * dis, amp)
+    vertex(0, offSet + maxArray * dis - i * dis, amp)
+    normal(amp, offSet + maxArray * dis - i * dis, 0)
+    vertex(amp, offSet + maxArray * dis - i * dis, 0)
+    normal(0, offSet + maxArray * dis - i * dis, -amp)
+    vertex(0, offSet + maxArray * dis - i * dis, -amp)
+    normal(-amp, offSet + maxArray * dis - i * dis, 0)
+    vertex(-amp, offSet + maxArray * dis - i * dis, 0)
   }
   //vertex(0, offSet + maxArray * dis, 0);
-  endShape();
+  endShape()
   if (ampHistory.length > maxArray) {
-    ampHistory.splice(0, 1);
+    ampHistory.splice(0, 1)
   }
 }
 
@@ -374,595 +424,551 @@ let lightShows = [
         random(-10, 10) / 10,
         random(-10, 10) / 10,
         random(-10, 10) / 10
-      );
+      )
     }
     //Lichtsucher
-    lightVec.x = lerp(lightVec.x, lightVecTemp.x, 0.1);
-    lightVec.y = lerp(lightVec.y, lightVecTemp.y, 0.1);
-    lightVec.z = lerp(lightVec.z, lightVecTemp.z, 0.1);
+    lightVec.x = lerp(lightVec.x, lightVecTemp.x, 0.1)
+    lightVec.y = lerp(lightVec.y, lightVecTemp.y, 0.1)
+    lightVec.z = lerp(lightVec.z, lightVecTemp.z, 0.1)
   },
   function lightShow2() {
-    let x = cos(frameCount * 0.1);
-    let y = sin(frameCount * 0.025);
-    let z = sin(frameCount * 0.05);
+    let x = cos(frameCount * 0.1)
+    let y = sin(frameCount * 0.025)
+    let z = sin(frameCount * 0.05)
     if (stopFuncAfter(1000)) {
-      console.log("LichtTransfer");
-      lightVec.x = lerp(lightVec.x, x, 0.2);
-      lightVec.y = lerp(lightVec.y, y, 0.2);
-      lightVec.z = lerp(lightVec.z, z, 0.2);
+      lightVec.x = lerp(lightVec.x, x, 0.2)
+      lightVec.y = lerp(lightVec.y, y, 0.2)
+      lightVec.z = lerp(lightVec.z, z, 0.2)
     } else {
       //LichtKreise
-      lightVec.x = x;
-      lightVec.y = y;
-      lightVec.z = z;
+      lightVec.x = x
+      lightVec.y = y
+      lightVec.z = z
     }
-  },
-];
+  }
+]
 
 function stopFuncAfter(del) {
   // Beim change m = millis
   if (del + mil > millis()) {
-    return true;
-  } else return false;
-}
-
-function sphaere(m, sSize) {
-  noStroke();
-  total = resCheck.checked ? 100 : 50;
-  /*  stroke(255)
-  strokeWeight(0.5) */
-  for (let i = 0; i < total + 1; i++) {
-    shape[i] = [];
-    let phi = map(i, 0, total, 0, PI);
-    for (let j = 0; j < total + 1; j++) {
-      let theta = map(j, 0, total, 0, TWO_PI);
-      let r = 0;
-
-      r += pow(sin(m[0] * phi), m[1]);
-      r += pow(cos(m[2] * phi), m[3]);
-      r += pow(sin(m[4] * theta), m[5]);
-      r += pow(cos(m[6] * theta), m[7]);
-
-      let x = r * sin(phi) * cos(theta);
-      let y = r * cos(phi);
-      let z = r * sin(phi) * sin(theta);
-
-      shape[i][j] = createVector(x, y, z).mult(60 * sSize);
-    }
-  }
-  specularMaterial(90, 0.96);
-
-  for (let i = 0; i < total; i++) {
-    let v1, v2;
-    beginShape(TRIANGLE_STRIP);
-    for (let j = 0; j < total + 1; j++) {
-      v1 = shape[i][j % total];
-      let v3 = v1;
-      normal(v3);
-      vertex(v1.x, v1.y, v1.z);
-      v2 = shape[i + 1][j % total];
-      let v4 = v2;
-      //normal(v4);
-      vertex(v2.x, v2.y, v2.z);
-    }
-    endShape();
-  }
+    return true
+  } else return false
 }
 
 let lichtMode = [
   function lichter() {
-    let angle = frameCount * 0.001;
-    let angle2 = frameCount * 0.01;
-    let radius = map(sin(angle2), -1, 1, 200, 500);
-    let dirX = radius * cos(angle + PI);
-    let dirY = radius * sin(angle + PI);
-    let xLight = radius * cos(angle);
-    let yLight = radius * sin(angle);
-    let x2Light = radius * cos(angle2);
-    let y2Light = radius * sin(angle2);
-    col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-    let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255);
-    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
-    let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255);
-    col5 = map(sin(angle + radians(240)), -1, 1, 0, 255);
+    let angle = frameCount * 0.001
+    let angle2 = frameCount * 0.01
+    let radius = map(sin(angle2), -1, 1, 200, 500)
+    let dirX = radius * cos(angle + PI)
+    let dirY = radius * sin(angle + PI)
+    let xLight = radius * cos(angle)
+    let yLight = radius * sin(angle)
+    let x2Light = radius * cos(angle2)
+    let y2Light = radius * sin(angle2)
+    col = map(sin(angle + radians(0)), -1, 1, 0, 255)
+    let col2 = map(sin(angle + radians(180)), -1, 1, 0, 255)
+    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255)
+    let col4 = map(sin(angle + radians(210)), -1, 1, 0, 255)
+    col5 = map(sin(angle + radians(240)), -1, 1, 0, 255)
 
-    shininess(25);
+    shininess(25)
     if (scheinW) {
-      directionalLight(col, 255, 100, -1, 1, 0);
-      directionalLight(col2, 255, 100, 1, 1, 0);
-      directionalLight(col3, 255, 100, -1, -1, 0);
-      directionalLight(col4, 255, 100, 1, -1, 0);
+      directionalLight(col, 255, 100, -1, 1, 0)
+      directionalLight(col2, 255, 100, 1, 1, 0)
+      directionalLight(col3, 255, 100, -1, -1, 0)
+      directionalLight(col4, 255, 100, 1, -1, 0)
     }
     /*   directionalLight(col, 255, 100, -lightVec.y, lightVec.x, lightVec.z);
   directionalLight(col2, 255, 100, lightVec.z, -lightVec.y, -lightVec.x);
   directionalLight(col3, 255, 100, lightVec.z, lightVec.x, -lightVec.y);
   directionalLight(col4, 255, 100, -lightVec.x, lightVec.y, lightVec.z); */
-    pointLight(col, 255, 255, dirX, dirY, x2Light);
-    pointLight(col2, 255, 255, xLight, yLight, y2Light);
-    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
-    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
-    let alphaV = 0.96;
-    specularMaterial(90, alphaV);
+    pointLight(col, 255, 255, dirX, dirY, x2Light)
+    pointLight(col2, 255, 255, xLight, yLight, y2Light)
+    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
+    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY)
+    let alphaV = 0.96
+    specularMaterial(90, alphaV)
     if (lightCheck.checked) {
       //ambientLight(0);
-      let center = createVector(0, 0, 0);
+      let center = createVector(0, 0, 0)
 
-      push();
-      translate(dirX, dirY, x2Light);
-      stroke(col, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col, 255, 255, alphaV);
-      line(center.x, center.y, center.z, dirX, dirY, x2Light);
-      push();
-      translate(xLight, yLight, y2Light);
-      stroke(col2, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col2, 255, 255, alphaV);
-      line(center.x, center.y, center.z, xLight, yLight, y2Light);
-      push();
-      translate(-xLight, -x2Light, -yLight);
-      stroke(col3, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col3, 255, 255, alphaV);
-      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
-      push();
-      translate(-dirX, -y2Light, -dirY);
-      stroke(col4, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col4, 255, 255, alphaV);
-      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
+      push()
+      translate(dirX, dirY, x2Light)
+      stroke(col, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col, 255, 255, alphaV)
+      line(center.x, center.y, center.z, dirX, dirY, x2Light)
+      push()
+      translate(xLight, yLight, y2Light)
+      stroke(col2, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col2, 255, 255, alphaV)
+      line(center.x, center.y, center.z, xLight, yLight, y2Light)
+      push()
+      translate(-xLight, -x2Light, -yLight)
+      stroke(col3, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col3, 255, 255, alphaV)
+      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight)
+      push()
+      translate(-dirX, -y2Light, -dirY)
+      stroke(col4, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col4, 255, 255, alphaV)
+      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY)
     }
   },
   function lichter2() {
-    let angle = frameCount * 0.001;
-    let angle2 = frameCount * 0.01;
-    let radius = map(sin(angle2), -1, 1, 200, 500);
-    let dirX = radius * cos(angle + PI);
-    let dirY = radius * sin(angle + PI);
-    let xLight = radius * cos(angle);
-    let yLight = radius * sin(angle);
-    let x2Light = radius * cos(angle2);
-    let y2Light = radius * sin(angle2);
-    col = map(sin(angle + radians(0)), -1, 1, 0, 255);
-    let col2 = map(sin(angle + radians(15)), -1, 1, 0, 255);
-    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255);
-    let col4 = map(sin(angle + radians(45)), -1, 1, 0, 255);
-    col5 = map(sin(angle + radians(180)), -1, 1, 0, 255);
+    let angle = frameCount * 0.001
+    let angle2 = frameCount * 0.01
+    let radius = map(sin(angle2), -1, 1, 200, 500)
+    let dirX = radius * cos(angle + PI)
+    let dirY = radius * sin(angle + PI)
+    let xLight = radius * cos(angle)
+    let yLight = radius * sin(angle)
+    let x2Light = radius * cos(angle2)
+    let y2Light = radius * sin(angle2)
+    col = map(sin(angle + radians(0)), -1, 1, 0, 255)
+    let col2 = map(sin(angle + radians(15)), -1, 1, 0, 255)
+    let col3 = map(sin(angle + radians(30)), -1, 1, 0, 255)
+    let col4 = map(sin(angle + radians(45)), -1, 1, 0, 255)
+    col5 = map(sin(angle + radians(240)), -1, 1, 0, 255)
 
-    shininess(25);
+    shininess(25)
     /*   directionalLight(255, 0, 0, -1, 1, 0);
   directionalLight(255, 0, 0, 1, 1, 0);
   directionalLight(255, 0, 0, -1, -1, 0);
   directionalLight(255, 0, 255, 1, -1, 0); */
     if (scheinW) {
-      directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z);
-      directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x);
-      directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y);
-      directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z);
+      directionalLight(col4, 32, 100, -lightVec.y, lightVec.x, lightVec.z)
+      directionalLight(col4, 64, 100, lightVec.z, -lightVec.y, -lightVec.x)
+      directionalLight(col4, 96, 100, lightVec.z, lightVec.x, -lightVec.y)
+      directionalLight(col4, 128, 100, -lightVec.x, lightVec.y, lightVec.z)
     }
-    pointLight(col, 255, 255, dirX, dirY, x2Light);
-    pointLight(col2, 255, 255, xLight, yLight, y2Light);
-    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight);
-    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY);
-    let alphaV = 0.96;
+    pointLight(col, 255, 255, dirX, dirY, x2Light)
+    pointLight(col2, 255, 255, xLight, yLight, y2Light)
+    pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
+    pointLight(col4, 255, 255, -dirX, -y2Light, -dirY)
+    let alphaV = 0.96
 
     if (lightCheck.checked) {
       //ambientLight(0);
-      let center = createVector(0, 0, 0);
+      let center = createVector(0, 0, 0)
 
-      push();
-      translate(dirX, dirY, x2Light);
-      stroke(col, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col, 255, 255, alphaV);
-      line(center.x, center.y, center.z, dirX, dirY, x2Light);
-      push();
-      translate(xLight, yLight, y2Light);
-      stroke(col2, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col2, 255, 255, alphaV);
-      line(center.x, center.y, center.z, xLight, yLight, y2Light);
-      push();
-      translate(-xLight, -x2Light, -yLight);
-      stroke(col3, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col3, 255, 255, alphaV);
-      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight);
-      push();
-      translate(-dirX, -y2Light, -dirY);
-      stroke(col4, 255, 255, alphaV);
-      strokeWeight(5);
-      point(0, 0, 0);
-      pop();
-      stroke(col4, 255, 255, alphaV);
-      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY);
+      push()
+      translate(dirX, dirY, x2Light)
+      stroke(col, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col, 255, 255, alphaV)
+      line(center.x, center.y, center.z, dirX, dirY, x2Light)
+      push()
+      translate(xLight, yLight, y2Light)
+      stroke(col2, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col2, 255, 255, alphaV)
+      line(center.x, center.y, center.z, xLight, yLight, y2Light)
+      push()
+      translate(-xLight, -x2Light, -yLight)
+      stroke(col3, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col3, 255, 255, alphaV)
+      line(center.x, center.y, center.z, -xLight, -x2Light, -yLight)
+      push()
+      translate(-dirX, -y2Light, -dirY)
+      stroke(col4, 255, 255, alphaV)
+      strokeWeight(5)
+      point(0, 0, 0)
+      pop()
+      stroke(col4, 255, 255, alphaV)
+      line(center.x, center.y, center.z, -dirX, -y2Light, -dirY)
     }
-  },
-];
+  }
+]
 function htmlHandler() {
-  document.getElementById("m0").innerHTML = "m0=" + m0;
-  document.getElementById("m1").innerHTML = "m1=" + m1;
-  document.getElementById("m2").innerHTML = "m2=" + m2;
-  document.getElementById("m3").innerHTML = "m3=" + m3;
-  document.getElementById("m4").innerHTML = "m4=" + m4;
-  document.getElementById("m5").innerHTML = "m5=" + m5;
-  document.getElementById("m6").innerHTML = "m6=" + m6;
-  document.getElementById("m7").innerHTML = "m7=" + m7;
-  document.getElementById("sM0").innerHTML = "m0S=" + strenghtValuem0;
-  document.getElementById("sM2").innerHTML = "m2S=" + strenghtValuem2;
-  document.getElementById("sM4").innerHTML = "m4S=" + strenghtValuem4;
-  document.getElementById("sM6").innerHTML = "m6S=" + strenghtValuem6;
-  document.getElementById("speed").innerHTML = morphSlider.value / 1000;
-  document.getElementById("travelSpeed").innerHTML =
-    "Warp" + floor(spaceSlider.value / 1000);
-  document.getElementById("smth").innerHTML = smoothValue;
-  document.getElementById("x").innerHTML = "X=" + rotateSliderX.value / 1000;
-  document.getElementById("y").innerHTML = "Y=" + rotateSliderY.value / 1000;
-  document.getElementById("z").innerHTML = "Z=" + rotateSliderZ.value / 1000;
+  document.getElementById('m0').innerHTML = 'm0=' + m0
+  document.getElementById('m1').innerHTML = 'm1=' + m1
+  document.getElementById('m2').innerHTML = 'm2=' + m2
+  document.getElementById('m3').innerHTML = 'm3=' + m3
+  document.getElementById('m4').innerHTML = 'm4=' + m4
+  document.getElementById('m5').innerHTML = 'm5=' + m5
+  document.getElementById('m6').innerHTML = 'm6=' + m6
+  document.getElementById('m7').innerHTML = 'm7=' + m7
+  document.getElementById('sM0').innerHTML = 'm0S=' + strenghtValuem0
+  document.getElementById('sM2').innerHTML = 'm2S=' + strenghtValuem2
+  document.getElementById('sM4').innerHTML = 'm4S=' + strenghtValuem4
+  document.getElementById('sM6').innerHTML = 'm6S=' + strenghtValuem6
+  document.getElementById('speed').innerHTML = morphSlider.value / 1000
+  document.getElementById('travelSpeed').innerHTML =
+    'Warp' + floor(spaceSlider.value / 1000)
+  document.getElementById('smth').innerHTML = smoothValue
+  document.getElementById('x').innerHTML = 'X=' + rotateSliderX.value / 1000
+  document.getElementById('y').innerHTML = 'Y=' + rotateSliderY.value / 1000
+  document.getElementById('z').innerHTML = 'Z=' + rotateSliderZ.value / 1000
 }
 
 function getAudioFile(file) {
-  console.log(file);
-  mic.stop();
-  audio.stop();
-  audio = createAudio(file.data);
-  audio.play();
-  fft.setInput(audio);
+  console.log(file)
+  mic.stop()
+  audio.stop()
+  audio = createAudio(file.data)
+  audio.play()
+  fft.setInput(audio)
   //amplitude = new p5.Amplitude();
-  amplitude.setInput(audio);
-  audioSourceBtn.innerHTML = "AudioFile";
+  amplitude.setInput(audio)
+  audioSourceBtn.innerHTML = 'AudioFile'
 }
 
 function htmlEvents() {
-  m0Slider = document.getElementById("m0Slider"); //createSlider(-21, 21, 0, 0.01);
-  m1Slider = document.getElementById("m1Slider"); //createSlider(0, 9, 1);
-  m2Slider = document.getElementById("m2Slider"); //createSlider(-21, 21, 0, 0.01);
-  m3Slider = document.getElementById("m3Slider"); //createSlider(0, 9, 2);
-  m4Slider = document.getElementById("m4Slider"); //createSlider(-21, 21, 0, 0.01);
-  m5Slider = document.getElementById("m5Slider"); //createSlider(0, 9, 1);
-  m6Slider = document.getElementById("m6Slider"); //createSlider(-21, 21, 0, 0.01);
-  m7Slider = document.getElementById("m7Slider"); //createSlider(0, 9, 1);
-  smoothSlider = document.getElementById("smoothSlider"); //createSlider(0.5, 1, 0.78, 0.001);
-  morphSlider = document.getElementById("morphSlider");
-  spaceSlider = document.getElementById("spaceSlider"); //createSlider(0.0001, 0.003, 0.0002, 0.00001);
-  rotateSliderX = document.getElementById("rotateSliderX");
-  rotateSliderY = document.getElementById("rotateSliderY");
-  rotateSliderZ = document.getElementById("rotateSliderZ");
-  strenghtSliderm0 = document.getElementById("strenghtSliderm0"); //createSlider(-21, 21, 9, 0.01);
-  strenghtSliderm2 = document.getElementById("strenghtSliderm2"); //createSlider(-21, 21, 9, 0.01);
-  strenghtSliderm4 = document.getElementById("strenghtSliderm4"); //createSlider(-21, 21, 9, 0.01);
-  strenghtSliderm6 = document.getElementById("strenghtSliderm6"); //createSlider(-21, 21, 9, 0.01);
-  peakCheck = document.getElementById("peakCheck");
-  rotateCheck = document.getElementById("rotateCheck");
-  audioSourceBtn = document.getElementById("audioSource");
-  saveBtn = document.getElementById("saveBtn");
-  loadBtn = document.getElementById("loadBtn");
-  resetBtn = document.getElementById("resetBtn");
-  lightCheck = document.getElementById("lightCheck");
-  resCheck = document.getElementById("resCheck");
-  spaceCheck = document.getElementById("spaceCheck");
-  morphBtn = document.getElementById("morphCheck");
-  serverAdress = document.getElementById("server");
-  dropZone = select("#dropZone");
+  m0Slider = document.getElementById('m0Slider') //createSlider(-21, 21, 0, 0.01);
+  m1Slider = document.getElementById('m1Slider') //createSlider(0, 9, 1);
+  m2Slider = document.getElementById('m2Slider') //createSlider(-21, 21, 0, 0.01);
+  m3Slider = document.getElementById('m3Slider') //createSlider(0, 9, 2);
+  m4Slider = document.getElementById('m4Slider') //createSlider(-21, 21, 0, 0.01);
+  m5Slider = document.getElementById('m5Slider') //createSlider(0, 9, 1);
+  m6Slider = document.getElementById('m6Slider') //createSlider(-21, 21, 0, 0.01);
+  m7Slider = document.getElementById('m7Slider') //createSlider(0, 9, 1);
+  smoothSlider = document.getElementById('smoothSlider') //createSlider(0.5, 1, 0.78, 0.001);
+  morphSlider = document.getElementById('morphSlider')
+  spaceSlider = document.getElementById('spaceSlider') //createSlider(0.0001, 0.003, 0.0002, 0.00001);
+  rotateSliderX = document.getElementById('rotateSliderX')
+  rotateSliderY = document.getElementById('rotateSliderY')
+  rotateSliderZ = document.getElementById('rotateSliderZ')
+  strenghtSliderm0 = document.getElementById('strenghtSliderm0') //createSlider(-21, 21, 9, 0.01);
+  strenghtSliderm2 = document.getElementById('strenghtSliderm2') //createSlider(-21, 21, 9, 0.01);
+  strenghtSliderm4 = document.getElementById('strenghtSliderm4') //createSlider(-21, 21, 9, 0.01);
+  strenghtSliderm6 = document.getElementById('strenghtSliderm6') //createSlider(-21, 21, 9, 0.01);
+  peakCheck = document.getElementById('peakCheck')
+  rotateCheck = document.getElementById('rotateCheck')
+  audioSourceBtn = document.getElementById('audioSource')
+  saveBtn = document.getElementById('saveBtn')
+  loadBtn = document.getElementById('loadBtn')
+  resetBtn = document.getElementById('resetBtn')
+  lightCheck = document.getElementById('lightCheck')
+  resCheck = document.getElementById('resCheck')
+  spaceCheck = document.getElementById('spaceCheck')
+  morphBtn = document.getElementById('morphCheck')
+  serverAdress = document.getElementById('server')
+  dropZone = select('#dropZone')
   dropZone.drop(getAudioFile, () => {
-    console.log("waiting for file...");
-  });
-  serverAdress.addEventListener("keydown", (x) => {
+    console.log('waiting for file...')
+  })
+  serverAdress.addEventListener('keydown', x => {
     /*   if (!x) { var x = window.event; }
     x.preventDefault();  */
     if (x.keyCode === 13) {
-      audioSourceBtn.innerHTML = "CustomServer";
-      mic.stop();
-      audio.stop();
-      audio = createAudio(serverAdress.value); //("https://ice6.somafm.com/vaporwaves-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
-      audio.play();
-      fft.setInput(audio);
+      audioSourceBtn.innerHTML = 'CustomServer'
+      mic.stop()
+      audio.stop()
+      audio = createAudio(serverAdress.value) //("https://ice6.somafm.com/vaporwaves-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
+      audio.play()
+      fft.setInput(audio)
       //amplitude = new p5.Amplitude();
-      amplitude.setInput(audio);
+      amplitude.setInput(audio)
     }
-  });
-  audioSourceBtn.addEventListener("click", () => {
-    switchSource();
-  });
-  saveBtn.addEventListener("click", () => {
-    setPreset();
-  });
-  loadBtn.addEventListener("click", () => {
-    getPreset();
-  });
-  resetBtn.addEventListener("click", () => {
-    m0Slider.value = 0;
-    m1Slider.value = 1;
-    m2Slider.value = 0;
-    m3Slider.value = 1;
-    m4Slider.value = 0;
-    m5Slider.value = 1;
-    m6Slider.value = 0;
-    m7Slider.value = 1;
-    strenghtSliderm0.value = 0;
-    strenghtSliderm2.value = 0;
-    strenghtSliderm4.value = 0;
-    strenghtSliderm6.value = 0;
-    rotateSliderX.value = 0;
-    rotateSliderY.value = 0;
-    rotateSliderZ.value = 0;
-    spaceSlider.value = 0;
-    morphCheck.checked = false;
-    rotateCheck.checked = false;
-    lightCheck.checked = false;
-    peakCheck.checked = false;
-    resCheck.checked = false;
-    spaceCheck.checked = false;
-  });
-  document.getElementById("m0").addEventListener("click", () => {
-    m0Slider.value = 0;
-  });
-  document.getElementById("m1").addEventListener("click", () => {
-    m1Slider.value = 0;
-  });
-  document.getElementById("m2").addEventListener("click", () => {
-    m2Slider.value = 0;
-  });
-  document.getElementById("m3").addEventListener("click", () => {
-    m3Slider.value = 0;
-  });
-  document.getElementById("m4").addEventListener("click", () => {
-    m4Slider.value = 0;
-  });
-  document.getElementById("m5").addEventListener("click", () => {
-    m5Slider.value = 0;
-  });
-  document.getElementById("m6").addEventListener("click", () => {
-    m6Slider.value = 0;
-  });
-  document.getElementById("m7").addEventListener("click", () => {
-    m7Slider.value = 0;
-  });
-  document.getElementById("sM0").addEventListener("click", () => {
-    strenghtSliderm0.value = 0;
-  });
-  document.getElementById("sM2").addEventListener("click", () => {
-    strenghtSliderm2.value = 0;
-  });
-  document.getElementById("sM4").addEventListener("click", () => {
-    strenghtSliderm4.value = 0;
-  });
-  document.getElementById("sM6").addEventListener("click", () => {
-    strenghtSliderm6.value = 0;
-  });
-  document.getElementById("x").addEventListener("click", () => {
-    rotateSliderX.value = 0;
-  });
-  document.getElementById("y").addEventListener("click", () => {
-    rotateSliderY.value = 0;
-  });
-  document.getElementById("z").addEventListener("click", () => {
-    rotateSliderZ.value = 0;
-  });
-  document.getElementById("travelSpeed").addEventListener("click", () => {
-    spaceSlider.value = 0;
-  });
+  })
+  audioSourceBtn.addEventListener('click', () => {
+    switchSource()
+  })
+  saveBtn.addEventListener('click', () => {
+    setPreset()
+  })
+  loadBtn.addEventListener('click', () => {
+    getPreset()
+  })
+  resetBtn.addEventListener('click', () => {
+    m0Slider.value = 0
+    m1Slider.value = 1
+    m2Slider.value = 0
+    m3Slider.value = 1
+    m4Slider.value = 0
+    m5Slider.value = 1
+    m6Slider.value = 0
+    m7Slider.value = 1
+    strenghtSliderm0.value = 0
+    strenghtSliderm2.value = 0
+    strenghtSliderm4.value = 0
+    strenghtSliderm6.value = 0
+    rotateSliderX.value = 0
+    rotateSliderY.value = 0
+    rotateSliderZ.value = 0
+    spaceSlider.value = 0
+    morphCheck.checked = false
+    rotateCheck.checked = false
+    lightCheck.checked = false
+    peakCheck.checked = false
+    resCheck.checked = false
+    spaceCheck.checked = false
+  })
+  document.getElementById('m0').addEventListener('click', () => {
+    m0Slider.value = 0
+  })
+  document.getElementById('m1').addEventListener('click', () => {
+    m1Slider.value = 0
+  })
+  document.getElementById('m2').addEventListener('click', () => {
+    m2Slider.value = 0
+  })
+  document.getElementById('m3').addEventListener('click', () => {
+    m3Slider.value = 0
+  })
+  document.getElementById('m4').addEventListener('click', () => {
+    m4Slider.value = 0
+  })
+  document.getElementById('m5').addEventListener('click', () => {
+    m5Slider.value = 0
+  })
+  document.getElementById('m6').addEventListener('click', () => {
+    m6Slider.value = 0
+  })
+  document.getElementById('m7').addEventListener('click', () => {
+    m7Slider.value = 0
+  })
+  document.getElementById('sM0').addEventListener('click', () => {
+    strenghtSliderm0.value = 0
+  })
+  document.getElementById('sM2').addEventListener('click', () => {
+    strenghtSliderm2.value = 0
+  })
+  document.getElementById('sM4').addEventListener('click', () => {
+    strenghtSliderm4.value = 0
+  })
+  document.getElementById('sM6').addEventListener('click', () => {
+    strenghtSliderm6.value = 0
+  })
+  document.getElementById('x').addEventListener('click', () => {
+    rotateSliderX.value = 0
+  })
+  document.getElementById('y').addEventListener('click', () => {
+    rotateSliderY.value = 0
+  })
+  document.getElementById('z').addEventListener('click', () => {
+    rotateSliderZ.value = 0
+  })
+  document.getElementById('travelSpeed').addEventListener('click', () => {
+    spaceSlider.value = 0
+  })
 }
 
 function sliderLogic() {
   morphSpeed = !morphCheck.checked
     ? morphSpeed
-    : (morphSpeed += morphSlider.value / 100000);
+    : (morphSpeed += morphSlider.value / 100000)
   m0 = !morphCheck.checked
     ? m0Slider.value / 100
-    : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000;
-  m1 = m1Slider.value;
+    : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000
+  m1 = m1Slider.value
   m2 = !morphCheck.checked
     ? m2Slider.value / 100
     : floor(
-        map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
-      ) / 1000;
-  m3 = m3Slider.value;
+      map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
+    ) / 1000
+  m3 = m3Slider.value
   m4 = !morphCheck.checked
     ? m4Slider.value / 100
     : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
-      1000;
-  m5 = m5Slider.value;
+    1000
+  m5 = m5Slider.value
   m6 = !morphCheck.checked
     ? m6Slider.value / 100
     : floor(
-        map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
-          1000
-      ) / 1000;
-  m7 = m7Slider.value;
-  smoothValue = smoothSlider.value / 100;
-  strenghtValuem0 = strenghtSliderm0.value / 100;
-  strenghtValuem2 = strenghtSliderm2.value / 100;
-  strenghtValuem4 = strenghtSliderm4.value / 100;
-  strenghtValuem6 = strenghtSliderm6.value / 100;
+      map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
+      1000
+    ) / 1000
+  m7 = m7Slider.value
+  smoothValue = smoothSlider.value / 100
+  strenghtValuem0 = strenghtSliderm0.value / 100
+  strenghtValuem2 = strenghtSliderm2.value / 100
+  strenghtValuem4 = strenghtSliderm4.value / 100
+  strenghtValuem6 = strenghtSliderm6.value / 100
 }
 function switchSource() {
   if (sourceIsStream) {
-    audioSourceBtn.innerHTML = "Mic/External";
-    audio.stop();
-    mic = new p5.AudioIn();
-    mic.start();
-    fft.setInput(mic);
+    audioSourceBtn.innerHTML = 'Mic/External'
+    audio.stop()
+    mic = new p5.AudioIn()
+    mic.start()
+    fft.setInput(mic)
     //amplitude = new p5.Amplitude();
-    amplitude.setInput(mic);
-    sourceIsStream = !sourceIsStream;
+    amplitude.setInput(mic)
+    sourceIsStream = !sourceIsStream
   } else {
-    audioSourceBtn.innerHTML = "A2Random";
-    mic.stop();
-    audio.stop();
-    audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");
-    audio.play();
-    fft.setInput(audio);
+    audioSourceBtn.innerHTML = 'A2Random'
+    mic.stop()
+    audio.stop()
+    audio = createAudio('http://a2r.twenty4seven.cc:8000/puredata.ogg')
+    audio.play()
+    fft.setInput(audio)
     //amplitude = new p5.Amplitude();
-    amplitude.setInput(audio);
-    sourceIsStream = !sourceIsStream;
+    amplitude.setInput(audio)
+    sourceIsStream = !sourceIsStream
   }
 }
 
 function setPreset() {
   //localStorage.clear();
-  localStorage.setItem("m0", m0Slider.value);
-  localStorage.setItem("m1", m1Slider.value);
-  localStorage.setItem("m2", m2Slider.value);
-  localStorage.setItem("m3", m3Slider.value);
-  localStorage.setItem("m4", m4Slider.value);
-  localStorage.setItem("m5", m5Slider.value);
-  localStorage.setItem("m6", m6Slider.value);
-  localStorage.setItem("m7", m7Slider.value);
-  localStorage.setItem("smooth", smoothSlider.value);
-  localStorage.setItem("morphCheck", morphCheck.checked);
-  localStorage.setItem("morph", morphSlider.value);
-  localStorage.setItem("spaceCheck", spaceCheck.checked);
-  localStorage.setItem("travelSpeed", spaceSlider.value);
-  localStorage.setItem("rotateCheck", rotateCheck.checked);
-  localStorage.setItem("resCheck", resCheck.checked);
-  localStorage.setItem("lightCheck", lightCheck.checked);
-  localStorage.setItem("peakCheck", peakCheck.checked);
-  localStorage.setItem("rotateX", rotateSliderX.value);
-  localStorage.setItem("rotateY", rotateSliderY.value);
-  localStorage.setItem("rotateZ", rotateSliderZ.value);
-  localStorage.setItem("sM0", strenghtSliderm0.value);
-  localStorage.setItem("sM2", strenghtSliderm2.value);
-  localStorage.setItem("sM4", strenghtSliderm4.value);
-  localStorage.setItem("sM6", strenghtSliderm6.value);
-  console.log("Gespeichert" + "\n" + localStorage.length);
+  localStorage.setItem('m0', m0Slider.value)
+  localStorage.setItem('m1', m1Slider.value)
+  localStorage.setItem('m2', m2Slider.value)
+  localStorage.setItem('m3', m3Slider.value)
+  localStorage.setItem('m4', m4Slider.value)
+  localStorage.setItem('m5', m5Slider.value)
+  localStorage.setItem('m6', m6Slider.value)
+  localStorage.setItem('m7', m7Slider.value)
+  localStorage.setItem('smooth', smoothSlider.value)
+  localStorage.setItem('morphCheck', morphCheck.checked)
+  localStorage.setItem('morph', morphSlider.value)
+  localStorage.setItem('spaceCheck', spaceCheck.checked)
+  localStorage.setItem('travelSpeed', spaceSlider.value)
+  localStorage.setItem('rotateCheck', rotateCheck.checked)
+  localStorage.setItem('resCheck', resCheck.checked)
+  localStorage.setItem('lightCheck', lightCheck.checked)
+  localStorage.setItem('peakCheck', peakCheck.checked)
+  localStorage.setItem('rotateX', rotateSliderX.value)
+  localStorage.setItem('rotateY', rotateSliderY.value)
+  localStorage.setItem('rotateZ', rotateSliderZ.value)
+  localStorage.setItem('sM0', strenghtSliderm0.value)
+  localStorage.setItem('sM2', strenghtSliderm2.value)
+  localStorage.setItem('sM4', strenghtSliderm4.value)
+  localStorage.setItem('sM6', strenghtSliderm6.value)
+  console.log('Gespeichert' + '\n' + localStorage.length)
 }
 
 function getPreset() {
-  m0Slider.value = localStorage.getItem("m0");
-  m1Slider.value = localStorage.getItem("m1");
-  m2Slider.value = localStorage.getItem("m2");
-  m3Slider.value = localStorage.getItem("m3");
-  m4Slider.value = localStorage.getItem("m4");
-  m5Slider.value = localStorage.getItem("m5");
-  m6Slider.value = localStorage.getItem("m6");
-  m7Slider.value = localStorage.getItem("m7");
-  smoothSlider.value = localStorage.getItem("smooth");
-  morphSlider.value = localStorage.getItem("morph");
-  spaceSlider.value = localStorage.getItem("travelSpeed");
+  m0Slider.value = localStorage.getItem('m0')
+  m1Slider.value = localStorage.getItem('m1')
+  m2Slider.value = localStorage.getItem('m2')
+  m3Slider.value = localStorage.getItem('m3')
+  m4Slider.value = localStorage.getItem('m4')
+  m5Slider.value = localStorage.getItem('m5')
+  m6Slider.value = localStorage.getItem('m6')
+  m7Slider.value = localStorage.getItem('m7')
+  smoothSlider.value = localStorage.getItem('smooth')
+  morphSlider.value = localStorage.getItem('morph')
+  spaceSlider.value = localStorage.getItem('travelSpeed')
   morphCheck.checked =
-    localStorage.getItem("morphCheck") == "true" ? true : false;
-  rotateSliderX.value = localStorage.getItem("rotateX");
-  rotateSliderY.value = localStorage.getItem("rotateY");
-  rotateSliderZ.value = localStorage.getItem("rotateZ");
+    localStorage.getItem('morphCheck') == 'true' ? true : false
+  rotateSliderX.value = localStorage.getItem('rotateX')
+  rotateSliderY.value = localStorage.getItem('rotateY')
+  rotateSliderZ.value = localStorage.getItem('rotateZ')
   rotateCheck.checked =
-    localStorage.getItem("rotateCheck") == "true" ? true : false;
+    localStorage.getItem('rotateCheck') == 'true' ? true : false
   lightCheck.checked =
-    localStorage.getItem("lightCheck") == "true" ? true : false;
-  peakCheck.checked =
-    localStorage.getItem("peakCheck") == "true" ? true : false;
+    localStorage.getItem('lightCheck') == 'true' ? true : false
+  peakCheck.checked = localStorage.getItem('peakCheck') == 'true' ? true : false
   spaceCheck.checked =
-    localStorage.getItem("spaceCheck") == "true" ? true : false;
-  resCheck.checked = localStorage.getItem("resCheck") == "true" ? true : false;
-  strenghtSliderm0.value = localStorage.getItem("sM0");
-  strenghtSliderm2.value = localStorage.getItem("sM2");
-  strenghtSliderm4.value = localStorage.getItem("sM4");
-  strenghtSliderm6.value = localStorage.getItem("sM6");
-  console.log("Geladen" + "\n" + localStorage.length);
+    localStorage.getItem('spaceCheck') == 'true' ? true : false
+  resCheck.checked = localStorage.getItem('resCheck') == 'true' ? true : false
+  strenghtSliderm0.value = localStorage.getItem('sM0')
+  strenghtSliderm2.value = localStorage.getItem('sM2')
+  strenghtSliderm4.value = localStorage.getItem('sM4')
+  strenghtSliderm6.value = localStorage.getItem('sM6')
+  console.log('Geladen' + '\n' + localStorage.length)
 }
 
 function logValues() {
   console.log(
-    " m0: " + m0 + " strength: " + strenghtValuem0,
-    "\n",
-    "m1: " + m1,
-    "\n",
-    "m2: " + m2 + " strength: " + strenghtValuem2,
-    "\n",
-    "m3: " + m3,
-    "\n",
-    "m4: " + m4 + " strength: " + strenghtValuem4,
-    "\n",
-    "m5: " + m5,
-    "\n",
-    "m6: " + m6 + " strength: " + strenghtValuem6,
-    "\n",
-    "m7: " + m7,
-    "\n"
-  );
+    ' m0: ' + m0 + ' strength: ' + strenghtValuem0,
+    '\n',
+    'm1: ' + m1,
+    '\n',
+    'm2: ' + m2 + ' strength: ' + strenghtValuem2,
+    '\n',
+    'm3: ' + m3,
+    '\n',
+    'm4: ' + m4 + ' strength: ' + strenghtValuem4,
+    '\n',
+    'm5: ' + m5,
+    '\n',
+    'm6: ' + m6 + ' strength: ' + strenghtValuem6,
+    '\n',
+    'm7: ' + m7,
+    '\n'
+  )
 }
 
 function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
   console.log(
-    " band1: " + mov0,
-    +" " + band1 + "\n",
-    "band2: " + mov2,
-    +" " + band2 + "\n",
-    "band3: " + mov4,
-    +" " + band3 + "\n",
-    "band4: " + mov6,
-    +" " + band4
-  );
+    ' band1: ' + mov0,
+    +' ' + band1 + '\n',
+    'band2: ' + mov2,
+    +' ' + band2 + '\n',
+    'band3: ' + mov4,
+    +' ' + band3 + '\n',
+    'band4: ' + mov6,
+    +' ' + band4
+  )
 }
 
 let sketch = function (p) {
   p.setup = function () {
-    var canvasp = p.createCanvas(312, 117);
-    canvasp.parent("canvasid");
-  };
+    var canvasp = p.createCanvas(312, 117)
+    canvasp.parent('canvasid')
+  }
   p.draw = function () {
     if (sidebar) {
-      let spectrum = fft.analyze();
-      p.background("#262126");
-      p.noFill();
-      p.strokeWeight(1);
-      p.beginShape();
+      let spectrum = fft.analyze()
+      p.background('#262126')
+      p.noFill()
+      p.strokeWeight(1)
+      p.beginShape()
       for (i = 0; i < spectrum.length / 1.1; i++) {
         //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
-        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7));
+        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
       }
-      p.endShape();
-      let waveform = fft.waveform();
-      p.strokeWeight(1.2);
-      p.stroke(255);
-      p.noFill();
-      p.beginShape();
+      p.endShape()
+      let waveform = fft.waveform()
+      p.strokeWeight(1.2)
+      p.stroke(255)
+      p.noFill()
+      p.beginShape()
 
       for (let i = 0; i < waveform.length; i++) {
-        let x = map(i, 0, waveform.length, 0, p.width);
-        let y = map(waveform[i], -1, 1, 0, p.height / 2);
-        p.vertex(x, y);
+        let x = map(i, 0, waveform.length, 0, p.width)
+        let y = map(waveform[i], -1, 1, 0, p.height / 2)
+        p.vertex(x, y)
       }
-      p.endShape();
+      p.endShape()
     }
-  };
-};
-let node = document.createElement("div");
-new p5(sketch, node);
+  }
+}
+let node = document.createElement('div')
+new p5(sketch, node)
 //window.document.getElementsByTagName('body')[0].appendChild(node);
 
 // Audio an in manchen Browsern Handy etc
 function touchStarted() {
-  getAudioContext().resume();
+  getAudioContext().resume()
 }
 
-//Hilfe, Liebe Hoffnung, Dankbar, Dankbarkeit
+//Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit
 
 class Stars {
   constructor(amount) {
-    this.amount = amount;
-    this.particles = [];
-    this.lerpSpace = createVector(0, 0, 0);
-    this.alSterne = 0;
-    this.pumper = 0;
+    this.amount = amount
+    this.particles = []
+    this.lerpSpace = createVector(0, 0, 0)
+    this.alSterne = 0
+    this.pumper = 0
+    this.peakCounter = 0
   }
   setStars() {
-    this.particles.splice(0, this.particles.length);
-    let space = (width + height) / 2;
+    this.particles.splice(0, this.particles.length)
+    let space = (width + height) / 2
     for (let i = 0; i < this.amount; i++) {
       this.particles.push(
         createVector(
@@ -970,153 +976,140 @@ class Stars {
           random(-space * 2, space * 2),
           random(-space * 2, space * 2)
         )
-      );
+      )
     }
   }
   setStarsPlanet() {
-    this.particles.splice(0, this.particles.length);
-    let space = planet.size / 4;
+    this.particles.splice(0, this.particles.length)
+    let space = planet.size / 4
     for (let i = 0; i < this.amount; i++) {
       this.particles.push(
-        createVector(
-          random(-space, space),
-          random(-space, space),
-          random(-space, space)
+        createVector(random(-space, space), random(-space, space), random(-space, space)
         )
-      );
+      )
     }
     for (let i = 0; i < this.particles.length; i++) {
       let getAround = createVector(0, 0, 0)
         .sub(this.particles[i])
         .normalize()
-        .mult(planet.size * random(1.2, 1.618));
-      this.particles[i].add(getAround);
+        .mult(planet.size * random(1.3, 1.618))
+      this.particles[i].add(getAround)
     }
   }
   show() {
-    push();
-    translate(planet.planetX, planet.planetY, 0);
+    push()
+    translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
+
     for (let p of this.particles) {
-      if (spaceCheck.checked && !planetMode) {
-        this.lerpSpace.y = lerp(
-          this.lerpSpace.y,
-          spaceSlider.value / 1000,
-          0.002
-        ); // WarpBremse
-      } else {
-        this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001);
-      }
       if (planetMode) {
-        this.pumper = lerp(this.pumper, planet.pump, 0.1);
+        this.pumper = lerp(this.pumper, planet.pump, 0.1)
+        // Transparenz
         this.alSterne = map(
-          dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z),
-          0,
-          planet.size * 2,
-          1,
-          0
-        );
-        strokeWeight(1 + this.pumper * 0.1); //
+          dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0
+        )
+        strokeWeight(1 + this.pumper * 0.05)
       } else {
-        p.add(this.lerpSpace);
-        let space = (width + height) / 2;
-        if (p.y > space * 2) {
-          p.y = -space * 2;
-          p.x = random(-space * 2, space * 2);
+        // WarpBremse
+        if (spaceCheck.checked) {
+          this.lerpSpace.y = lerp(this.lerpSpace.y, spaceSlider.value / 1000, 0.002)
+          p.add(this.lerpSpace)
+          // SternArray Reset Y Achse
+          let space = (width + height) / 2
+          if (p.y > space * 2) {
+            p.y = -space * 2; p.x = random(-space * 2, space * 2)
+          }
+        } else {
+          this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001) // Interpolation der Bremsung
         }
-        this.alSterne = map(
-          dist(0, 0, 0, p.x, p.y, p.z),
-          0,
-          width + height,
-          1,
-          0
-        );
-        strokeWeight(3.33);
+        // Transparenz
+        this.alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0
+        )
+        strokeWeight(3.33)
       }
-      stroke(255, this.alSterne);
-      point(p.x, p.y, p.z);
+      stroke(255, this.alSterne)
+      point(p.x, p.y, p.z)
     }
-    pop();
+    pop()
   }
 }
 
 class Planet {
   constructor(size) {
-    this.size = size;
-    this.dist = size + size * 0.2;
-    this.maxCam = size * 0.5;
-    this.planetSize = 0;
-    this.planetDist = 0;
-    this.maxDistCam = 3000;
-    this.planetX = 0;
-    this.planetY = 0;
-    this.rotationState = 0;
-    this.pump = 0;
-    this.rings = (floor(random(1,12)))
+    this.size = size
+    this.dist = size + size * 0.2
+    this.maxCam = size * 0.5
+    this.planetSize = 1
+    this.planetDist = 1
+    this.maxDistCam = 3000
+    this.planetX = 0
+    this.planetY = 0
+    this.rotationState = 1
+    this.pump = 0
+    this.rings = floor(random(-3, 15))
   }
 
   show() {
     if (planetMode) {
-      this.planetDist = lerp(this.planetDist, this.dist, 0.01);
-      this.planetSize = lerp(this.planetSize, this.size, 0.01);
-      this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01);
-      easycam.setDistanceMax(this.maxDistCam);
+      this.planetDist = lerp(this.planetDist, this.dist, 0.01)
+      this.planetSize = lerp(this.planetSize, this.size, 0.01)
+      this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01)
+      easycam.setDistanceMax(this.maxDistCam)
     } else {
-      this.planetDist = lerp(this.planetDist, 0, 0.01);
-      this.planetSize = lerp(this.planetSize, 0, 0.07);
-      this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01);
-      easycam.setDistanceMax(this.maxDistCam);
+      this.planetDist = lerp(this.planetDist, 0, 0.01)
+      this.planetSize = lerp(this.planetSize, 0, 0.07)
+      this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01)
+      easycam.setDistanceMax(this.maxDistCam)
     }
 
-    this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI;
-    this.planetX = this.planetDist * cos(this.rotationState) + 0.0000000001; //NaN Hack
-    this.planetY = this.planetDist * sin(this.rotationState) + 0.0000000001;
+    this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI
+    this.planetX = this.planetDist * cos(this.rotationState) + 0.0000000001 //NaN Hack
+    this.planetY = this.planetDist * sin(this.rotationState) + 0.0000000001
 
-    push();
-    translate(this.planetX, this.planetY, 0);
-    rotateY(frameCount * 0.0001); // Drehung um eigene Achse
+    push()
+    translate(this.planetX, this.planetY, 0)
+    rotateY(frameCount * 0.0001) // Drehung um eigene Achse
     //rotateZ(frameCount * 0.001); //WegenTextur
 
-    let dark = 0;
-    let planetCol = 0;
-    let ampMe = a;
+    let dark = 0
+    let planetCol = 0
+    let ampMe = a
     if (
       planetMode &&
       this.planetSize > this.planetSize - this.planetSize * 0.8
     ) {
-      this.pump = ampMe * 200;
-      dark = map(this.rotationState, 0, TWO_PI, 0, 200);
-      planetCol = map(ampMe, 0, 1, 0, 200);
+      this.pump = ampMe * 200
+      dark = map(this.rotationState, 0, TWO_PI, 0, 200)
+      planetCol = map(ampMe, 0, 1, 0, 200)
     } else {
-      this.pump = 0;
+      this.pump = 0
     }
     if (planetMode) {
-      push();
-      rotateX(PI / 2);
-      stroke(col, 255, 255);
+      push()
+      rotateX(PI / 2)
+      stroke(col, 255, 255)
       for (let i = 3; i < this.rings; i++) {
-        strokeWeight((i + 3) * 3 * ampMe);
-        noFill();
-        circle(0, 0, this.planetSize + i * (planet.size * 0.618));
+        strokeWeight((i + 3) * 3 * ampMe)
+        noFill()
+        circle(0, 0, this.planetSize + i * (planet.size * 0.618))
       }
 
-      pop();
+      pop()
     }
-    noStroke();
-    fill(255);
-    if (l == 1) specularMaterial(col5, 255, planetCol + 55);
+    noStroke()
+    fill(255)
+    if (l == 1) specularMaterial(col5, 255, planetCol + 55)
     else {
-      ambientMaterial(col5, 255, planetCol + 55);
+      ambientMaterial(col5, 255, planetCol + 55)
     }
-    if (planetAmp) {      
-      noLights();
+    if (planetAmp) {
+      noLights()
       //ambientLight(255);
-      pointLight(0, 0, 255, -1, 1, 0);
-      let textures = floor((frameCount * 0.01) % 3);
-      texture(tex[textures]);
+      pointLight(0, 0, 255, -1, 1, 0)
+      let textures = floor((frameCount * 0.01) % 3)
+      texture(tex[textures])
     }
-    sphere(this.planetSize + this.pump, 24, 24);
-    pop();
+    sphere(this.planetSize + this.pump, 24, 24)
+    pop()
   }
 }
 
-function changeTexture() {}
