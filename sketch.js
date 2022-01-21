@@ -51,7 +51,6 @@ let sSize = 0.2
 let offSet = 50
 let morphSpeed = 0
 let streamAdress
-let counter
 let a //Amplitude
 let ampHistory = [] // Lautstärke Analyse
 let planetMode = false
@@ -127,14 +126,14 @@ function setup() {
   var state = {
     distance: 900,
     center: [0, 0, 0],
-    rotation: [0.5, 1, 0.5, 0]
+    rotation: [0.5, -0.5, 0, 0]
   }
 
   easycam = new Dw.EasyCam(this._renderer, state)
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
-  easycam.setRotation([1, -0.5, -1, 0], 6000)
+  easycam.setRotation([1, 0, 0, 0], 6000)
   easycam.setDistance(1000, 6000)
 
   let eyeZ = height / 2 / tan(PI / 6)
@@ -155,7 +154,7 @@ function setup() {
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   amplitude = new p5.Amplitude()
-  peakDetect = new p5.PeakDetect(33, 96, 0.5, 30)
+  peakDetect = new p5.PeakDetect(33, 96, 0.8, 30)
   audio = createAudio('https://ice2.somafm.com/defcon-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(audio)
   amplitude.setInput(audio)
@@ -264,7 +263,7 @@ function draw() {
   let planetVec = createVector(planet.planetX, planet.planetY, 0);
   shapeRot = centerVec.angleBetween(planetVec)
   //console.log(easycam.getPosition())
-  if (isNaN(shapeRot)){  // Hack wegen verschwinden der Figur
+  if (isNaN(shapeRot)) {  // Hack wegen verschwinden der Figur
     shapeRot = 1;
   }
 
@@ -272,9 +271,9 @@ function draw() {
 
   // Drehung zum Planeten
   if (planetMode) {
-     if (stopFuncAfter(3000)) {
+    if (stopFuncAfter(3000)) {
       rotateShape = lerp(rotateShape, shapeRot, 0.03)
-    } else {       
+    } else {
       rotateShape = shapeRot
     }
   } else {
@@ -309,19 +308,18 @@ function changePlanetMode() {
   if (!planetMode) {
     sterne.setStars()
   } else {
-    planet = new Planet(random(2500, 10000));
+    planet = new Planet(random(1500, 15000));
     sterne.setStarsPlanet()
   }
-
   if (planetMode) {
-    easycam.setRotation([0.5, 0, 0.5, 0], 3000)
-    rotateSliderX.value = planet.size*0.021
+    easycam.setRotation([-0.5, 0, -0.5, 0], 6000)
+    rotateSliderX.value = 1000000 / planet.size 
     rotateCheck.checked = true
     easycam.setDistance(950, 3000)
     spaceCheck.checked = true
   } else {
     easycam.setDistance(1500, 3000)
-    easycam.setRotation([-0.5, 1, -0.5, 0], 3000)
+    easycam.setRotation([-0.5, 1, -1, 0], 3000)
   }
 }
 function changeLichtMode() {
@@ -451,6 +449,12 @@ let lightShows = [
 function stopFuncAfter(del) {
   // Beim change m = millis
   if (del + mil > millis()) {
+    return true
+  } else return false
+}
+function waitFuncFor(del) {
+  // Beim change m = millis
+  if (del + mil < millis()) {
     return true
   } else return false
 }
@@ -965,6 +969,7 @@ class Stars {
     this.alSterne = 0
     this.pumper = 0
     this.peakCounter = 0
+    this.tempParticles = createVector(1, 1, 1);
   }
   setStars() {
     this.particles.splice(0, this.particles.length)
@@ -1000,25 +1005,41 @@ class Stars {
     push()
     translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
 
+    //console.log("peakCounter: " + peakCounter(4))
+    if (peakCounter(4)) {
+      this.tempParticles = particlesPlanetTemp(this.amount);   // Neue SternPosition
+      //console.log(this.tempParticles);
+    }
+    let i = 0;
     for (let p of this.particles) {
+
       if (planetMode) {
         this.pumper = lerp(this.pumper, planet.pump, 0.1)
         // Transparenz
         this.alSterne = map(
           dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0
         )
-        strokeWeight(1 + this.pumper * 0.05)
+        strokeWeight(1 + this.pumper * 0.05)  
+
+        if (waitFuncFor(9000)) {
+        p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
+        p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
+        p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
+        i++;
+        }
+
       } else {
         // WarpBremse
         if (spaceCheck.checked) {
-          this.lerpSpace.y = lerp(this.lerpSpace.y, spaceSlider.value / 1000, 0.002)
           p.add(this.lerpSpace)
+          this.lerpSpace.y = lerp(this.lerpSpace.y, spaceSlider.value / 1000, 0.002)
           // SternArray Reset Y Achse
           let space = (width + height) / 2
           if (p.y > space * 2) {
             p.y = -space * 2; p.x = random(-space * 2, space * 2)
           }
         } else {
+          p.add(this.lerpSpace)
           this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001) // Interpolation der Bremsung
         }
         // Transparenz
@@ -1045,7 +1066,9 @@ class Planet {
     this.planetY = 0
     this.rotationState = 1
     this.pump = 0
-    this.rings = floor(random(-3, 15))
+    this.rings = floor(random(0, 8))
+    this.hasMoon = (random(11)>5) ? true : false;
+    this.moonTex = floor(random(tex.length))
   }
 
   show() {
@@ -1061,13 +1084,13 @@ class Planet {
       easycam.setDistanceMax(this.maxDistCam)
     }
 
-    this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI
+    this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI; //(frameCount / (planet.size * 0.1)) % TWO_PI
     this.planetX = this.planetDist * cos(this.rotationState) + 0.0000000001 //NaN Hack
     this.planetY = this.planetDist * sin(this.rotationState) + 0.0000000001
 
     push()
     translate(this.planetX, this.planetY, 0)
-    rotateY(frameCount * 0.0001) // Drehung um eigene Achse
+    //rotateY(frameCount * 0.0001) // Drehung um eigene Achse
     //rotateZ(frameCount * 0.001); //WegenTextur
 
     let dark = 0
@@ -1094,6 +1117,25 @@ class Planet {
       }
 
       pop()
+      if (this.hasMoon) {
+      push()
+      let speed = frameCount * 0.005;
+      let x = (planet.size * 3) * cos(speed)
+      let y = (planet.size * 3) * sin(speed)
+      let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
+      rotateX(PI / 2)
+      translate(x, y, z)
+      rotateZ(speed)
+      noStroke();
+      noLights()
+      //ambientLight(127);
+      lichtMode[0]()
+      pointLight(col5, 127, 127, -1, 1, 0)
+      texture(tex[this.moonTex])
+      //specularMaterial(255)
+      sphere(planet.size * 0.25)
+      pop()
+      }
     }
     noStroke()
     fill(255)
@@ -1104,7 +1146,6 @@ class Planet {
     if (planetAmp) {
       noLights()
       //ambientLight(255);
-      pointLight(0, 0, 255, -1, 1, 0)
       let textures = floor((frameCount * 0.01) % 3)
       texture(tex[textures])
     }
@@ -1113,3 +1154,33 @@ class Planet {
   }
 }
 
+function particlesPlanetTemp(amount) {
+  let particlesTemp = []
+  let space = planet.size / 4
+  for (let i = 0; i < amount; i++) {
+    particlesTemp.push(
+      createVector(random(-space, space), random(-space, space), random(-space, space)
+      )
+    )
+  }
+  for (let i = 0; i < particlesTemp.length; i++) {
+    let getAround = createVector(0, 0, 0)
+      .sub(particlesTemp[i])
+      .normalize()
+      .mult(planet.size * random(1.3, 1.618))
+    particlesTemp[i].add(getAround)
+  }
+  return particlesTemp;
+}
+
+let count = 0;
+function peakCounter(peaks) {
+  if (peakDetect.isDetected) {
+    count++;
+    console.log(count)
+    if (count % peaks == 0) {
+      return true;
+    }
+  }
+  return false;
+}
