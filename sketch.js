@@ -1109,7 +1109,7 @@ class Planet {
     this.planetY = 0
     this.rotationState = 1
     this.pump = 0
-    this.rings = floor(random(0, 8))
+    this.rings = floor(random(0, 18))
     this.hasMoon = (random(16) > 5) ? true : false;
     this.moonSize = this.size * random(0.1,0.33)
     this.moonTex = floor(random(tex.length))
