@@ -71,6 +71,10 @@ let ls = 0 // LichtShowArray
 let scheinW = false
 let planetAmp = false
 
+// Kamera Stuff
+let autoCam = false;
+let state2;
+
 // SoundStuff
 let reverb
 
@@ -116,6 +120,7 @@ function windowResized() {
   scheinWCheckBox.position(width - 150, 90)
   lightShowCheckbox.position(width - 150, 120)
   planetAmpCheckbox.position(width - 150, 150)
+  autoCamCheckbox.position(width - 150, 180)
 }
 
 function setup() {
@@ -130,13 +135,17 @@ function setup() {
   htmlEvents()
 
   // simple Kamera ohne Rechtsklick
-  var state = {
+  let state = {
     distance: 900,
     center: [0, 0, 0],
     rotation: [0.5, -0.5, 0, 0]
   }
 
   easycam = new Dw.EasyCam(this._renderer, state)
+  // RightClick aus
+  document.oncontextmenu = function () {
+    return false
+  }
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
@@ -146,10 +155,7 @@ function setup() {
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 100) // Frustum Far Clip eyeZ*50
 
-  // RightClick aus
-  document.oncontextmenu = function () {
-    return false
-  }
+
   document.getElementById('spaceCheck').checked = true
 
   //Sterne
@@ -161,8 +167,8 @@ function setup() {
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   amplitude = new p5.Amplitude()
-  peakDetect = new p5.PeakDetect(33, 96, 0.8, 30)
-  audio = createAudio('https://ice2.somafm.com/defcon-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  peakDetect = new p5.PeakDetect(33, 99, 0.86, 30)
+  audio = createAudio('https://ice2.somafm.com/groovesalad-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(audio)
   amplitude.setInput(audio)
   audio.play()
@@ -194,6 +200,11 @@ function setup() {
   planetAmpCheckbox.position(width - 150, 150)
   planetAmpCheckbox.changed(() => {
     planetAmp = !planetAmp
+  })
+  autoCamCheckbox = createCheckbox('AutoCam', false)
+  autoCamCheckbox.position(width - 150, 180)
+  autoCamCheckbox.changed(() => {
+    autoCam = !autoCam
   })
 
   sterne = new Stars(377)
@@ -255,6 +266,17 @@ function draw() {
     easycam.rotateY(rotateSliderY.value / 100000)
     easycam.rotateZ(rotateSliderZ.value / 100000)
   }
+  if (autoCam) {
+    let count16 = peakCounter(16);
+    console.log(count16)
+    if (count16) {
+      console.log("Camera Neu")
+      state2 = {
+        distance: random(300,2000), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+      }
+      easycam.setState(state2,3333);
+    }
+  }
 
   // Szene
   background(0)
@@ -314,13 +336,14 @@ function changePlanetMode() {
 
   if (!planetMode) {
     sterne.setStars()
+    spaceSlider.value = 50000
   } else {
     planet = new Planet(random(1500, 15000));
     sterne.setStarsPlanet()
   }
   if (planetMode) {
     easycam.setRotation([-0.5, 0, -0.5, 0], 6000)
-    rotateSliderX.value = 1000000 / planet.size 
+    rotateSliderX.value = 1000000 / planet.size
     rotateCheck.checked = true
     easycam.setDistance(950, 3000)
     spaceCheck.checked = true
@@ -484,16 +507,11 @@ let lichtMode = [
     col5 = map(sin(angle + radians(240)), -1, 1, 0, 255)
 
     shininess(25)
-    if (scheinW) {
-      directionalLight(col, 255, 100, -1, 1, 0)
-      directionalLight(col2, 255, 100, 1, 1, 0)
-      directionalLight(col3, 255, 100, -1, -1, 0)
-      directionalLight(col4, 255, 100, 1, -1, 0)
-    }
-    /*   directionalLight(col, 255, 100, -lightVec.y, lightVec.x, lightVec.z);
-  directionalLight(col2, 255, 100, lightVec.z, -lightVec.y, -lightVec.x);
-  directionalLight(col3, 255, 100, lightVec.z, lightVec.x, -lightVec.y);
-  directionalLight(col4, 255, 100, -lightVec.x, lightVec.y, lightVec.z); */
+
+    directionalLight(col, 255, 100, -1, 1, 0);
+    directionalLight(col2, 255, 100, 1, 1, 0);
+    directionalLight(col3, 255, 100, -1, -1, 0);
+    directionalLight(col4, 255, 100, 1, -1, 0);
     pointLight(col, 255, 255, dirX, dirY, x2Light)
     pointLight(col2, 255, 255, xLight, yLight, y2Light)
     pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
@@ -1026,13 +1044,13 @@ class Stars {
         this.alSterne = map(
           dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0
         )
-        strokeWeight(1 + this.pumper * 0.05)  
+        strokeWeight(1 + this.pumper * 0.05)
 
-        if (waitFuncFor(7000)) {
-        p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
-        p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
-        p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
-        i++;
+        if (waitFuncFor(9000)) {
+          p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
+          p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
+          p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
+          i++;
         }
 
       } else {
@@ -1074,7 +1092,7 @@ class Planet {
     this.rotationState = 1
     this.pump = 0
     this.rings = floor(random(0, 8))
-    this.hasMoon = (random(11)>5) ? true : false;
+    this.hasMoon = (random(11) > 5) ? true : false;
     this.moonTex = floor(random(tex.length))
   }
 
@@ -1125,23 +1143,23 @@ class Planet {
 
       pop()
       if (this.hasMoon) {
-      push()
-      let speed = frameCount * 0.005;
-      let x = (planet.size * 3) * cos(speed)
-      let y = (planet.size * 6) * sin(speed)
-      let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
-      rotateX(PI / 2)
-      translate(x-planet.size, y, z)
-      rotateZ(speed)
-      noStroke();
-      noLights()
-      //ambientLight(127);
-      lichtMode[0]()
-      pointLight(col5, 127, 127, -1, 1, 0)
-      texture(tex[this.moonTex])
-      //specularMaterial(255)
-      sphere(planet.size * 0.25)
-      pop()
+        push()
+        let speed = frameCount * 0.005;
+        let x = (planet.size * 3) * cos(speed)
+        let y = (planet.size * 6) * sin(speed)
+        let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
+        rotateX(PI / 2)
+        translate(x - planet.size, y, z)
+        rotateZ(speed)
+        noStroke();
+        noLights()
+        //ambientLight(127);
+        lichtMode[0]()
+        pointLight(col5, 127, 127, -1, 1, 0)
+        texture(tex[this.moonTex])
+        //specularMaterial(255)
+        sphere(planet.size * 0.25)
+        pop()
       }
     }
     noStroke()
@@ -1185,7 +1203,8 @@ function peakCounter(peaks) {
   if (peakDetect.isDetected) {
     count++;
     console.log(count)
-    if (count % peaks == 0) {
+    if (count % peaks >= peaks-2) {
+      //count = 0;
       return true;
     }
   }
