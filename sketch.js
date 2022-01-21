@@ -82,7 +82,14 @@ function preload() {
     loadImage('2-observingsol.jpeg'),
     loadImage('2k_mercury.jpeg'),
     loadImage('2k_neptune.jpeg'),
-    loadImage('anshar.jpeg')
+    loadImage('anshar.jpeg'),
+    loadImage('base.jpeg'),
+    loadImage('charis3.jpeg'),
+    loadImage('Endor.jpeg'),
+    loadImage('jupiter.jpeg'),
+    loadImage('moon.jpeg'),
+    loadImage('planet2.png'),
+    loadImage('planet2d.png')
   ]
 }
 
@@ -1021,7 +1028,7 @@ class Stars {
         )
         strokeWeight(1 + this.pumper * 0.05)  
 
-        if (waitFuncFor(9000)) {
+        if (waitFuncFor(7000)) {
         p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
         p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
         p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
@@ -1098,7 +1105,7 @@ class Planet {
     let ampMe = a
     if (
       planetMode &&
-      this.planetSize > this.planetSize - this.planetSize * 0.8
+      this.planetDist >= this.planetSize
     ) {
       this.pump = ampMe * 200
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
@@ -1121,10 +1128,10 @@ class Planet {
       push()
       let speed = frameCount * 0.005;
       let x = (planet.size * 3) * cos(speed)
-      let y = (planet.size * 3) * sin(speed)
+      let y = (planet.size * 6) * sin(speed)
       let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
       rotateX(PI / 2)
-      translate(x, y, z)
+      translate(x-planet.size, y, z)
       rotateZ(speed)
       noStroke();
       noLights()
