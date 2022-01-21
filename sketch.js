@@ -95,6 +95,7 @@ function preload() {
     loadImage('planet2.png'),
     loadImage('planet2d.png')
   ]
+  //deepField = loadImage("space-panoramic-3.jpg")
 }
 
 function centerCanvas() {
@@ -168,18 +169,16 @@ function setup() {
   mic = new p5.AudioIn()
   amplitude = new p5.Amplitude()
   peakDetect = new p5.PeakDetect(33, 99, 0.86, 30)
-  audio = createAudio('https://ice2.somafm.com/groovesalad-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  audio = createAudio('https://ice2.somafm.com/cliqhop-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(audio)
   amplitude.setInput(audio)
   audio.play()
 
   // Audio Effekte
-  //reverb = new p5.Reverb();
-  //audio.disconnect();
-  /*  reverb.process(audio, 3, 0.0);
-  reverb.amp(1) */
-  //reverb.drywet(0.33);
-  //reverb.set(6,0.33)
+/*   reverb = new p5.Reverb(); //audio.disconnect();  //reverb.drywet(0.33);
+  reverb.process(audio, 3, 0.0);
+  reverb.amp(2) 
+  reverb.set(7,0.00) */
 
   // PlanetDebug
   planetCheckBox = createCheckbox('planetMode', false)
@@ -226,6 +225,12 @@ function draw() {
   a = amplitude.getLevel()
   amplitude.smooth(0.8)
 
+  // "RaumKlang"
+/*   let verbAmount = map(easycam.getDistance(),300,3000,0,1);
+  let verbAmp = map(easycam.getDistance(),300,3000,1,3);
+  reverb.drywet(verbAmount);
+  reverb.amp(verbAmp)  */
+
   // Bänder der Analyse
   let oBands = fft.getOctaveBands(1, 33)
   //console.log(oBands);
@@ -271,19 +276,30 @@ function draw() {
     console.log(count16)
     if (count16) {
       console.log("Camera Neu")
+      if (!planetMode)
       state2 = {
-        distance: random(300,2000), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+        distance: random(500,2500), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
       }
+      else { state2 = {
+        distance: random(500,planet.dist-planet.size), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+      }}
       easycam.setState(state2,3333);
     }
   }
 
   // Szene
   background(0)
+  
+ /*  texture(deepField);
+  noStroke();
+  noLights();
+  sphere(40000) */
 
   // Lichter
   lichtMode[l]()
   lightShows[ls]()
+
+
 
   // Figur
 
@@ -508,10 +524,10 @@ let lichtMode = [
 
     shininess(25)
 
-    directionalLight(col, 255, 100, -1, 1, 0);
-    directionalLight(col2, 255, 100, 1, 1, 0);
-    directionalLight(col3, 255, 100, -1, -1, 0);
-    directionalLight(col4, 255, 100, 1, -1, 0);
+    directionalLight(col , 255, 70, -1, 1, 0);
+    directionalLight(col2, 255, 70, 1, 1, 0);
+    directionalLight(col3, 255, 70, -1, -1, 0);
+    directionalLight(col4, 255, 70, 1, -1, 0);
     pointLight(col, 255, 255, dirX, dirY, x2Light)
     pointLight(col2, 255, 255, xLight, yLight, y2Light)
     pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
@@ -832,6 +848,7 @@ function switchSource() {
     mic = new p5.AudioIn()
     mic.start()
     fft.setInput(mic)
+    //reverb.process(mic, 3, 0.0);
     //amplitude = new p5.Amplitude();
     amplitude.setInput(mic)
     sourceIsStream = !sourceIsStream
@@ -842,6 +859,7 @@ function switchSource() {
     audio = createAudio('http://a2r.twenty4seven.cc:8000/puredata.ogg')
     audio.play()
     fft.setInput(audio)
+    //reverb.process(audio, 3, 0.0);
     //amplitude = new p5.Amplitude();
     amplitude.setInput(audio)
     sourceIsStream = !sourceIsStream
@@ -966,7 +984,7 @@ let sketch = function (p) {
       p.noFill()
       p.beginShape()
 
-      for (let i = 0; i < waveform.length; i++) {
+      for (let i = 0; i < waveform.length; i++) {   // Mit WaveForm Figur modulieren!!! 
         let x = map(i, 0, waveform.length, 0, p.width)
         let y = map(waveform[i], -1, 1, 0, p.height / 2)
         p.vertex(x, y)
@@ -1092,7 +1110,8 @@ class Planet {
     this.rotationState = 1
     this.pump = 0
     this.rings = floor(random(0, 8))
-    this.hasMoon = (random(11) > 5) ? true : false;
+    this.hasMoon = (random(16) > 5) ? true : false;
+    this.moonSize = this.size * random(0.1,0.33)
     this.moonTex = floor(random(tex.length))
   }
 
@@ -1146,7 +1165,7 @@ class Planet {
         push()
         let speed = frameCount * 0.005;
         let x = (planet.size * 3) * cos(speed)
-        let y = (planet.size * 6) * sin(speed)
+        let y = (planet.size * 4) * sin(speed)
         let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
         rotateX(PI / 2)
         translate(x - planet.size, y, z)
@@ -1158,7 +1177,7 @@ class Planet {
         pointLight(col5, 127, 127, -1, 1, 0)
         texture(tex[this.moonTex])
         //specularMaterial(255)
-        sphere(planet.size * 0.25)
+        sphere(this.moonSize)
         pop()
       }
     }
