@@ -82,6 +82,9 @@ let mov2 = 0;
 let mov4 = 0;
 let mov6 = 0;
 
+// Counter
+let peakCounter1,peakCounter2;
+
 function preload() {
   tex = [
     loadImage('planet1d.jpeg'),
@@ -118,7 +121,7 @@ function windowResized() {
   easycam.setRotation([0, -0.5, 0, 0], 6000)
   easycam.setDistance(2000, 3000)
   let eyeZ = height / 2 / tan(PI / 6)
-  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 100) // Frustum Far Clip eyeZ*50
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
 
   planetCheckBox.position(width - 150, 30)
   lichtCheckBox.position(width - 150, 60)
@@ -158,7 +161,7 @@ function setup() {
   easycam.setDistance(1000, 6000)
 
   let eyeZ = height / 2 / tan(PI / 6)
-  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 100) // Frustum Far Clip eyeZ*50
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
 
 
   document.getElementById('spaceCheck').checked = true
@@ -215,6 +218,9 @@ function setup() {
   planet = new Planet(floor(random(3000, 8000)));
   //console.log(mic.getSources());
   //mic.start();
+
+  peakCounter1 = new PeakCounter();
+  peakCounter2 = new PeakCounter();
 }
 function draw() {
   //console.log(getFrameRate())
@@ -276,16 +282,15 @@ function draw() {
     easycam.rotateZ(rotateSliderZ.value / 100000)
   }
   if (autoCam) {
-    let count16 = peakCounter(16);
-    console.log(count16)
-    if (count16) {
+    let count8 = peakCounter1.countMe(8);
+    if (count8) {
       console.log("Camera Neu")
       if (!planetMode)
       state2 = {
-        distance: random(500,2500), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+        distance: random(400,1500), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
       }
       else { state2 = {
-        distance: random(500,planet.dist-planet.size), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+        distance: random(400,planet.dist-planet.size), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
       }}
       easycam.setState(state2,3333);
     }
@@ -1015,12 +1020,11 @@ class Stars {
     this.lerpSpace = createVector(0, 0, 0)
     this.alSterne = 0
     this.pumper = 0
-    this.peakCounter = 0
     this.tempParticles = createVector(1, 1, 1);
   }
   setStars() {
     this.particles.splice(0, this.particles.length)
-    let space = (width + height) / 2
+    let space = (width + height);   // /2
     for (let i = 0; i < this.amount; i++) {
       this.particles.push(
         createVector(
@@ -1048,16 +1052,33 @@ class Stars {
       this.particles[i].add(getAround)
     }
   }
+  particlesPlanetTemp(amount) {
+    let particlesTemp = []
+    let space = planet.size / 4
+    for (let i = 0; i < amount; i++) {
+      particlesTemp.push(
+        createVector(random(-space, space), random(-space, space), random(-space, space)
+        )
+      )
+    }
+    for (let i = 0; i < particlesTemp.length; i++) {
+      let getAround = createVector(0, 0, 0)
+        .sub(particlesTemp[i])
+        .normalize()
+        .mult(planet.size * random(1.3, 1.618))
+      particlesTemp[i].add(getAround)
+    }
+    return particlesTemp;
+  }
   show() {
     push()
     translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
 
-    //console.log("peakCounter: " + peakCounter(4))
-    if (peakCounter(4)) {
-      this.tempParticles = particlesPlanetTemp(this.amount);   // Neue SternPosition
-      //console.log(this.tempParticles);
+    if (planetMode && peakCounter2.countMe(4)) {
+      this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
+    
     for (let p of this.particles) {
 
       if (planetMode) {
@@ -1081,7 +1102,7 @@ class Stars {
           p.add(this.lerpSpace)
           this.lerpSpace.y = lerp(this.lerpSpace.y, spaceSlider.value / 1000, 0.002)
           // SternArray Reset Y Achse
-          let space = (width + height) / 2
+          let space = (width + height);
           if (p.y > space * 2) {
             p.y = -space * 2; p.x = random(-space * 2, space * 2)
           }
@@ -1090,7 +1111,7 @@ class Stars {
           this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001) // Interpolation der Bremsung
         }
         // Transparenz
-        this.alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, width + height, 1, 0
+        this.alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, (width + height)*2, 1, 0
         )
         strokeWeight(3.33)
       }
@@ -1202,34 +1223,20 @@ class Planet {
   }
 }
 
-function particlesPlanetTemp(amount) {
-  let particlesTemp = []
-  let space = planet.size / 4
-  for (let i = 0; i < amount; i++) {
-    particlesTemp.push(
-      createVector(random(-space, space), random(-space, space), random(-space, space)
-      )
-    )
+class PeakCounter {
+  constructor() { 
+    this.count = 0; 
   }
-  for (let i = 0; i < particlesTemp.length; i++) {
-    let getAround = createVector(0, 0, 0)
-      .sub(particlesTemp[i])
-      .normalize()
-      .mult(planet.size * random(1.3, 1.618))
-    particlesTemp[i].add(getAround)
-  }
-  return particlesTemp;
-}
+  countMe(peaks) {
+    if (peakDetect.isDetected) {
+      this.count++;
+      console.log("count: " + this.count)
 
-let count = 0;
-function peakCounter(peaks) {   // Zur Klasse machen! 
-  if (peakDetect.isDetected) {
-    count++;
-    console.log(count)
-    if (count % peaks >= peaks-2) {
-      //count = 0;
-      return true;
+      if (this.count % peaks == 0) {
+        this.count = 0;
+        return true;
+      }
     }
+    return false;
   }
-  return false;
 }
