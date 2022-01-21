@@ -77,6 +77,10 @@ let state2;
 
 // SoundStuff
 let reverb
+let mov0 = 0;
+let mov2 = 0;
+let mov4 = 0;
+let mov6 = 0;
 
 function preload() {
   tex = [
@@ -168,7 +172,7 @@ function setup() {
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   amplitude = new p5.Amplitude()
-  peakDetect = new p5.PeakDetect(33, 99, 0.86, 30)
+  peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   audio = createAudio('https://ice2.somafm.com/cliqhop-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   fft.setInput(audio)
   amplitude.setInput(audio)
@@ -248,10 +252,10 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-  let mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
-  let mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
-  let mov4 = map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4)
-  let mov6 = map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6)
+  mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
+  mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
+  mov4 = lerp(mov4,map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4),0.2)    // Interpolation der Höhen
+  mov6 = lerp(mov6,map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6),0.2)
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
   /*   bandValues(
     mov0,
@@ -1218,7 +1222,7 @@ function particlesPlanetTemp(amount) {
 }
 
 let count = 0;
-function peakCounter(peaks) {
+function peakCounter(peaks) {   // Zur Klasse machen! 
   if (peakDetect.isDetected) {
     count++;
     console.log(count)
