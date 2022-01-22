@@ -260,8 +260,8 @@ function draw() {
 
   mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
   mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
-  mov4 = lerp(mov4, map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4), 0.2)    // Interpolation der Höhen
-  mov6 = lerp(mov6, map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6), 0.2)
+  mov4 = lerp(mov4, map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4), 0.1)    // Interpolation der Höhen
+  mov6 = lerp(mov6, map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6), 0.1)
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
   /*   bandValues(
     mov0,
@@ -1139,6 +1139,7 @@ class Planet {
     this.rings = floor(random(0, 18))
     this.hasMoon = (random(16) > 5) ? true : false;
     this.moonSize = this.size * random(0.1, 0.33)
+    this.moonSpeed = random(0.001,0.01);
     this.moonTex = floor(random(tex.length))
   }
 
@@ -1184,17 +1185,17 @@ class Planet {
       stroke(col, 255, 255)
       let ringDistance = planet.size * 0.618;
       for (let i = 3; i < this.rings; i++) {
-        strokeWeight((i + 6) * ampMe * 2)
+        strokeWeight((i/2 + 6) * ampMe * 2)
         noFill()
         this.circleWave(0, 0, this.planetSize + i * ringDistance,i*ringDistance/3)
       }
       pop()
       if (this.hasMoon) {
         push()
-        let speed = frameCount * 0.005;
+        let speed = frameCount * this.moonSpeed;
         let x = (planet.size * 3) * cos(speed)
-        let y = (planet.size * 4) * sin(speed)
-        let z = (planet.size * 3) * map(cos(speed), -1, 1, -0.1, 0.1)
+        let y = (planet.size * 5) * sin(speed)
+        let z = (planet.size * 3) * map(cos(speed), -PI, PI, -PI/9, PI/9)
         rotateX(PI / 2)
         translate(x - planet.size, y, z)
         rotateZ(speed)
