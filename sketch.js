@@ -83,7 +83,7 @@ let mov4 = 0;
 let mov6 = 0;
 
 // Counter
-let peakCounter1,peakCounter2;
+let peakCounter1, peakCounter2;
 
 function preload() {
   tex = [
@@ -182,10 +182,10 @@ function setup() {
   audio.play()
 
   // Audio Effekte
-/*   reverb = new p5.Reverb(); //audio.disconnect();  //reverb.drywet(0.33);
-  reverb.process(audio, 3, 0.0);
-  reverb.amp(2) 
-  reverb.set(7,0.00) */
+  /*   reverb = new p5.Reverb(); //audio.disconnect();  //reverb.drywet(0.33);
+    reverb.process(audio, 3, 0.0);
+    reverb.amp(2) 
+    reverb.set(7,0.00) */
 
   // PlanetDebug
   planetCheckBox = createCheckbox('planetMode', false)
@@ -236,10 +236,10 @@ function draw() {
   amplitude.smooth(0.8)
 
   // "RaumKlang"
-/*   let verbAmount = map(easycam.getDistance(),300,3000,0,1);
-  let verbAmp = map(easycam.getDistance(),300,3000,1,3);
-  reverb.drywet(verbAmount);
-  reverb.amp(verbAmp)  */
+  /*   let verbAmount = map(easycam.getDistance(),300,3000,0,1);
+    let verbAmp = map(easycam.getDistance(),300,3000,1,3);
+    reverb.drywet(verbAmount);
+    reverb.amp(verbAmp)  */
 
   // Bänder der Analyse
   let oBands = fft.getOctaveBands(1, 33)
@@ -260,8 +260,8 @@ function draw() {
 
   mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
   mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
-  mov4 = lerp(mov4,map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4),0.2)    // Interpolation der Höhen
-  mov6 = lerp(mov6,map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6),0.2)
+  mov4 = lerp(mov4, map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4), 0.2)    // Interpolation der Höhen
+  mov6 = lerp(mov6, map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6), 0.2)
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
   /*   bandValues(
     mov0,
@@ -286,23 +286,25 @@ function draw() {
     if (count8) {
       console.log("Camera Neu")
       if (!planetMode)
-      state2 = {
-        distance: random(400,1500), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
+        state2 = {
+          distance: random(400, 1500), center: [0, 0, 0], rotation: [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)]
+        }
+      else {
+        state2 = {
+          distance: random(400, planet.dist - planet.size), center: [0, 0, 0], rotation: [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)]
+        }
       }
-      else { state2 = {
-        distance: random(400,planet.dist-planet.size), center: [0, 0, 0], rotation: [random(-1,1), random(-1,1), random(-1,1), random(-1,1)]
-      }}
-      easycam.setState(state2,3333);
+      easycam.setState(state2, 3333);
     }
   }
 
   // Szene
   background(0)
-  
- /*  texture(deepField);
-  noStroke();
-  noLights();
-  sphere(40000) */
+
+  /*  texture(deepField);
+   noStroke();
+   noLights();
+   sphere(40000) */
 
   // Lichter
   lichtMode[l]()
@@ -533,7 +535,7 @@ let lichtMode = [
 
     shininess(25)
 
-    directionalLight(col , 255, 70, -1, 1, 0);
+    directionalLight(col, 255, 70, -1, 1, 0);
     directionalLight(col2, 255, 70, 1, 1, 0);
     directionalLight(col3, 255, 70, -1, -1, 0);
     directionalLight(col4, 255, 70, 1, -1, 0);
@@ -977,7 +979,7 @@ let sketch = function (p) {
   }
   p.draw = function () {
     if (sidebar) {
-      let spectrum = fft.analyze()
+      let spectrum = fft.analyze(512)
       p.background('#262126')
       p.noFill()
       p.strokeWeight(1)
@@ -987,7 +989,7 @@ let sketch = function (p) {
         p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
       }
       p.endShape()
-      let waveform = fft.waveform()
+      let waveform = fft.waveform(512)
       p.strokeWeight(1.2)
       p.stroke(255)
       p.noFill()
@@ -1078,7 +1080,7 @@ class Stars {
       this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
-    
+
     for (let p of this.particles) {
 
       if (planetMode) {
@@ -1111,7 +1113,7 @@ class Stars {
           this.lerpSpace.y = lerp(this.lerpSpace.y, 0, 0.0001) // Interpolation der Bremsung
         }
         // Transparenz
-        this.alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, (width + height)*2, 1, 0
+        this.alSterne = map(dist(0, 0, 0, p.x, p.y, p.z), 0, (width + height) * 2, 1, 0
         )
         strokeWeight(3.33)
       }
@@ -1136,7 +1138,7 @@ class Planet {
     this.pump = 0
     this.rings = floor(random(0, 18))
     this.hasMoon = (random(16) > 5) ? true : false;
-    this.moonSize = this.size * random(0.1,0.33)
+    this.moonSize = this.size * random(0.1, 0.33)
     this.moonTex = floor(random(tex.length))
   }
 
@@ -1176,15 +1178,16 @@ class Planet {
       this.pump = 0
     }
     if (planetMode) {
+
       push()
       rotateX(PI / 2)
       stroke(col, 255, 255)
+      let ringDistance = planet.size * 0.618;
       for (let i = 3; i < this.rings; i++) {
-        strokeWeight((i + 3) * 3 * ampMe)
+        strokeWeight((i + 6) * ampMe * 2)
         noFill()
-        circle(0, 0, this.planetSize + i * (planet.size * 0.618))
+        this.circleWave(0, 0, this.planetSize + i * ringDistance,i*ringDistance/3)
       }
-
       pop()
       if (this.hasMoon) {
         push()
@@ -1221,11 +1224,30 @@ class Planet {
     sphere(this.planetSize + this.pump, 24, 24)
     pop()
   }
+  circleWave(x,y,size,strength) {
+    push()
+    translate(x,y);
+    angleMode(DEGREES)
+    let wave = fft.waveform(512); // analyze the waveform
+    for (let j = -1; j <= 1; j += 2) {
+      beginShape();
+      for (let i = 0; i <= 180; i++) {
+        let index = floor(map(i, 0, 180, 0, wave.length - 1));
+        let r = map(wave[index], -1, 1, size-strength, size+strength);
+        let x = r * sin(i) * j;
+        let y = r * cos(i);
+        vertex(x, y);
+      }
+      endShape();     
+    }
+    angleMode(RADIANS)
+    pop()
+  }
 }
 
 class PeakCounter {
-  constructor() { 
-    this.count = 0; 
+  constructor() {
+    this.count = 0;
   }
   countMe(peaks) {
     if (peakDetect.isDetected) {
