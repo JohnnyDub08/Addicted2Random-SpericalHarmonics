@@ -100,9 +100,18 @@ function preload() {
     loadImage('jupiter.jpeg'),
     loadImage('moon.jpeg'),
     loadImage('planet2.png'),
-    loadImage('planet2d.png')
+    loadImage('planet2d.png'),
+    loadImage('planet3.png'),
+    loadImage('planet4.png'),
+    loadImage('planet5.png'),
+    loadImage('planet7d.png'),
+    loadImage('pluto.jpeg'),
+    loadImage('superearth.png'),
+    loadImage('valdrada.jpeg'),
+    loadImage('venus_surface.jpeg'),
+    loadImage('venus_surface.jpeg')
   ]
-  //deepField = loadImage("space-panoramic-3.jpg")
+  /* deepField = loadImage("Nebula.png") */
 }
 
 function centerCanvas() {
@@ -132,7 +141,7 @@ function windowResized() {
 }
 
 function setup() {
-  //setAttributes("antialias", true);
+  setAttributes("antialias", true);
   setAttributes('alpha', false)
   cnv = createCanvas(windowWidth, windowHeight, WEBGL)
   cnv.style('z-index', -1)
@@ -213,9 +222,10 @@ function setup() {
     autoCam = !autoCam
   })
 
+  planet = new Planet(floor(random(3000, 8000)));
   sterne = new Stars(377)
   sterne.setStars()
-  planet = new Planet(floor(random(3000, 8000)));
+  
   //console.log(mic.getSources());
   //mic.start();
 
@@ -301,11 +311,6 @@ function draw() {
   // Szene
   background(0)
 
-  /*  texture(deepField);
-   noStroke();
-   noLights();
-   sphere(40000) */
-
   // Lichter
   lichtMode[l]()
   lightShows[ls]()
@@ -355,6 +360,12 @@ function draw() {
 
   //Planet
   planet.show()
+
+ /*  texture(deepField);
+  noStroke();
+  noLights();
+  fill(col5,100,100)
+  sphere(100000) */
 }
 
 function changePlanetMode() {
@@ -535,10 +546,10 @@ let lichtMode = [
 
     shininess(25)
 
-    directionalLight(col, 255, 70, -1, 1, 0);
-    directionalLight(col2, 255, 70, 1, 1, 0);
-    directionalLight(col3, 255, 70, -1, -1, 0);
-    directionalLight(col4, 255, 70, 1, -1, 0);
+    directionalLight(col, 255, 255, -1, 1, 0);
+    directionalLight(col2, 255, 255, 1, 1, 0);
+    directionalLight(col3, 255, 255, -1, -1, 0);
+    directionalLight(col4, 255, 255, 1, -1, 0);
     pointLight(col, 255, 255, dirX, dirY, x2Light)
     pointLight(col2, 255, 255, xLight, yLight, y2Light)
     pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
@@ -972,7 +983,7 @@ function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
   )
 }
 
-let sketch = function (p) {
+/* let sketch = function (p) {
   p.setup = function () {
     var canvasp = p.createCanvas(312, 117)
     canvasp.parent('canvasid')
@@ -1005,7 +1016,7 @@ let sketch = function (p) {
   }
 }
 let node = document.createElement('div')
-new p5(sketch, node)
+new p5(sketch, node) */
 //window.document.getElementsByTagName('body')[0].appendChild(node);
 
 // Audio an in manchen Browsern Handy etc
@@ -1022,7 +1033,7 @@ class Stars {
     this.lerpSpace = createVector(0, 0, 0)
     this.alSterne = 0
     this.pumper = 0
-    this.tempParticles = createVector(1, 1, 1);
+    this.tempParticles = this.particlesPlanetTemp(this.amount);
   }
   setStars() {
     this.particles.splice(0, this.particles.length)
@@ -1059,10 +1070,9 @@ class Stars {
     translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
 
     if (planetMode && peakCounter2.countMe(4)) {
-      this.tempParticles = particlesPlanetTemp(this.amount);   // Neue SternPosition     
+      this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
-
     for (let p of this.particles) {
 
       if (planetMode) {
@@ -1104,24 +1114,25 @@ class Stars {
     }
     pop()
   }
-}
-function particlesPlanetTemp(amount) {
-  let particlesTemp = []
-  let space = planet.size / 4
-  for (let i = 0; i < amount; i++) {
-    particlesTemp.push(
-      createVector(random(-space, space), random(-space, space), random(-space, space)
+  particlesPlanetTemp(amount) {
+    let particlesTemp = []
+    let space = planet.size / 4
+    for (let i = 0; i < amount; i++) {
+      particlesTemp.push(
+        createVector(random(-space, space), random(-space, space), random(-space, space)
+        )
       )
-    )
+    }
+    for (let i = 0; i < particlesTemp.length; i++) {
+      let getAround = createVector(0, 0, 0)
+        .sub(particlesTemp[i])
+        .normalize()
+        .mult(planet.size * random(1.3, 1.618))
+      particlesTemp[i].add(getAround)
+    }
+    return particlesTemp;
   }
-  for (let i = 0; i < particlesTemp.length; i++) {
-    let getAround = createVector(0, 0, 0)
-      .sub(particlesTemp[i])
-      .normalize()
-      .mult(planet.size * random(1.3, 1.618))
-    particlesTemp[i].add(getAround)
-  }
-  return particlesTemp;
+  
 }
 
 class Planet {
@@ -1136,10 +1147,13 @@ class Planet {
     this.planetY = 0
     this.rotationState = 1
     this.pump = 0
-    this.rings = floor(random(0, 18))
+    this.rings = floor(random(0, 13))
     this.hasMoon = (random(16) > 5) ? true : false;
+    this.moonX = random(3,8);
+    this.moonY = random(3,8);
+    this.moonZ = random(3,8);
     this.moonSize = this.size * random(0.1, 0.33)
-    this.moonSpeed = random(0.001,0.01);
+    this.moonSpeed = random(0.005, 0.01);
     this.moonTex = floor(random(tex.length))
   }
 
@@ -1186,20 +1200,21 @@ class Planet {
       let ringDistance = planet.size * 0.618;
       let wave = fft.waveform(512); // analyze the waveform for circleWave
       for (let i = 3; i < this.rings; i++) {
-        strokeWeight((i/2 + 6) * ampMe * 2)
+        strokeWeight((i / 2 + 6) * ampMe * 2)
         noFill()
-        this.circleWave(0, 0, this.planetSize + i * ringDistance,i*ringDistance/3,wave)
+        this.circleWave(0, 0, this.planetSize + i * ringDistance, i * ringDistance / 3, wave)
       }
       pop()
       if (this.hasMoon) {
         push()
         let speed = frameCount * this.moonSpeed;
-        let x = (planet.size * 3) * cos(speed)
-        let y = (planet.size * 5) * sin(speed)
-        let z = (planet.size * 3) * map(cos(speed), -PI, PI, -PI/9, PI/9)
+        let x = (planet.size * this.moonX) * cos(speed)
+        let y = (planet.size * this.moonY) * sin(speed)
+        let z = (planet.size * this.moonZ) * map(cos(speed), -PI, PI, -PI / 9, PI / 9)
         rotateX(PI / 2)
-        translate(x - planet.size, y, z)
-        rotateZ(speed)
+        translate(x, y, z)  //x - planet.size
+        rotateX(-PI/2)
+        rotateY(-speed)
         noStroke();
         noLights()
         //ambientLight(127);
@@ -1226,20 +1241,20 @@ class Planet {
     sphere(this.planetSize + this.pump, 24, 24)
     pop()
   }
-  circleWave(x,y,size,strength,fftwave) {
+  circleWave(x, y, size, strength, fftwave) {
     push()
-    translate(x,y);
-    angleMode(DEGREES)   
+    translate(x, y);
+    angleMode(DEGREES)
     for (let j = -1; j <= 1; j += 2) {
       beginShape();
       for (let i = 0; i <= 180; i++) {
         let index = floor(map(i, 0, 180, 0, fftwave.length - 1));
-        let r = map(fftwave[index], -1, 1, size-strength, size+strength);
+        let r = map(fftwave[index], -1, 1, size - strength, size + strength);
         let x = r * sin(i) * j;
         let y = r * cos(i);
         vertex(x, y);
       }
-      endShape();     
+      endShape();
     }
     angleMode(RADIANS)
     pop()
@@ -1253,7 +1268,7 @@ class PeakCounter {
   countMe(peaks) {
     if (peakDetect.isDetected) {
       this.count++;
-      console.log("count: " + this.count)
+      //console.log("count: " + this.count)
 
       if (this.count % peaks == 0) {
         this.count = 0;
