@@ -1,10 +1,11 @@
-let cnv, mic, audio, fft, spectrum, peakDetect, amplitude
-let easycam
-let shape = []
-let rotateShape = 0
-let total = 50
-let sterne
-let planet
+'use strict';
+let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
+let easycam;
+let shape = [];
+let rotateShape = 0;
+let total = 50;
+let sterne;
+let planet;
 let m0Slider,
   m0,
   m1Slider,
@@ -34,6 +35,7 @@ let m0Slider,
   peakCheck,
   rotateCheck,
   spaceCheck,
+  resCheck,
   audioSourceBtn,
   saveBtn,
   loadBtn,
@@ -45,14 +47,14 @@ let m0Slider,
   rotateSliderX,
   rotateSliderY,
   rotateSliderZ,
-  dropZone
-let sourceIsStream = true
-let sSize = 0.2
-let offSet = 50
-let morphSpeed = 0
-let streamAdress
-let a //Amplitude
-let ampHistory = [] // Lautstärke Analyse
+  dropZone,
+  serverAdress
+let sourceIsStream = true;
+let sSize = 0.2;
+let offSet = 50;
+let morphSpeed = 0;
+let streamAdress;
+let ampHistory = []; // Lautstärke Analyse
 let planetMode = false
 let maxDistCam = 3000
 
@@ -70,6 +72,8 @@ let l = 0 // LichtArray
 let ls = 0 // LichtShowArray
 let scheinW = false
 let planetAmp = false
+let tex
+let lerpSpace
 
 // Kamera Stuff
 let autoCam = false;
@@ -81,6 +85,9 @@ let mov0 = 0;
 let mov2 = 0;
 let mov4 = 0;
 let mov6 = 0;
+
+// Dev Debug Helfer
+let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetAmpCheckBox, autoCamCheckBox
 
 // Counter
 let peakCounter1, peakCounter2;
@@ -135,9 +142,9 @@ function windowResized() {
   planetCheckBox.position(width - 150, 30)
   lichtCheckBox.position(width - 150, 60)
   scheinWCheckBox.position(width - 150, 90)
-  lightShowCheckbox.position(width - 150, 120)
-  planetAmpCheckbox.position(width - 150, 150)
-  autoCamCheckbox.position(width - 150, 180)
+  lightShowCheckBox.position(width - 150, 120)
+  planetAmpCheckBox.position(width - 150, 150)
+  autoCamCheckBox.position(width - 150, 180)
 }
 
 function setup() {
@@ -147,6 +154,16 @@ function setup() {
   cnv.style('z-index', -1)
   colorMode(HSB)
   centerCanvas()
+
+  // Audio Analyse
+  audio = createAudio('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  audio.play();
+  fft = new p5.FFT()
+  mic = new p5.AudioIn()
+  amplitude = new p5.Amplitude()
+  peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
+  fft.setInput(audio);
+  amplitude.setInput(audio);
 
   // get GUI/Slider ids
   htmlEvents()
@@ -172,23 +189,12 @@ function setup() {
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
 
-
   document.getElementById('spaceCheck').checked = true
 
   //Sterne
   lerpSpace = createVector(0, 0, 0) // LightShow
   lightVec = createVector(1, -1, 1)
   lightVecTemp = createVector(0, 0, 0)
-
-  // Audio Analyse
-  fft = new p5.FFT()
-  mic = new p5.AudioIn()
-  amplitude = new p5.Amplitude()
-  peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
-  audio = createAudio('https://ice2.somafm.com/cliqhop-128-aac') //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
-  fft.setInput(audio)
-  amplitude.setInput(audio)
-  audio.play()
 
   // Audio Effekte
   /*   reverb = new p5.Reverb(); //audio.disconnect();  //reverb.drywet(0.33);
@@ -208,24 +214,24 @@ function setup() {
   scheinWCheckBox.changed(() => {
     scheinW = !scheinW
   })
-  lightShowCheckbox = createCheckbox('LightShow', false)
-  lightShowCheckbox.position(width - 150, 120)
-  lightShowCheckbox.changed(changeLightShow)
-  planetAmpCheckbox = createCheckbox('planetTex', false)
-  planetAmpCheckbox.position(width - 150, 150)
-  planetAmpCheckbox.changed(() => {
+  lightShowCheckBox = createCheckbox('LightShow', false)
+  lightShowCheckBox.position(width - 150, 120)
+  lightShowCheckBox.changed(changeLightShow)
+  planetAmpCheckBox = createCheckbox('planetTex', false)
+  planetAmpCheckBox.position(width - 150, 150)
+  planetAmpCheckBox.changed(() => {
     planetAmp = !planetAmp
   })
-  autoCamCheckbox = createCheckbox('AutoCam', false)
-  autoCamCheckbox.position(width - 150, 180)
-  autoCamCheckbox.changed(() => {
+  autoCamCheckBox = createCheckbox('AutoCam', false)
+  autoCamCheckBox.position(width - 150, 180)
+  autoCamCheckBox.changed(() => {
     autoCam = !autoCam
   })
 
   planet = new Planet(floor(random(3000, 8000)));
   sterne = new Stars(377)
   sterne.setStars()
-  
+
   //console.log(mic.getSources());
   //mic.start();
 
@@ -242,22 +248,13 @@ function draw() {
   // Audio Spektrum
   spectrum = fft.analyze(512) // .analyze muss laufen
   fft.smooth(smoothValue)
-  a = amplitude.getLevel()
-  amplitude.smooth(0.8)
+  amplitude.smooth(0.5)
 
   // "RaumKlang"
   /*   let verbAmount = map(easycam.getDistance(),300,3000,0,1);
     let verbAmp = map(easycam.getDistance(),300,3000,1,3);
     reverb.drywet(verbAmount);
     reverb.amp(verbAmp)  */
-
-  // Bänder der Analyse
-  let oBands = fft.getOctaveBands(1, 33)
-  //console.log(oBands);
-  let bands2 = fft.logAverages(oBands)
-  //console.log(bands2);
-  //let bands = fft.linAverages(12);
-  //console.log(bands);
 
   // Peaks
   peakDetect.update(fft)
@@ -268,22 +265,11 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-  mov0 = map(bands2[0] + bands2[1], 0, 512, 0, strenghtValuem0)
-  mov2 = map(bands2[2] + bands2[3], 0, 512, 0, strenghtValuem2)
-  mov4 = lerp(mov4, map(bands2[4] + bands2[5], 0, 255, 0, strenghtValuem4), 0.1)    // Interpolation der Höhen
-  mov6 = lerp(mov6, map(bands2[6] + bands2[7] + bands2[8], 0, 255, 0, strenghtValuem6), 0.1)
+  mov0 = map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0);
+  mov2 = map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem2);
+  mov4 = map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem4);
+  mov6 = lerp(mov6,map(fft.getEnergy("treble"), 0, 255, 0, strenghtValuem6),0.1);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
-  /*   bandValues(
-    mov0,
-    mov2,
-    mov4,
-    mov6,
-    bands2[0] + bands2[1],
-    bands2[2] + bands2[3],
-    bands2[4] + bands2[5],
-    bands2[6] + bands2[7] + bands2[8]
-  ); */
-  //logValues();
 
   // Kamera
   if (rotateCheck.checked) {
@@ -291,6 +277,7 @@ function draw() {
     easycam.rotateY(rotateSliderY.value / 100000)
     easycam.rotateZ(rotateSliderZ.value / 100000)
   }
+
   if (autoCam) {
     let count8 = peakCounter1.countMe(8);
     if (count8) {
@@ -315,10 +302,7 @@ function draw() {
   lichtMode[l]()
   lightShows[ls]()
 
-
-
   // Figur
-
   push()
   let centerVec = createVector(1, 0, 0)
   let planetVec = createVector(planet.planetX, planet.planetY, 0);
@@ -361,45 +345,11 @@ function draw() {
   //Planet
   planet.show()
 
- /*  texture(deepField);
-  noStroke();
-  noLights();
-  fill(col5,100,100)
-  sphere(100000) */
-}
-
-function changePlanetMode() {
-  mil = millis()
-  planetMode = !planetMode
-
-  if (!planetMode) {
-    sterne.setStars()
-    spaceSlider.value = 50000
-  } else {
-    planet = new Planet(random(1500, 15000));
-    sterne.setStarsPlanet()
-  }
-  if (planetMode) {
-    easycam.setRotation([-0.5, 0, -0.5, 0], 6000)
-    rotateSliderX.value = 1000000 / planet.size
-    rotateCheck.checked = true
-    easycam.setDistance(950, 3000)
-    spaceCheck.checked = true
-  } else {
-    easycam.setDistance(1500, 3000)
-    easycam.setRotation([-0.5, 1, -1, 0], 3000)
-  }
-}
-function changeLichtMode() {
-  l++
-  l %= 2
-  //console.log(l);
-}
-
-function changeLightShow() {
-  ls++
-  ls %= 2
-  mil = millis()
+  /*  texture(deepField);
+   noStroke();
+   noLights();
+   fill(col5,100,100)
+   sphere(100000) */
 }
 
 function sphaere(m, sSize) {
@@ -445,8 +395,44 @@ function sphaere(m, sSize) {
     endShape()
   }
 }
+
+function changePlanetMode() {
+  mil = millis()
+  planetMode = !planetMode
+
+  if (!planetMode) {
+    sterne.setStars()
+    spaceSlider.value = 50000
+  } else {
+    planet = new Planet(random(1500, 15000));
+    sterne.setStarsPlanet()
+  }
+  if (planetMode) {
+    easycam.setRotation([-0.5, 0, -0.5, 0], 6000)
+    rotateSliderX.value = 1000000 / planet.size
+    rotateCheck.checked = true
+    easycam.setDistance(950, 3000)
+    spaceCheck.checked = true
+  } else {
+    easycam.setDistance(1500, 3000)
+    easycam.setRotation([-0.5, 1, -1, 0], 3000)
+  }
+}
+
+function changeLichtMode() {
+  l++
+  l %= 2
+  //console.log(l);
+}
+
+function changeLightShow() {
+  ls++
+  ls %= 2
+  mil = millis()
+}
+
 function showTrail() {
-  ampHistory.push(a)
+  ampHistory.push(amplitude.getLevel())
 
   let maxArray = 50
   let dis = 50 + spaceSlider.value / 1000
@@ -520,6 +506,7 @@ function stopFuncAfter(del) {
     return true
   } else return false
 }
+
 function waitFuncFor(del) {
   // Beim change m = millis
   if (del + mil < millis()) {
@@ -666,6 +653,7 @@ let lichtMode = [
     }
   }
 ]
+
 function htmlHandler() {
   document.getElementById('m0').innerHTML = 'm0=' + m0
   document.getElementById('m1').innerHTML = 'm1=' + m1
@@ -696,7 +684,7 @@ function getAudioFile(file) {
   audio.play()
   fft.setInput(audio)
   //amplitude = new p5.Amplitude();
-  amplitude.setInput(audio)
+  //amplitude.setInput(audio)
   audioSourceBtn.innerHTML = 'AudioFile'
 }
 
@@ -863,6 +851,7 @@ function sliderLogic() {
   strenghtValuem4 = strenghtSliderm4.value / 100
   strenghtValuem6 = strenghtSliderm6.value / 100
 }
+
 function switchSource() {
   if (sourceIsStream) {
     audioSourceBtn.innerHTML = 'Mic/External'
@@ -970,62 +959,6 @@ function logValues() {
   )
 }
 
-function bandValues(mov0, mov2, mov4, mov6, band1, band2, band3, band4) {
-  console.log(
-    ' band1: ' + mov0,
-    +' ' + band1 + '\n',
-    'band2: ' + mov2,
-    +' ' + band2 + '\n',
-    'band3: ' + mov4,
-    +' ' + band3 + '\n',
-    'band4: ' + mov6,
-    +' ' + band4
-  )
-}
-
-/* let sketch = function (p) {
-  p.setup = function () {
-    var canvasp = p.createCanvas(312, 117)
-    canvasp.parent('canvasid')
-  }
-  p.draw = function () {
-    if (sidebar) {
-      let spectrum = fft.analyze(512)
-      p.background('#262126')
-      p.noFill()
-      p.strokeWeight(1)
-      p.beginShape()
-      for (i = 0; i < spectrum.length / 1.1; i++) {
-        //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
-        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
-      }
-      p.endShape()
-      let waveform = fft.waveform(512)
-      p.strokeWeight(1.2)
-      p.stroke(255)
-      p.noFill()
-      p.beginShape()
-
-      for (let i = 0; i < waveform.length; i++) {   // Mit WaveForm Figur modulieren!!! 
-        let x = map(i, 0, waveform.length, 0, p.width)
-        let y = map(waveform[i], -1, 1, 0, p.height / 2)
-        p.vertex(x, y)
-      }
-      p.endShape()
-    }
-  }
-}
-let node = document.createElement('div')
-new p5(sketch, node) */
-//window.document.getElementsByTagName('body')[0].appendChild(node);
-
-// Audio an in manchen Browsern Handy etc
-function touchStarted() {
-  getAudioContext().resume()
-}
-
-//Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit
-
 class Stars {
   constructor(amount) {
     this.amount = amount
@@ -1083,6 +1016,7 @@ class Stars {
         )
         strokeWeight(1 + this.pumper * 0.05)
 
+        // Warte mit Sternanimation
         if (waitFuncFor(9000)) {
           p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
           p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
@@ -1132,7 +1066,6 @@ class Stars {
     }
     return particlesTemp;
   }
-  
 }
 
 class Planet {
@@ -1149,9 +1082,9 @@ class Planet {
     this.pump = 0
     this.rings = floor(random(0, 13))
     this.hasMoon = (random(16) > 5) ? true : false;
-    this.moonX = random(3,8);
-    this.moonY = random(3,8);
-    this.moonZ = random(3,8);
+    this.moonX = random(3, 8);
+    this.moonY = random(3, 8);
+    this.moonZ = random(3, 8);
     this.moonSize = this.size * random(0.1, 0.33)
     this.moonSpeed = random(0.005, 0.01);
     this.moonTex = floor(random(tex.length))
@@ -1181,7 +1114,7 @@ class Planet {
 
     let dark = 0
     let planetCol = 0
-    let ampMe = a
+    let ampMe = amplitude.getLevel();
     if (
       planetMode &&
       this.planetDist >= this.planetSize
@@ -1213,7 +1146,7 @@ class Planet {
         let z = (planet.size * this.moonZ) * map(cos(speed), -PI, PI, -PI / 9, PI / 9)
         rotateX(PI / 2)
         translate(x, y, z)  //x - planet.size
-        rotateX(-PI/2)
+        rotateX(-PI / 2)
         rotateY(-speed)
         noStroke();
         noLights()
@@ -1278,3 +1211,46 @@ class PeakCounter {
     return false;
   }
 }
+
+let sketch = function (p) {
+  p.setup = function () {
+    var canvasp = p.createCanvas(312, 117)
+    canvasp.parent('canvasid')
+  }
+  p.draw = function () {
+    if (sidebar) {
+      let spectrum = fft.analyze(512)
+      p.background('#262126')
+      p.noFill()
+      p.strokeWeight(1)
+      p.beginShape()
+      for (let i = 0; i < spectrum.length / 1.1; i++) {
+        //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
+        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
+      }
+      p.endShape()
+      let waveform = fft.waveform(512)
+      p.strokeWeight(1.2)
+      p.stroke(255)
+      p.noFill()
+      p.beginShape()
+
+      for (let i = 0; i < waveform.length; i++) {   // Mit WaveForm Figur modulieren!!! 
+        let x = map(i, 0, waveform.length, 0, p.width)
+        let y = map(waveform[i], -1, 1, 0, p.height / 2)
+        p.vertex(x, y)
+      }
+      p.endShape()
+    }
+  }
+}
+
+let node = document.createElement('div')
+new p5(sketch, node)
+//window.document.getElementsByTagName('body')[0].appendChild(node);
+
+// Audio an in manchen Browsern Handy etc
+function touchStarted() {
+  getAudioContext().resume()
+}
+//Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit
