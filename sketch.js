@@ -1184,10 +1184,11 @@ class Planet {
       rotateX(PI / 2)
       stroke(col, 255, 255)
       let ringDistance = planet.size * 0.618;
+      let wave = fft.waveform(512); // analyze the waveform for circleWave
       for (let i = 3; i < this.rings; i++) {
         strokeWeight((i/2 + 6) * ampMe * 2)
         noFill()
-        this.circleWave(0, 0, this.planetSize + i * ringDistance,i*ringDistance/3)
+        this.circleWave(0, 0, this.planetSize + i * ringDistance,i*ringDistance/3,wave)
       }
       pop()
       if (this.hasMoon) {
@@ -1225,11 +1226,10 @@ class Planet {
     sphere(this.planetSize + this.pump, 24, 24)
     pop()
   }
-  circleWave(x,y,size,strength) {
+  circleWave(x,y,size,strength,wave) {
     push()
     translate(x,y);
-    angleMode(DEGREES)
-    let wave = fft.waveform(512); // analyze the waveform
+    angleMode(DEGREES)   
     for (let j = -1; j <= 1; j += 2) {
       beginShape();
       for (let i = 0; i <= 180; i++) {
