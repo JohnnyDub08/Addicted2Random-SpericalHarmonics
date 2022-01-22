@@ -1054,30 +1054,12 @@ class Stars {
       this.particles[i].add(getAround)
     }
   }
-  particlesPlanetTemp(amount) {
-    let particlesTemp = []
-    let space = planet.size / 4
-    for (let i = 0; i < amount; i++) {
-      particlesTemp.push(
-        createVector(random(-space, space), random(-space, space), random(-space, space)
-        )
-      )
-    }
-    for (let i = 0; i < particlesTemp.length; i++) {
-      let getAround = createVector(0, 0, 0)
-        .sub(particlesTemp[i])
-        .normalize()
-        .mult(planet.size * random(1.3, 1.618))
-      particlesTemp[i].add(getAround)
-    }
-    return particlesTemp;
-  }
   show() {
     push()
     translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
 
     if (planetMode && peakCounter2.countMe(4)) {
-      this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
+      this.tempParticles = particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
 
@@ -1122,6 +1104,24 @@ class Stars {
     }
     pop()
   }
+}
+function particlesPlanetTemp(amount) {
+  let particlesTemp = []
+  let space = planet.size / 4
+  for (let i = 0; i < amount; i++) {
+    particlesTemp.push(
+      createVector(random(-space, space), random(-space, space), random(-space, space)
+      )
+    )
+  }
+  for (let i = 0; i < particlesTemp.length; i++) {
+    let getAround = createVector(0, 0, 0)
+      .sub(particlesTemp[i])
+      .normalize()
+      .mult(planet.size * random(1.3, 1.618))
+    particlesTemp[i].add(getAround)
+  }
+  return particlesTemp;
 }
 
 class Planet {
@@ -1226,15 +1226,15 @@ class Planet {
     sphere(this.planetSize + this.pump, 24, 24)
     pop()
   }
-  circleWave(x,y,size,strength,wave) {
+  circleWave(x,y,size,strength,fftwave) {
     push()
     translate(x,y);
     angleMode(DEGREES)   
     for (let j = -1; j <= 1; j += 2) {
       beginShape();
       for (let i = 0; i <= 180; i++) {
-        let index = floor(map(i, 0, 180, 0, wave.length - 1));
-        let r = map(wave[index], -1, 1, size-strength, size+strength);
+        let index = floor(map(i, 0, 180, 0, fftwave.length - 1));
+        let r = map(fftwave[index], -1, 1, size-strength, size+strength);
         let x = r * sin(i) * j;
         let y = r * cos(i);
         vertex(x, y);
