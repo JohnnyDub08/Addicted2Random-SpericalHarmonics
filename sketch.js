@@ -92,7 +92,12 @@ let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetAmp
 // Counter
 let peakCounter1, peakCounter2;
 
+// Landing SoundEffekt
+let soundFx;
+
 function preload() {
+  soundFormats('mp3', 'ogg');
+  soundFx = loadSound('sFx');
   tex = [
     loadImage('planet1d.jpeg'),
     loadImage('moon_tex.jpeg'),
@@ -156,8 +161,8 @@ function setup() {
   centerCanvas()
 
   // Audio Analyse
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
-  audio.play();
+  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //('https://ice2.somafm.com/groovesalad-128-aac');
+  setTimeout(()=>audio.play(),2500);
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   amplitude = new p5.Amplitude()
@@ -183,7 +188,7 @@ function setup() {
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
-  easycam.setRotation([1, 0, 0, 0], 6000)
+  easycam.setRotation([1, -0.5, 0.5, -0.5], 6000)
   easycam.setDistance(1000, 6000)
 
   let eyeZ = height / 2 / tan(PI / 6)

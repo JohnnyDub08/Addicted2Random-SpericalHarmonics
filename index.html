@@ -135,7 +135,6 @@
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
       transition: all .5s cubic-bezier(0, 0, .58, 1);
-      border-radius: 10px;
       z-index: 1;
     }
 
@@ -145,8 +144,8 @@
       right: 38.2%;
       text-align: center;
       font-family: 'Audiowide', cursive !important;
-      font-size: 3rem;
-      /* transition: all .05s; */
+      font-size: 5rem;
+      transition: all .01s;
     }
 
     #box2 {
@@ -159,17 +158,16 @@
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
       transition: all .5s cubic-bezier(0, 0, .58, 1);
-      border-radius: 10px;
       z-index: 1;
     }
 
     #box2>div {
       position: absolute;
-      /* left: 55%; */
-      left: 38.2%;
+      left:  38.2%; 
       text-align: center;
       font-family: 'Audiowide', cursive !important;
-      font-size: 3rem;
+      font-size: 5rem;
+      transition: all .01s;
     }
 
     /*     .image {
@@ -191,7 +189,14 @@
 <body>
   <script>
     let box1, box2, text1, text2;
-    setTimeout(() => init(), 500);
+    let htmlText1 = 'addicted';
+    let htmlText2 = ' 2random';
+
+    let temp;
+    let temp2;
+    let temp3 = [];
+    let temp4 = [];
+    window.onload = setTimeout(() => init(), 500);
     function init() {
       console.log("init")
       text1 = document.getElementById("txt1");
@@ -201,21 +206,39 @@
       //console.log(text1)
       window.requestAnimationFrame(textGlitch);
     }
-   
+
+    let j = 0;
     function textGlitch(timeStamp) {
+      if (timeStamp < 3000) {
+        if (j < 8) {   
+          temp =  (j % floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase(); 
+          temp3.push(temp)      
+          text1.innerHTML = temp3.join('').toString(); 
+          text2.innerHTML = " "; 
+          j++; 
+          }
+        else if (j < 16) {
+          temp2 = (j % floor(Math.random() * 2) == 0) ? htmlText2.charAt(j % htmlText2.length).toUpperCase() : htmlText2.charAt(j % htmlText2.length).toLowerCase();
+          temp4.push(temp2)
+          text2.innerHTML = temp4.join('').toString();          
+          j++;      
+        } 
 
-      if (timeStamp < 2000) {
-        let t = Math.random() * 60 + 10;
-        let t2 = Math.random() * 60 + 10;
-        text1.style.fontSize = floor(t).toString() + "px";
-        text2.style.fontSize = floor(t2).toString() + "px";
-        text1.style.width = floor(t2).toString() + "%";
-        text2.style.width = floor(t).toString() + "%";
+        let ran01 = Math.random() * 50 + 30;
+        let ran02 = Math.random() * 50 + 30;
 
-        setTimeout(() => window.requestAnimationFrame(textGlitch), t);
+        text1.style.fontSize = floor(ran01).toString() + "px";
+        text2.style.fontSize = floor(ran02).toString() + "px";
+        text1.style.width = floor(ran02*0.5).toString() + "%";
+        text2.style.width = floor(ran01*0.5).toString() + "%";
+        
+        soundFx.rate(Math.random()*2);
+        soundFx.play();
+        setTimeout(() => window.requestAnimationFrame(textGlitch), timeStamp * timeStamp / 20000);
       }
+      //else { text1.innerHTML = "Addicted" }
     }
-    setTimeout(() => startSide(), 2500);
+    setTimeout(() => startSide(), 3000);
     function startSide() {
       box1.style.width = "0%";
       box1.style.height = "0%";
@@ -276,7 +299,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="-2100" max="2100" value="-560" class="slider" id="m4Slider">
+          <input type="range" min="-2100" max="2100" value="1170" class="slider" id="m4Slider">
         </div>
         <div class="col-sm-3">
           <label id="m4" class="schrift">m4</label>
@@ -345,7 +368,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="-2100" max="2100" value="324" class="slider" id="strenghtSliderm4">
+          <input type="range" min="-2100" max="2100" value="-1150" class="slider" id="strenghtSliderm4">
         </div>
         <div class="col-sm-3">
           <label id="sM4" class="schrift">m4</label>
@@ -353,7 +376,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="-2100" max="2100" value="60" class="slider" id="strenghtSliderm6">
+          <input type="range" min="-2100" max="2100" value="1900" class="slider" id="strenghtSliderm6">
         </div>
         <div class="col-sm-3">
           <label id="sM6" class="schrift">m6</label>
