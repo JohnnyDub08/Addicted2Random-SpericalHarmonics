@@ -266,9 +266,9 @@ function draw() {
   }
 
   mov0 = map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0);
-  mov2 = map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem2);
-  mov4 = map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem4);
-  mov6 = lerp(mov6,map(fft.getEnergy("treble"), 0, 255, 0, strenghtValuem6),0.1);
+  mov2 = map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2);
+  mov4 = lerp(mov4,map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4),0.1);
+  mov6 = lerp(mov6,map(fft.getEnergy("highMid")+fft.getEnergy("treble"), 0, 512, 0, strenghtValuem6),0.1);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
 
   // Kamera
