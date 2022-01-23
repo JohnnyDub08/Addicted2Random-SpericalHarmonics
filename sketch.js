@@ -156,7 +156,7 @@ function setup() {
   centerCanvas()
 
   // Audio Analyse
-  audio = createAudio('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
+  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg");//('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");
   audio.play();
   fft = new p5.FFT()
   mic = new p5.AudioIn()

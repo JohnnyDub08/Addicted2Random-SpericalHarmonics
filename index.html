@@ -134,15 +134,16 @@
       background-color: #262126;
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
-      transition: all .8s cubic-bezier(0, 0, .58, 1);
+      transition: all .5s cubic-bezier(0, 0, .58, 1);
       border-radius: 10px;
       z-index: 1;
     }
-    #box1>div{
-      position:absolute;
+
+    #box1>div {
+      position: absolute;
       bottom: 50%;
-      left: 40%;
-      text-align: center; 
+      right: 38.2%;
+      text-align: center;
       font-family: 'Audiowide', cursive !important;
       font-size: 3rem;
       /* transition: all .05s; */
@@ -157,18 +158,18 @@
       background-color: #262126;
       overflow-x: hidden;
       -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
-      transition: all .8s cubic-bezier(0, 0, .58, 1);
+      transition: all .5s cubic-bezier(0, 0, .58, 1);
       border-radius: 10px;
       z-index: 1;
     }
 
     #box2>div {
-      position:absolute;
-      right: 40%;
+      position: absolute;
+      /* left: 55%; */
+      left: 38.2%;
       text-align: center;
       font-family: 'Audiowide', cursive !important;
       font-size: 3rem;
-      
     }
 
     /*     .image {
@@ -189,39 +190,37 @@
 
 <body>
   <script>
-    let secondsPassed;
-    let oldTimeStamp;
-    let text1,text2;
+    let box1, box2, text1, text2;
+    setTimeout(() => init(), 500);
     function init() {
       console.log("init")
       text1 = document.getElementById("txt1");
       text2 = document.getElementById("txt2");
+      box1 = document.getElementById("box1");
+      box2 = document.getElementById("box2");
       //console.log(text1)
       window.requestAnimationFrame(textGlitch);
     }
-    setTimeout(() => init(), 500);
+   
     function textGlitch(timeStamp) {
 
-    secondsPassed = (timeStamp - oldTimeStamp) / 1000;
-    oldTimeStamp = timeStamp;
-    //console.log(timeStamp)
-    if ( timeStamp < 2000) {
-    let t = Math.random()*60+10;
-    let t2 = Math.random()*60+10;
-     text1.style.fontSize = floor(t).toString()+"px";
-     text2.style.fontSize = floor(t2).toString()+"px";
-     text1.style.width= floor(t2).toString()+"%";
-     text2.style.width = floor(t).toString()+"%";
-    
-     setTimeout(() => window.requestAnimationFrame(textGlitch), 30);
+      if (timeStamp < 2000) {
+        let t = Math.random() * 60 + 10;
+        let t2 = Math.random() * 60 + 10;
+        text1.style.fontSize = floor(t).toString() + "px";
+        text2.style.fontSize = floor(t2).toString() + "px";
+        text1.style.width = floor(t2).toString() + "%";
+        text2.style.width = floor(t).toString() + "%";
+
+        setTimeout(() => window.requestAnimationFrame(textGlitch), t);
+      }
     }
-    }
-    setTimeout(() => startSide(), 3000);
+    setTimeout(() => startSide(), 2500);
     function startSide() {
-      document.getElementById("box1").style.width = "0%";
-      document.getElementById("box1").style.height = "0%";
-      document.getElementById("box2").style.width = "0%";
-      document.getElementById("box2").style.height = "0%";
+      box1.style.width = "0%";
+      box1.style.height = "0%";
+      box2.style.width = "0%";
+      box2.style.height = "0%";
     }
 
   </script>
