@@ -145,7 +145,7 @@
       text-align: center;
       font-family: 'Audiowide', cursive !important;
       font-size: 5rem;
-      transition: all .01s;
+      transition: all .07s;
     }
 
     #box2 {
@@ -163,11 +163,11 @@
 
     #box2>div {
       position: absolute;
-      left:  38.2%; 
+      left: 38.2%;
       text-align: center;
       font-family: 'Audiowide', cursive !important;
       font-size: 5rem;
-      transition: all .01s;
+      transition: all .07s;
     }
 
     /*     .image {
@@ -187,70 +187,11 @@
 </head>
 
 <body>
-  <script>
-    let box1, box2, text1, text2;
-    let htmlText1 = 'addicted';
-    let htmlText2 = ' 2random';
-
-    let temp;
-    let temp2;
-    let temp3 = [];
-    let temp4 = [];
-    window.onload = setTimeout(() => init(), 500);
-    function init() {
-      console.log("init")
-      text1 = document.getElementById("txt1");
-      text2 = document.getElementById("txt2");
-      box1 = document.getElementById("box1");
-      box2 = document.getElementById("box2");
-      //console.log(text1)
-      window.requestAnimationFrame(textGlitch);
-    }
-
-    let j = 0;
-    function textGlitch(timeStamp) {
-      if (timeStamp < 3000) {
-        if (j < 8) {   
-          temp =  (j % floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase(); 
-          temp3.push(temp)      
-          text1.innerHTML = temp3.join('').toString(); 
-          text2.innerHTML = " "; 
-          j++; 
-          }
-        else if (j < 16) {
-          temp2 = (j % floor(Math.random() * 2) == 0) ? htmlText2.charAt(j % htmlText2.length).toUpperCase() : htmlText2.charAt(j % htmlText2.length).toLowerCase();
-          temp4.push(temp2)
-          text2.innerHTML = temp4.join('').toString();          
-          j++;      
-        } 
-
-        let ran01 = Math.random() * 50 + 30;
-        let ran02 = Math.random() * 50 + 30;
-
-        text1.style.fontSize = floor(ran01).toString() + "px";
-        text2.style.fontSize = floor(ran02).toString() + "px";
-        text1.style.width = floor(ran02*0.5).toString() + "%";
-        text2.style.width = floor(ran01*0.5).toString() + "%";
-        
-        soundFx.rate(Math.random()*2);
-        soundFx.play();
-        setTimeout(() => window.requestAnimationFrame(textGlitch), timeStamp * timeStamp / 20000);
-      }
-      //else { text1.innerHTML = "Addicted" }
-    }
-    setTimeout(() => startSide(), 3000);
-    function startSide() {
-      box1.style.width = "0%";
-      box1.style.height = "0%";
-      box2.style.width = "0%";
-      box2.style.height = "0%";
-    }
-
-  </script>
-  <div id="box1" onclick="startSide()">
+ 
+  <div id="box1" onclick="">
     <div id="txt1">Addicted</div>
   </div>
-  <div id="box2" onclick="startSide()">
+  <div id="box2" onclick="">
     <div id="txt2">2Random</div>
   </div>
   <!-- <img src="a2r.png" alt="" class="image"> -->
@@ -403,7 +344,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="0" max="50000" value="12000" class="slider" id="spaceSlider">
+          <input type="range" min="0" max="50000" value="33000" class="slider" id="spaceSlider">
         </div>
         <div class="col-sm-3">
           <label id="travelSpeed" class="schrift">speed</label>
@@ -498,11 +439,108 @@
   </div>
 
   <script>
+    let box1, box2, text1, text2;
+    let htmlText1 = 'Addicted';
+    let htmlText2 = ' 2Random';
+
+    let temp;
+    let temp2;
+    let temp3 = [];
+    let temp4 = [];
+    window.addEventListener('load', (event) => {setTimeout(() => init(), 1200)});
+    function init() {
+      text1 = document.getElementById("txt1");
+      text2 = document.getElementById("txt2");
+      box1 = document.getElementById("box1");
+      box2 = document.getElementById("box2");
+      window.requestAnimationFrame(textGlitch);
+    }
+
+    function customIterator() {
+      let n = 50;
+      return {
+        next: function () {
+          n *= 1.02;
+          return { value: n, done: false };
+        }
+      };
+    }
+    let n = customIterator();
+
+    let j = 0;
+    function textGlitch(timeStamp) {
+      //console.log(timeStamp)
+      if (timeStamp < 4200) {
+        if (j < 8) {
+          temp = (j % Math.floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase();
+          temp3.push(temp)
+          text1.innerHTML = temp3.join('').toString();
+          text2.innerHTML = " ";
+          j++;
+        }
+        else if (j < 16) {
+          temp2 = (j % Math.floor(Math.random() * 2) == 0) ? htmlText2.charAt(j % htmlText2.length).toUpperCase() : htmlText2.charAt(j % htmlText2.length).toLowerCase();
+          temp4.push(temp2)
+          text2.innerHTML = temp4.join('').toString();
+          j++;
+        } else if (j < 24) {
+          text1.innerHTML = temp3.slice(j - 15).join('').toUpperCase();
+          j++;
+        }
+        else {
+          text2.innerHTML = temp4.slice(j - 23).join('').toUpperCase();
+          j++;
+        }
+
+        let ran01 = Math.random() * 70 + 10;
+        let ran02 = Math.random() * 70 + 10;
+
+        text1.style.fontSize = Math.floor(ran01).toString() + "px";
+        text2.style.fontSize = Math.floor(ran02).toString() + "px";
+        text1.style.width = Math.floor(ran02 * 0.5).toString() + "%";
+        text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
+
+        let filterFreq = map(ran01, 10, 80, 33, 2500);
+        let filterWidth = map(ran02, 10, 80, 50, 90);
+        filter.set(filterFreq, filterWidth);
+        
+        soundFx.rate(Math.random() * 3.33 + 0.33);
+        soundFx.amp(5);
+        soundFx.play();
+        setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
+      } else {
+        text1.innerHTML = temp3.join('');
+        text1.style.fontSize = "5rem";
+        text1.style.width = "50%";
+        text2.innerHTML = temp4.join('');
+        text2.style.fontSize = "5rem";
+        text2.style.width = "50%";
+
+        filter.set(1200, 10);
+        filter.disconnect()
+        reverb.process(soundFx, 2, 1.0);
+        reverb.set(5,1.00) 
+        soundFx.connect();
+        soundFx.rate(0.5);
+        soundFx.play();
+      }
+    }
+    setTimeout(() => startSide(), 5500);
+    function startSide() {
+
+      box1.style.width = "0%";
+      box1.style.height = "0%";
+      box2.style.width = "0%";
+      box2.style.height = "0%";
+    }
+
+  </script>
+
+  <script>
     var sidebar = false; // Für Audio Visual P5 an aus
     let bar = 0;
     function openNav() {
-      let sw = window.innerWidth;
-      let widthRight = (sw > 768) ? "333px" : "333px" //"61.4%";
+      let widthRight = "339px"; //"61.4%";
       switch (bar) {
         case 0:
           document.getElementById("leftSidebar").style.width = widthRight;

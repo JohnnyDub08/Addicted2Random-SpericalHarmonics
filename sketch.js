@@ -1,5 +1,5 @@
 'use strict';
-let cnv, mic, audio, fft, spectrum, peakDetect, amplitude;
+let cnv, mic, audio, fft, spectrum, peakDetect, amplitude, filter;
 let easycam;
 let shape = [];
 let rotateShape = 0;
@@ -72,11 +72,12 @@ let l = 0 // LichtArray
 let ls = 0 // LichtShowArray
 let scheinW = false
 let planetAmp = false
-let tex
+let tex;
+let deepField;
 let lerpSpace
 
 // Kamera Stuff
-let autoCam = false;
+let autoCam = true;
 let state2;
 
 // SoundStuff
@@ -123,7 +124,7 @@ function preload() {
     loadImage('venus_surface.jpeg'),
     loadImage('venus_surface.jpeg')
   ]
-  /* deepField = loadImage("Nebula.png") */
+  deepField = loadImage("Nebula.png");
 }
 
 function centerCanvas() {
@@ -152,8 +153,13 @@ function windowResized() {
   autoCamCheckBox.position(width - 150, 180)
 }
 
+function loaded() {
+  //console.log(audio)
+  setTimeout(() => audio.play(), 3500);
+  
+}
 function setup() {
-  setAttributes("antialias", true);
+  //setAttributes("antialias", true);
   setAttributes('alpha', false)
   cnv = createCanvas(windowWidth, windowHeight, WEBGL)
   cnv.style('z-index', -1)
@@ -161,10 +167,14 @@ function setup() {
   centerCanvas()
 
   // Audio Analyse
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg"); //('https://ice2.somafm.com/groovesalad-128-aac');
-  setTimeout(()=>audio.play(),2500);
+  audio = createAudio('https://ice2.somafm.com/defcon-128-aac', loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
+  
   fft = new p5.FFT()
   mic = new p5.AudioIn()
+  filter = new p5.Filter('bandpass')
+  filter.amp(5)
+  soundFx.disconnect();
+  soundFx.connect(filter)
   amplitude = new p5.Amplitude()
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
@@ -188,8 +198,8 @@ function setup() {
   //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
-  easycam.setRotation([1, -0.5, 0.5, -0.5], 6000)
-  easycam.setDistance(1000, 6000)
+  easycam.setRotation([-1, -0.5, 0.5, -0.5], 10000)
+  easycam.setDistance(1000, 10000)
 
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
@@ -202,10 +212,10 @@ function setup() {
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
-  /*   reverb = new p5.Reverb(); //audio.disconnect();  //reverb.drywet(0.33);
-    reverb.process(audio, 3, 0.0);
-    reverb.amp(2) 
-    reverb.set(7,0.00) */
+    reverb = new p5.Reverb();   //reverb.drywet(0.33);
+    reverb.process(filter, 2, 1.0);
+    reverb.amp(1) 
+    //reverb.set(7,0.00) 
 
   // PlanetDebug
   planetCheckBox = createCheckbox('planetMode', false)
@@ -227,7 +237,7 @@ function setup() {
   planetAmpCheckBox.changed(() => {
     planetAmp = !planetAmp
   })
-  autoCamCheckBox = createCheckbox('AutoCam', false)
+  autoCamCheckBox = createCheckbox('AutoCam', true)
   autoCamCheckBox.position(width - 150, 180)
   autoCamCheckBox.changed(() => {
     autoCam = !autoCam
@@ -243,6 +253,7 @@ function setup() {
   peakCounter1 = new PeakCounter();
   peakCounter2 = new PeakCounter();
 }
+
 function draw() {
   //console.log(getFrameRate())
   // Disco Mode auf Peak legen
@@ -272,8 +283,8 @@ function draw() {
 
   mov0 = map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0);
   mov2 = map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2);
-  mov4 = lerp(mov4,map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4),0.1);
-  mov6 = lerp(mov6,map(fft.getEnergy("highMid")+fft.getEnergy("treble"), 0, 512, 0, strenghtValuem6),0.1);
+  mov4 = lerp(mov4, map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4), 0.3);
+  mov6 = lerp(mov6, map(fft.getEnergy("highMid") + fft.getEnergy("treble"), 0, 512, 0, strenghtValuem6), 0.3);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
 
   // Kamera
@@ -344,17 +355,19 @@ function draw() {
     }
   }
 
+/*   texture(deepField);
+  //noStroke();
+  //noLights();
+  //fill(col5, 100, 100)
+  sphere(90000) */
+
   //Sterne
   sterne.show()
 
   //Planet
   planet.show()
 
-  /*  texture(deepField);
-   noStroke();
-   noLights();
-   fill(col5,100,100)
-   sphere(100000) */
+
 }
 
 function sphaere(m, sSize) {
@@ -389,11 +402,11 @@ function sphaere(m, sSize) {
     beginShape(TRIANGLE_STRIP)
     for (let j = 0; j < total + 1; j++) {
       v1 = shape[i][j % total]
-      let v3 = v1
-      normal(v3)
+      //let v3 = v1
+      normal(v1)
       vertex(v1.x, v1.y, v1.z)
       v2 = shape[i + 1][j % total]
-      let v4 = v2
+      //let v4 = v2
       //normal(v4);
       vertex(v2.x, v2.y, v2.z)
     }
@@ -1136,8 +1149,8 @@ class Planet {
       rotateX(PI / 2)
       stroke(col, 255, 255)
       let ringDistance = planet.size * 0.618;
-      let wave = fft.waveform(512); // analyze the waveform for circleWave
-      for (let i = 3; i < this.rings; i++) {
+      let wave = fft.waveform(); // analyze the waveform for circleWave
+      for (let i = 3; i < this.rings; i++) {  
         strokeWeight((i / 2 + 6) * ampMe * 2)
         noFill()
         this.circleWave(0, 0, this.planetSize + i * ringDistance, i * ringDistance / 3, wave)
@@ -1217,14 +1230,14 @@ class PeakCounter {
   }
 }
 
-let sketch = function (p) {
+/* let sketch = function (p) {
   p.setup = function () {
     var canvasp = p.createCanvas(312, 117)
     canvasp.parent('canvasid')
   }
   p.draw = function () {
     if (sidebar) {
-      let spectrum = fft.analyze(512)
+      //let spectrum = fft.analyze(512)
       p.background('#262126')
       p.noFill()
       p.strokeWeight(1)
@@ -1251,7 +1264,7 @@ let sketch = function (p) {
 }
 
 let node = document.createElement('div')
-new p5(sketch, node)
+new p5(sketch, node) */
 //window.document.getElementsByTagName('body')[0].appendChild(node);
 
 // Audio an in manchen Browsern Handy etc
