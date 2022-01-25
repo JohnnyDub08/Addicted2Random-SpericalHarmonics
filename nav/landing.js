@@ -29,8 +29,15 @@ let n = customIterator();
 
 let j = 0;
 function textGlitch(timeStamp) {
-  //console.log(timeStamp)
+
   if (timeStamp < 4200) {
+    let ran01 = Math.random() * 70 + 10;
+    let ran02 = Math.random() * 70 + 10;
+    text1.style.fontSize = Math.floor(ran01).toString() + "px";
+    text2.style.fontSize = Math.floor(ran02).toString() + "px";
+    text1.style.width = Math.floor(ran02 * 0.5).toString() + "%";
+    text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
+    
     if (j < 8) {
       temp = (j % Math.floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase();
       temp3.push(temp)
@@ -52,17 +59,9 @@ function textGlitch(timeStamp) {
       j++;
     }
 
-    let ran01 = Math.random() * 70 + 10;
-    let ran02 = Math.random() * 70 + 10;
-
-    text1.style.fontSize = Math.floor(ran01).toString() + "px";
-    text2.style.fontSize = Math.floor(ran02).toString() + "px";
-    text1.style.width = Math.floor(ran02 * 0.5).toString() + "%";
-    text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
-
     if (j < 33) {
-      let filterFreq = map2(ran01, 10, 80, 33, 2500, 7, 2);
-      let filterWidth = map2(ran02, 10, 80, 50, 90, 7, 2);
+      let filterFreq = map(ran01, 10, 80, 33, 2500);
+      let filterWidth = map2(ran02, 10, 80, 50, 90, 3, 2);
       filter.set(filterFreq, filterWidth);
       soundFx.rate(Math.random() * 3.33 + 0.33);
       soundFx.amp(8);
@@ -71,7 +70,6 @@ function textGlitch(timeStamp) {
 
     setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
   } else {
-
     text1.innerHTML = temp3.join('');
     text1.style.transition = "all .12s";
     text1.style.fontSize = "5rem";
@@ -81,9 +79,8 @@ function textGlitch(timeStamp) {
     text2.style.transition = "all .12s";
     text2.style.fontSize = "5rem";
     text2.style.width = "50%";
-    
     //filter.set(1200, 10);
-    filter.disconnect()
+    filter.disconnect();
     reverb.process(soundFx, 2, 1.0);
     reverb.set(5, 1.00)
     soundFx.connect();
@@ -93,7 +90,6 @@ function textGlitch(timeStamp) {
 }
 setTimeout(() => startSide(), 5500);
 function startSide() {
-
   box1.style.width = "0%";
   box1.style.height = "0%";
   box2.style.width = "0%";

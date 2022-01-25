@@ -39,11 +39,11 @@ let tex;
 let deepField;
 
 // Kamera Stuff
-let autoCam = true;
+let autoCam = false;
 let state2;
 
 // SoundStuff
-let reverb
+let reverb;
 let mov0 = 0;
 let mov2 = 0;
 let mov4 = 0;
@@ -121,7 +121,7 @@ function setup() {
   centerCanvas()
 
   // Audio Analyse
-  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg", loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 'https://ice2.somafm.com/defcon-128-aac'
+  audio = createAudio('https://ice2.somafm.com/defcon-128-aac', loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
@@ -133,6 +133,7 @@ function setup() {
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
   amplitude.setInput(audio);
+  amplitude.smooth(0.7)
 
   // get GUI/Slider ids
   htmlEvents()
@@ -191,7 +192,7 @@ function setup() {
   planetAmpCheckBox.changed(() => {
     planetAmp = !planetAmp
   })
-  autoCamCheckBox = createCheckbox('AutoCam', true)
+  autoCamCheckBox = createCheckbox('AutoCam', false)
   autoCamCheckBox.position(width - 150, 180)
   autoCamCheckBox.changed(() => {
     autoCam = !autoCam
@@ -230,15 +231,16 @@ function draw() {
   peakDetect.update(fft)
 
   if (peakCheck.checked && peakDetect.isDetected) {
-    sSize = lerp(sSize, 2, 0.5)
+    sSize = lerp(sSize, 1.5, 0.5)
   } else {
     sSize = lerp(sSize, 1, 0.1)
   }
+  
 
-  mov0 = map2(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0,0,1);
-  mov2 = map2(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem2,0,1);
-  mov4 = map2(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem4,0,1);
-  mov6 = map2(fft.getEnergy("treble"), 0, 255, 0, strenghtValuem6,0,1);
+  mov0 = map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0);
+  mov2 = map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2);
+  mov4 = map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4);
+  mov6 = map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem6);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
 
   // Kamera
@@ -249,7 +251,7 @@ function draw() {
   }
 
   if (autoCam) {
-    let count8 = peakCounter1.countMe(8);
+    let count8 = peakCounter1.countMe(12);
     if (count8) {
       //console.log("Camera Neu")
       if (!planetMode)
@@ -347,7 +349,7 @@ function sphaere(m, sSize) {
       shape[i][j] = createVector(x, y, z).mult(60 * sSize)
     }
   }
-  specularMaterial(90, 0.96)
+  specularMaterial(190, 0.96)
 
   for (let i = 0; i < total; i++) {
     let v1, v2
@@ -929,6 +931,11 @@ function logValues() {
   )
 }
 
+function rampUp(x,t) {
+  x = lerp(x,1,t);
+  return x;
+}
+
 class Stars {
   constructor(amount) {
     this.amount = amount
@@ -971,7 +978,7 @@ class Stars {
     push()
     translate(planet.planetX, planet.planetY, 0) // Sterne werden mit dem Planet verschoben
 
-    if (planetMode && peakCounter2.countMe(4)) {
+    if (planetMode && peakCounter2.countMe(8)) {
       this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
@@ -986,9 +993,10 @@ class Stars {
         // Warte mit Sternanimation
         let interpolBool = (floor(this.particles[0].x) != floor(this.tempParticles[0].x));  // Interpolation nötig?
         if (waitFuncFor(9000) && interpolBool) {
-          p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
-          p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
-          p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
+          //setInterval(adsr,0)
+          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.01,0.01));   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
+          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.01,0.03));
+          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.01,0.02));
           i++;
         }
 
