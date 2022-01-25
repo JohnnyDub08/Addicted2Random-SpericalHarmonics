@@ -120,7 +120,7 @@
     text-align: center;
     font-family: 'Audiowide', cursive !important;
     font-size: 5rem;
-    transition: all .07s;
+    transition: all .01s;
   }
 
   #box2 {
@@ -142,7 +142,7 @@
     text-align: center;
     font-family: 'Audiowide', cursive !important;
     font-size: 5rem;
-    transition: all .07s;
+    transition: all .01s;
   }
   input{
     cursor: pointer;

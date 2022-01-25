@@ -1,4 +1,5 @@
 'use strict';
+
 let cnv, mic, audio, fft, spectrum, peakDetect, amplitude, filter;
 let easycam;
 let shape = [];
@@ -109,8 +110,7 @@ function windowResized() {
 
 function loaded() {
   //console.log(audio)
-  setTimeout(() => audio.play(), 1500);
-
+  setTimeout(() => audio.play(), 4500);
 }
 function setup() {
   //setAttributes("antialias", true);
@@ -126,7 +126,7 @@ function setup() {
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   filter = new p5.Filter('bandpass')
-  filter.amp(5)
+  filter.amp(3)
   soundFx.disconnect();
   soundFx.connect(filter)
   amplitude = new p5.Amplitude()
@@ -235,10 +235,10 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-  mov0 = map(fft.getEnergy(33, 96), 0, 255, 0, strenghtValuem0);
-  mov2 = map(fft.getEnergy(120, 1100), 0, 255, 0, strenghtValuem2);
-  mov4 = map(fft.getEnergy(1200, 3500), 0, 255, 0, strenghtValuem4);
-  mov6 = lerp(mov6, map(fft.getEnergy(3600, 20000), 0, 255, 0, strenghtValuem6), 0.1);
+  mov0 = map2(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0,0,1);
+  mov2 = map2(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem2,0,1);
+  mov4 = map2(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem4,0,1);
+  mov6 = map2(fft.getEnergy("treble"), 0, 255, 0, strenghtValuem6,0,1);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
 
   // Kamera
@@ -251,7 +251,7 @@ function draw() {
   if (autoCam) {
     let count8 = peakCounter1.countMe(8);
     if (count8) {
-      console.log("Camera Neu")
+      //console.log("Camera Neu")
       if (!planetMode)
         state2 = {
           distance: random(400, 1500), center: [0, 0, 0], rotation: [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)]
@@ -352,14 +352,14 @@ function sphaere(m, sSize) {
   for (let i = 0; i < total; i++) {
     let v1, v2
     beginShape(TRIANGLE_STRIP)
+/*     noFill();
+    strokeWeight(0.7)   // WireframeMode?
+    stroke(255) */
     for (let j = 0; j < total + 1; j++) {
       v1 = shape[i][j % total]
-      //let v3 = v1
       normal(v1)
       vertex(v1.x, v1.y, v1.z)
       v2 = shape[i + 1][j % total]
-      //let v4 = v2
-      //normal(v4);
       vertex(v2.x, v2.y, v2.z)
     }
     endShape()
@@ -503,10 +503,10 @@ let lichtMode = [
 
     shininess(25)
 
-    directionalLight(col, 255, 255, -1, 1, 0);
-    directionalLight(col2, 255, 255, 1, 1, 0);
-    directionalLight(col3, 255, 255, -1, -1, 0);
-    directionalLight(col4, 255, 255, 1, -1, 0);
+    directionalLight(col, 255, 100, -1, 1, 0);
+    directionalLight(col2, 255, 100, 1, 1, 0);
+    directionalLight(col3, 255, 100, -1, -1, 0);
+    directionalLight(col4, 255, 100, 1, -1, 0);
     pointLight(col, 255, 255, dirX, dirY, x2Light)
     pointLight(col2, 255, 255, xLight, yLight, y2Light)
     pointLight(col3, 255, 255, -xLight, -x2Light, -yLight)
@@ -1060,7 +1060,7 @@ class Planet {
 
   show() {
     if (planetMode) {
-      this.planetDist = lerp(this.planetDist, this.dist, 0.01)
+      this.planetDist = lerp(this.planetDist, this.dist, 0.03)
       this.planetSize = lerp(this.planetSize, this.size, 0.01)
       this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
@@ -1069,6 +1069,7 @@ class Planet {
       this.planetSize = lerp(this.planetSize, 0, 0.07)
       this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
+      this.rise = 0.001;
     }
 
     this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI; //(frameCount / (planet.size * 0.1)) % TWO_PI
@@ -1086,7 +1087,7 @@ class Planet {
     if (planetMode && this.planetDist >= this.planetSize) {
       this.pump = map(amplitude.getLevel(), 0, 1, 0, 200)
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
-      planetCol = map(amplitude.getLevel(), 0, 1, 0, 200)
+      planetCol = map(amplitude.getLevel(), 0, 1, 50, 150)
     } else {
       this.pump = 0
     }
@@ -1116,7 +1117,7 @@ class Planet {
         noLights()
         //ambientLight(127);
         lichtMode[0]()
-        pointLight(col5, 127, 127, -1, 1, 0)
+        pointLight(255, -1, 0.5, 0)
         texture(tex[this.moonTex])
         //specularMaterial(255)
         sphere(this.moonSize)
@@ -1125,9 +1126,9 @@ class Planet {
     }
     noStroke()
     fill(255)
-    if (l == 1) specularMaterial(col5, 255, planetCol + 55)
+    if (l == 1) specularMaterial(col5, 50, planetCol)
     else {
-      ambientMaterial(col5, 255, planetCol + 55)
+      ambientMaterial(col5, 50, 50)
     }
     if (planetAmp) {
       noLights()

@@ -44,11 +44,11 @@ function textGlitch(timeStamp) {
       text2.innerHTML = temp4.join('').toString();
       j++;
     } else if (j < 24) {
-      text1.innerHTML = temp3.slice(j - 15).join('').toUpperCase();
+      text1.innerHTML = temp3.slice(j - 15).join('').toLowerCase();
       j++;
     }
     else {
-      text2.innerHTML = temp4.slice(j - 23).join('').toUpperCase();
+      text2.innerHTML = temp4.slice(j - 23).join('').toLowerCase();
       j++;
     }
 
@@ -61,24 +61,28 @@ function textGlitch(timeStamp) {
     text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
 
     if (j < 33) {
-      let filterFreq = map(ran01, 10, 80, 33, 2500);
-      let filterWidth = map(ran02, 10, 80, 50, 90);
+      let filterFreq = map2(ran01, 10, 80, 33, 2500, 7, 2);
+      let filterWidth = map2(ran02, 10, 80, 50, 90, 7, 2);
       filter.set(filterFreq, filterWidth);
       soundFx.rate(Math.random() * 3.33 + 0.33);
-      soundFx.amp(5);
+      soundFx.amp(8);
       soundFx.play();
     }
 
     setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
   } else {
+
     text1.innerHTML = temp3.join('');
+    text1.style.transition = "all .12s";
     text1.style.fontSize = "5rem";
     text1.style.width = "50%";
+    text1.style.padding = "15px";
     text2.innerHTML = temp4.join('');
+    text2.style.transition = "all .12s";
     text2.style.fontSize = "5rem";
     text2.style.width = "50%";
-
-    filter.set(1200, 10);
+    
+    //filter.set(1200, 10);
     filter.disconnect()
     reverb.process(soundFx, 2, 1.0);
     reverb.set(5, 1.00)
