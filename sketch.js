@@ -5,76 +5,37 @@ let shape = [];
 let rotateShape = 0;
 let total = 50;
 let sterne;
+let lerpSpace; // SternOffset
 let planet;
-let m0Slider,
-  m0,
-  m1Slider,
-  m1,
-  m2Slider,
-  m2,
-  m3Slider,
-  m3,
-  m4Slider,
-  m4,
-  m5Slider,
-  m5,
-  m6Slider,
-  m6,
-  m7Slider,
-  m7,
-  smoothSlider,
-  smoothValue,
-  strenghtSliderm0,
-  strenghtValuem0,
-  strenghtSliderm2,
-  strenghtValuem2,
-  strenghtSliderm4,
-  strenghtValuem4,
-  strenghtSliderm6,
-  strenghtValuem6,
-  peakCheck,
-  rotateCheck,
-  spaceCheck,
-  resCheck,
-  audioSourceBtn,
-  saveBtn,
-  loadBtn,
-  lightCheck,
-  morphBtn,
-  resetBtn,
-  morphSlider,
-  spaceSlider,
-  rotateSliderX,
-  rotateSliderY,
-  rotateSliderZ,
-  dropZone,
-  serverAdress
+let m0Slider,m0,m1Slider,m1,m2Slider,m2,m3Slider,m3,m4Slider,m4,m5Slider,
+    m5,m6Slider,m6,m7Slider,m7,smoothSlider,smoothValue,strenghtSliderm0,
+    strenghtValuem0,strenghtSliderm2,strenghtValuem2,strenghtSliderm4,
+    strenghtValuem4,strenghtSliderm6,strenghtValuem6,
+    peakCheck,rotateCheck,spaceCheck,resCheck,audioSourceBtn,saveBtn,loadBtn,
+    lightCheck,morphBtn,resetBtn,morphSlider,spaceSlider,rotateSliderX,
+    rotateSliderY,rotateSliderZ,dropZone,serverAdress;
 let sourceIsStream = true;
 let sSize = 0.2;
 let offSet = 50;
 let morphSpeed = 0;
 let streamAdress;
 let ampHistory = []; // Lautstärke Analyse
-let planetMode = false
-let maxDistCam = 3000
+let planetMode = false;
+let maxDistCam = 3000;
 
-let shapeRot = 0 // Rotation um PLaneten
+let shapeRot = 0 // Rotation um Planeten
 let mil //millis()
 let col = 0
 let col5 = 0 // Globale Farben
 
-let myShader
-let matcap
-let lightVec
+let lightVec  // Licht
 let lightVecTemp
-let pg
 let l = 0 // LichtArray
 let ls = 0 // LichtShowArray
 let scheinW = false
 let planetAmp = false
 let tex;
 let deepField;
-let lerpSpace
 
 // Kamera Stuff
 let autoCam = true;
@@ -98,33 +59,26 @@ let soundFx;
 
 function preload() {
   soundFormats('mp3', 'ogg');
-  soundFx = loadSound('sFx');
+  soundFx = loadSound('audio/sFx');
   tex = [
-    loadImage('planet1d.jpeg'),
-    loadImage('moon_tex.jpeg'),
-    loadImage('planet3.png'),
-    loadImage('2-observingsol.jpeg'),
-    loadImage('2k_mercury.jpeg'),
-    loadImage('2k_neptune.jpeg'),
-    loadImage('anshar.jpeg'),
-    loadImage('base.jpeg'),
-    loadImage('charis3.jpeg'),
-    loadImage('Endor.jpeg'),
-    loadImage('jupiter.jpeg'),
-    loadImage('moon.jpeg'),
-    loadImage('planet2.png'),
-    loadImage('planet2d.png'),
-    loadImage('planet3.png'),
-    loadImage('planet4.png'),
-    loadImage('planet5.png'),
-    loadImage('planet7d.png'),
-    loadImage('pluto.jpeg'),
-    loadImage('superearth.png'),
-    loadImage('valdrada.jpeg'),
-    loadImage('venus_surface.jpeg'),
-    loadImage('venus_surface.jpeg')
+    loadImage('textures/moon0.jpeg'),
+    loadImage('textures/moon1.jpeg'),
+    loadImage('textures/moon2.jpeg'),
+    loadImage('textures/moon3.jpeg'),
+    loadImage('textures/moon4.jpeg'),
+    loadImage('textures/moon5.jpeg'),
+    loadImage('textures/moon6.jpeg'),
+    loadImage('textures/moon7.jpeg'),
+    loadImage('textures/moon8.jpeg'),
+    loadImage('textures/moon9.jpeg'),
+    loadImage('textures/moon10.png'),
+    loadImage('textures/moon11.png'),
+    loadImage('textures/moon12.png'),
+    loadImage('textures/moon13.png'),
+    loadImage('textures/moon14.png'),
+    loadImage('textures/moon15.png')
   ]
-  deepField = loadImage("Nebula.png");
+  deepField = loadImage("textures/Nebula.png");
 }
 
 function centerCanvas() {
@@ -155,8 +109,8 @@ function windowResized() {
 
 function loaded() {
   //console.log(audio)
-  setTimeout(() => audio.play(), 3500);
-  
+  setTimeout(() => audio.play(), 1500);
+
 }
 function setup() {
   //setAttributes("antialias", true);
@@ -167,8 +121,8 @@ function setup() {
   centerCanvas()
 
   // Audio Analyse
-  audio = createAudio('https://ice2.somafm.com/defcon-128-aac', loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
-  
+  audio = createAudio("http://a2r.twenty4seven.cc:8000/puredata.ogg", loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 'https://ice2.somafm.com/defcon-128-aac'
+
   fft = new p5.FFT()
   mic = new p5.AudioIn()
   filter = new p5.Filter('bandpass')
@@ -212,10 +166,10 @@ function setup() {
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
-    reverb = new p5.Reverb();   //reverb.drywet(0.33);
-    reverb.process(filter, 2, 1.0);
-    reverb.amp(1) 
-    //reverb.set(7,0.00) 
+  reverb = new p5.Reverb();   //reverb.drywet(0.33);
+  reverb.process(filter, 2, 1.0);
+  reverb.amp(1)
+  //reverb.set(7,0.00) 
 
   // PlanetDebug
   planetCheckBox = createCheckbox('planetMode', false)
@@ -258,8 +212,8 @@ function draw() {
   //console.log(getFrameRate())
   // Disco Mode auf Peak legen
   //l = floor(frameCount*0.02 % 2);
-  sliderLogic()
-  htmlHandler()
+  sliderLogic();
+  htmlHandler();
 
   // Audio Spektrum
   spectrum = fft.analyze() // .analyze muss laufen
@@ -281,10 +235,10 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-  mov0 = map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0);
-  mov2 = map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2);
-  mov4 = map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4);
- mov6 =  lerp(mov6,map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem6),0.1);
+  mov0 = map(fft.getEnergy(33, 96), 0, 255, 0, strenghtValuem0);
+  mov2 = map(fft.getEnergy(120, 1100), 0, 255, 0, strenghtValuem2);
+  mov4 = map(fft.getEnergy(1200, 3500), 0, 255, 0, strenghtValuem4);
+  mov6 = lerp(mov6, map(fft.getEnergy(3600, 20000), 0, 255, 0, strenghtValuem6), 0.1);
   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]
 
   // Kamera
@@ -328,8 +282,6 @@ function draw() {
     shapeRot = 1;
   }
 
-
-
   // Drehung zum Planeten
   if (planetMode) {
     if (stopFuncAfter(3000)) {
@@ -355,11 +307,11 @@ function draw() {
     }
   }
 
-/*   texture(deepField);
-  //noStroke();
-  //noLights();
-  //fill(col5, 100, 100)
-  sphere(90000) */
+  /*   texture(deepField);
+    //noStroke();
+    //noLights();
+    //fill(col5, 100, 100)
+    sphere(90000) */
 
   //Sterne
   sterne.show()
@@ -703,7 +655,7 @@ function getAudioFile(file) {
   fft.setInput(audio)
   //amplitude = new p5.Amplitude();
   //amplitude.setInput(audio)
-  audioSourceBtn.innerHTML = 'AudioFile'
+  audioSourceBtn.innerHTML = file.name;
 }
 
 function htmlEvents() {
@@ -983,7 +935,6 @@ class Stars {
     this.particles = []
     this.lerpSpace = createVector(0, 0, 0)
     this.alSterne = 0
-    this.pumper = 0
     this.tempParticles = this.particlesPlanetTemp(this.amount);
   }
   setStars() {
@@ -1024,18 +975,17 @@ class Stars {
       this.tempParticles = this.particlesPlanetTemp(this.amount);   // Neue SternPosition     
     }
     let i = 0;
+    //console.log(dist(this.particles[0].x,this.particles[0].y,this.tempParticles[0].x,this.tempParticles[0].x));
     for (let p of this.particles) {
 
       if (planetMode) {
-        this.pumper = lerp(this.pumper, planet.pump, 0.1)
         // Transparenz
-        this.alSterne = map(
-          dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0
-        )
-        strokeWeight(1 + this.pumper * 0.05)
+        this.alSterne = map(dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0)
+        strokeWeight(1 + amplitude.getLevel() * 5)
 
         // Warte mit Sternanimation
-        if (waitFuncFor(9000)) {
+        let interpolBool = (floor(this.particles[0].x) != floor(this.tempParticles[0].x));  // Interpolation nötig?
+        if (waitFuncFor(9000) && interpolBool) {
           p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG verfickte Scheisse nochmal!!!!!!!!
           p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
           p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
@@ -1098,7 +1048,7 @@ class Planet {
     this.planetY = 0
     this.rotationState = 1
     this.pump = 0
-    this.rings = floor(random(0, 13))
+    this.rings = floor(random(0, 9))
     this.hasMoon = (random(16) > 5) ? true : false;
     this.moonX = random(3, 8);
     this.moonY = random(3, 8);
@@ -1133,25 +1083,21 @@ class Planet {
     let dark = 0
     let planetCol = 0
     let ampMe = amplitude.getLevel();
-    if (
-      planetMode &&
-      this.planetDist >= this.planetSize
-    ) {
-      this.pump = ampMe * 200
+    if (planetMode && this.planetDist >= this.planetSize) {
+      this.pump = map(amplitude.getLevel(), 0, 1, 0, 200)
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
-      planetCol = map(ampMe, 0, 1, 0, 200)
+      planetCol = map(amplitude.getLevel(), 0, 1, 0, 200)
     } else {
       this.pump = 0
     }
     if (planetMode) {
-
       push()
       rotateX(PI / 2)
       stroke(col, 255, 255)
       let ringDistance = planet.size * 0.618;
       let wave = fft.waveform(); // analyze the waveform for circleWave
-      for (let i = 3; i < this.rings; i++) {  
-        strokeWeight((i / 2 + 6) * ampMe * 2)
+      for (let i = 3; i < this.rings; i++) {
+        strokeWeight((i / 2 + 9) * ampMe * 2)
         noFill()
         this.circleWave(0, 0, this.planetSize + i * ringDistance, i * ringDistance / 3, wave)
       }
@@ -1219,8 +1165,6 @@ class PeakCounter {
   countMe(peaks) {
     if (peakDetect.isDetected) {
       this.count++;
-      //console.log("count: " + this.count)
-
       if (this.count % peaks == 0) {
         this.count = 0;
         return true;
@@ -1230,44 +1174,7 @@ class PeakCounter {
   }
 }
 
-/* let sketch = function (p) {
-  p.setup = function () {
-    var canvasp = p.createCanvas(312, 117)
-    canvasp.parent('canvasid')
-  }
-  p.draw = function () {
-    if (sidebar) {
-      //let spectrum = fft.analyze(512)
-      p.background('#262126')
-      p.noFill()
-      p.strokeWeight(1)
-      p.beginShape()
-      for (let i = 0; i < spectrum.length / 1.1; i++) {
-        //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
-        p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
-      }
-      p.endShape()
-      let waveform = fft.waveform(512)
-      p.strokeWeight(1.2)
-      p.stroke(255)
-      p.noFill()
-      p.beginShape()
-
-      for (let i = 0; i < waveform.length; i++) {   // Mit WaveForm Figur modulieren!!! 
-        let x = map(i, 0, waveform.length, 0, p.width)
-        let y = map(waveform[i], -1, 1, 0, p.height / 2)
-        p.vertex(x, y)
-      }
-      p.endShape()
-    }
-  }
-}
-
-let node = document.createElement('div')
-new p5(sketch, node) */
-//window.document.getElementsByTagName('body')[0].appendChild(node);
-
-// Audio an in manchen Browsern Handy etc
+// Audiostart an in manchen Browsern, Handys etc
 function touchStarted() {
   getAudioContext().resume()
 }
