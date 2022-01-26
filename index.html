@@ -9,17 +9,20 @@
   <title>Addicted2Random</title>
   <style>
   </style>
-  <script src="js/p5.js"></script>
+ <script src="js/p5.js"></script>
   <script src="js/p5.sound.js"></script>
-  <script src="nav/landing.js"></script>
   <script src="js/p5.easycam.js"></script>
+  <script src="nav/landing.js"></script>
   <script src="sketch.js"></script>
   <script src="nav/sidebar.js"></script>
-  <script src="nav/spectrum.js"></script>
+  <!-- <script src="nav/spectrum.js"></script> -->
+  <script src="nav/save.js"></script>
+  <script src="nav/load.js"></script>
   <script src="utils/map2.js"></script>
 </head>
 
 <body>
+ 
   <div id="box1" onclick="">
     <div id="txt1">Addicted</div>
   </div>
@@ -32,6 +35,7 @@
       <h1><u class="schrift">Addicted2Random</u></h1>
 
       <div id="canvasid"></div>   <!-- Audio Visualisation -->
+      <input class="button" onchange="readFile(this)" type="file">
 
       <div class="row">
         <div class="col-sm-9">
@@ -141,7 +145,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="-2100" max="2100" value="-1150" class="slider" id="strenghtSliderm4">
+          <input type="range" min="-2100" max="2100" value="-900" class="slider" id="strenghtSliderm4">
         </div>
         <div class="col-sm-3">
           <label id="sM4" class="schrift">m4</label>
@@ -149,7 +153,7 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="-2100" max="2100" value="1900" class="slider" id="strenghtSliderm6">
+          <input type="range" min="-2100" max="2100" value="900" class="slider" id="strenghtSliderm6">
         </div>
         <div class="col-sm-3">
           <label id="sM6" class="schrift">m6</label>
@@ -160,12 +164,46 @@
       </div>
       <div class="row">
         <div class="col-sm-9">
-          <input type="range" min="65" max="100" value="80" class="slider" id="smoothSlider">
+          <input type="range" min="0" max="100" value="80" class="slider" id="smoothSlider">
         </div>
         <div class="col-sm-3">
           <label id="smth" class="schrift">smth</label>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="100" value="0" class="slider" id="smoothSliderM0">
+        </div>
+        <div class="col-sm-3">
+          <label id="smthM0" class="schrift">m0</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="100" value="0" class="slider" id="smoothSliderM2">
+        </div>
+        <div class="col-sm-3">
+          <label id="smthM2" class="schrift">m2</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="100" value="0" class="slider" id="smoothSliderM4">
+        </div>
+        <div class="col-sm-3">
+          <label id="smthM4" class="schrift">m4</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-9">
+          <input type="range" min="0" max="100" value="0" class="slider" id="smoothSliderM6">
+        </div>
+        <div class="col-sm-3">
+          <label id="smthM6" class="schrift">m6</label>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-sm-1">
           <input type="checkbox" name="spaceTravel" id="spaceCheck">
