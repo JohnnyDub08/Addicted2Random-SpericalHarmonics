@@ -34,10 +34,10 @@ function loadFromFile(preset) {
     rotateSliderY.value = preset.rotateSliderY;
     rotateSliderZ.value = preset.rotateSliderZ;
     rotateCheck.checked = preset.rotateCheck;
-    lightCheck.checked = lightCheck;
-    peakCheck.checked = peakCheck;
-    spaceCheck.checked = spaceCheck.checked;
-    resCheck.checked = resCheck.checked;
+    lightCheck.checked = preset.lightCheck;
+    peakCheck.checked = preset.peakCheck;
+    spaceCheck.checked = preset.spaceCheck.checked;
+    resCheck.checked = preset.resCheck.checked;
     strenghtSliderm0.value = preset.strenghtSliderm0;
     strenghtSliderm2.value = preset.strenghtSliderm2;
     strenghtSliderm4.value = preset.strenghtSliderm4;

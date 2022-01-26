@@ -1182,7 +1182,7 @@ class Planet {
         translate(x, y, z)  //x - planet.size
         rotateX(-PI / 2)
         rotateY(-speed)
-        noStroke();
+       
         noLights()
         //ambientLight(127);
         lichtMode[0]()
@@ -1190,6 +1190,7 @@ class Planet {
         texture(tex[this.moonTex])
         //specularMaterial(255)
         let moonPump = map2(amplitude.getLevel(), 0, 1, 1, 9,2,0)
+        noStroke();
         sphere(this.moonSize*moonPump)
         pop()
       }
