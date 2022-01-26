@@ -242,33 +242,32 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-/*   let oBands = fft.getOctaveBands(1, 33);
-  let bands = fft.logAverages(oBands); */
+  /*   let oBands = fft.getOctaveBands(1, 33);
+    let bands = fft.logAverages(oBands); */
   //console.log(bands)
+  /*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
+    mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
+    mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
+    mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
 
-/*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
-  mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
-  mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
-  mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
-/*   mov0 = map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0);
-  mov2 = map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2);
-  mov6 = map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6);
-  mov4 = map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4);
-  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
-
+  //Bänder
   let bass = [20, 250];
   let lowMid = [250, 800];
   let mid = [800, 5000];
   let treble = [5000, 14000];
-  
 
+  mov0 = lerp(mov0, map(fft.getEnergy(bass[0], bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
+  mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0], lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
+  mov4 = lerp(mov4, map(fft.getEnergy(mid[0], mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
+  mov6 = lerp(mov6, map(fft.getEnergy(treble[0], treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
+  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
 
-    mov0 = lerp(mov0, map(fft.getEnergy(bass[0],bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
-    mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0],lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
-    mov4 = lerp(mov4, map(fft.getEnergy(mid[0],mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
-    mov6 = lerp(mov6, map(fft.getEnergy(treble[0],treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
-    let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
-  
+  /*     mov0 = lerp(mov0, map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0), smoothValueM0);
+      mov2 = lerp(mov2, map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2), smoothValueM2);
+      mov4 = lerp(mov4, map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4), smoothValueM4);
+      mov6 = lerp(mov6, map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem6), smoothValueM6);
+      let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
+
   // Kamera
   if (rotateCheck.checked) {
     easycam.rotateX(rotateSliderX.value / 100000)
@@ -1050,15 +1049,15 @@ class Stars {
       if (planetMode) {
         // Transparenz
         this.alSterne = map(dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0)
-        let sW = map2(amplitude.getLevel(), 0, 1, 1, 200,2,2)
-        strokeWeight(1+sW)
+        let sW = map2(amplitude.getLevel(), 0, 1, 1, 200, 2, 2)
+        strokeWeight(1 + sW)
 
         // Warte mit Sternanimation
-        let interpolBool = (floor(this.particles[0].x) != floor(this.tempParticles[0].x));  // Interpolation nötig?
+        let interpolBool = (floor(this.particles[0].x) !== floor(this.tempParticles[0].x));  // Interpolation nötig?
         if (waitFuncFor(10000) && interpolBool) {
-          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.003, 0.03));   // Hier BUG Scheisse nochmal!!!!!!!!
-          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.003, 0.03));
-          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.003, 0.03));
+          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.01, 0.03));   // Hier BUG Scheisse nochmal!!!!!!!!
+          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.01, 0.03));
+          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.01, 0.03));
           i++;
         }
 
@@ -1129,16 +1128,15 @@ class Planet {
 
   show() {
     if (planetMode) {
-      this.planetDist = lerp(this.planetDist+distSlider.value(), this.dist, 0.03)
+      this.planetDist = lerp(this.planetDist + distSlider.value(), this.dist, 0.03)
       this.planetSize = lerp(this.planetSize, this.size, 0.01)
       this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
     } else {
-      this.planetDist = lerp(this.planetDist, 0, 0.01)
-      this.planetSize = lerp(this.planetSize, 0, 0.07)
+      this.planetDist = lerp(this.planetDist, 0, 0.05)   
+      this.planetSize = lerp(this.planetSize, 0, 0.1)
       this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
-      this.rise = 0.001;
     }
 
     this.rotationState = (frameCount / (planet.size * 0.1)) % TWO_PI; //(frameCount / (planet.size * 0.1)) % TWO_PI
@@ -1150,15 +1148,16 @@ class Planet {
     //rotateY(frameCount * 0.0001) // Drehung um eigene Achse
     //rotateZ(frameCount * 0.001); //WegenTextur
 
-    let dark = 0
-    let planetCol = map2(this.rotationState, 0, TWO_PI, 50, 200,9,2)
-    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.3,1,0)
+    let dark = 0;
+    let planetCol = map2(this.rotationState, 0, TWO_PI, 50, 200, 2, 2);
+
+    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.3, 1, 0)
     if (planetMode && this.planetDist >= this.planetSize) {
       
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
-      planetCol = map2(amplitude.getLevel(), 0, 1, 50, 150,3,2)
+      planetCol = map2(amplitude.getLevel(), 0, 1, 50, 150, 3, 2)
     } else {
-      pump = 0
+      pump = 1
     }
     if (planetMode) {
       push()
@@ -1167,7 +1166,7 @@ class Planet {
       let ringDistance = planet.size * 0.618;
       let wave = fft.waveform(); // analyze the waveform for circleWave
       for (let i = 3; i < this.rings; i++) {
-        strokeWeight((i / 3 + 3) * (amplitude.getLevel()+1))
+        strokeWeight((i / 3 + 3) * (amplitude.getLevel() + 1))
         noFill()
         this.circleWave(0, 0, this.planetSize + i * ringDistance, i * ringDistance / 3, wave)
       }
@@ -1182,16 +1181,16 @@ class Planet {
         translate(x, y, z)  //x - planet.size
         rotateX(-PI / 2)
         rotateY(-speed)
-       
+
         noLights()
         //ambientLight(127);
         lichtMode[0]()
-        pointLight(255, -1, 0.5, 0)
+        pointLight(255, 0, 255, -1, 0.5, 0)
         texture(tex[this.moonTex])
         //specularMaterial(255)
-        let moonPump = map2(amplitude.getLevel(), 0, 1, 1, 9,2,0)
+        let moonPump = map2(amplitude.getLevel(), 0, 1, 1, 9, 2, 0)
         noStroke();
-        sphere(this.moonSize*moonPump)
+        sphere(this.moonSize * moonPump)
         pop()
       }
     }

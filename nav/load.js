@@ -5,7 +5,6 @@ function readFile(input) {
     fileReader.onload = function () {
         console.log(fileReader.result);
         let preset = JSON.parse(fileReader.result);
-
         loadFromFile(preset);
     };
     fileReader.onerror = function () {

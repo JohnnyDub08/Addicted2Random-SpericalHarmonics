@@ -30,10 +30,10 @@ let saveFile = () => {
         strenghtSliderm4: strenghtSliderm4.value,
         strenghtSliderm6: strenghtSliderm6.value
     }
-    let dataString = JSON.stringify(data);   // Unstring => JSON.parse(data);
+    let dataString = JSON.stringify(data);
     // Convert the text to BLOB.
     const textToBLOB = new Blob([dataString], { type: 'text/plain' });
-    const sFileName = 'preset.txt';	   // The file to save the data.
+    const sFileName = 'preset.txt';	 
 
     let newLink = document.createElement("a");
     newLink.download = sFileName;
