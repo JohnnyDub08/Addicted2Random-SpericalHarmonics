@@ -35,7 +35,7 @@ let lightVecTemp
 let l = 0 // LichtArray
 let ls = 0 // LichtShowArray
 let scheinW = false
-let planetAmp = false
+let planetTex = true
 let tex;
 let deepField;
 
@@ -51,7 +51,7 @@ let mov4 = 0;
 let mov6 = 0;
 
 // Dev Debug Helfer
-let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetAmpCheckBox, autoCamCheckBox
+let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetTexCheckBox, autoCamCheckBox
 
 // Counter
 let peakCounter1, peakCounter2;
@@ -105,8 +105,10 @@ function windowResized() {
   lichtCheckBox.position(width - 150, 60)
   scheinWCheckBox.position(width - 150, 90)
   lightShowCheckBox.position(width - 150, 120)
-  planetAmpCheckBox.position(width - 150, 150)
+  planetTexCheckBox.position(width - 150, 150)
   autoCamCheckBox.position(width - 150, 180)
+  saveBtn.position(width - 150, 210)
+  distSlider.position(width - 150, 260);
 }
 
 function loaded() {
@@ -188,10 +190,10 @@ function setup() {
   lightShowCheckBox = createCheckbox('LightShow', false)
   lightShowCheckBox.position(width - 150, 120)
   lightShowCheckBox.changed(changeLightShow)
-  planetAmpCheckBox = createCheckbox('planetTex', false)
-  planetAmpCheckBox.position(width - 150, 150)
-  planetAmpCheckBox.changed(() => {
-    planetAmp = !planetAmp
+  planetTexCheckBox = createCheckbox('planetTex', true)
+  planetTexCheckBox.position(width - 150, 150)
+  planetTexCheckBox.changed(() => {
+    planetTex = !planetTex
   })
   autoCamCheckBox = createCheckbox('AutoCam', false)
   autoCamCheckBox.position(width - 150, 180)
@@ -201,7 +203,7 @@ function setup() {
   saveBtn = createButton('Save')
   saveBtn.position(width - 150, 210)
   saveBtn.mousePressed(saveFile);
-  distSlider = createSlider(0, 1000);
+  distSlider = createSlider(0, 200, 0);
   distSlider.position(width - 150, 260);
 
   planet = new Planet(floor(random(3000, 8000)));
@@ -652,18 +654,18 @@ let lichtMode = [
 ]
 
 function htmlHandler() {
-  document.getElementById('m0').innerHTML = 'm0=' + m0
+  document.getElementById('m0').innerHTML = 'm0=' + Math.floor(m0*10)/10
   document.getElementById('m1').innerHTML = 'm1=' + m1
-  document.getElementById('m2').innerHTML = 'm2=' + m2
+  document.getElementById('m2').innerHTML = 'm2=' + Math.floor(m2*10)/10
   document.getElementById('m3').innerHTML = 'm3=' + m3
-  document.getElementById('m4').innerHTML = 'm4=' + m4
+  document.getElementById('m4').innerHTML = 'm4=' + Math.floor(m4*10)/10
   document.getElementById('m5').innerHTML = 'm5=' + m5
-  document.getElementById('m6').innerHTML = 'm6=' + m6
+  document.getElementById('m6').innerHTML = 'm6=' + Math.floor(m4*10)/10
   document.getElementById('m7').innerHTML = 'm7=' + m7
-  document.getElementById('sM0').innerHTML = 'm0S=' + strenghtValuem0
-  document.getElementById('sM2').innerHTML = 'm2S=' + strenghtValuem2
-  document.getElementById('sM4').innerHTML = 'm4S=' + strenghtValuem4
-  document.getElementById('sM6').innerHTML = 'm6S=' + strenghtValuem6
+  document.getElementById('sM0').innerHTML = 'm0S=' + Math.floor(strenghtValuem0*10)/10
+  document.getElementById('sM2').innerHTML = 'm2S=' + Math.floor(strenghtValuem2*10)/10
+  document.getElementById('sM4').innerHTML = 'm4S=' + Math.floor(strenghtValuem4*10)/10
+  document.getElementById('sM6').innerHTML = 'm6S=' + Math.floor(strenghtValuem6*10)/10
   document.getElementById('speed').innerHTML = morphSlider.value / 1000
   document.getElementById('travelSpeed').innerHTML =
     'Warp' + floor(spaceSlider.value / 1000)
@@ -1049,17 +1051,18 @@ class Stars {
       if (planetMode) {
         // Transparenz
         this.alSterne = map(dist(-planet.planetX, -planet.planetY, 0, p.x, p.y, p.z), 0, planet.size * 2, 1, 0)
-        let sW = map2(amplitude.getLevel(), 0, 1, 1, 200, 2, 2)
+        let sW = map2(amplitude.getLevel(), 0, 1, 1.5, 150, 2, 2)
         strokeWeight(1 + sW)
 
         // Warte mit Sternanimation
         let interpolBool = (floor(this.particles[0].x) !== floor(this.tempParticles[0].x));  // Interpolation nötig?
         if (waitFuncFor(10000) && interpolBool) {
-          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.01, 0.03));   // Hier BUG Scheisse nochmal!!!!!!!!
-          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.01, 0.03));
-          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.01, 0.03));
+          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.01, 0.07));   // Hier BUG Scheisse nochmal!!!!!!!!
+          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.01, 0.07));
+          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.01, 0.07));
           i++;
         }
+        
 
       } else {
         // WarpBremse
@@ -1086,8 +1089,8 @@ class Stars {
     pop()
   }
   particlesPlanetTemp(amount) {
-    let particlesTemp = []
-    let space = planet.size / 4
+    let particlesTemp = [];
+    let space = planet.size / 4;
     for (let i = 0; i < amount; i++) {
       particlesTemp.push(
         createVector(random(-space, space), random(-space, space), random(-space, space)
@@ -1098,7 +1101,7 @@ class Stars {
       let getAround = createVector(0, 0, 0)
         .sub(particlesTemp[i])
         .normalize()
-        .mult(planet.size * random(1.3, 1.618))
+        .mult(planet.size * (random(1.3, 1.618)))
       particlesTemp[i].add(getAround)
     }
     return particlesTemp;
@@ -1182,11 +1185,11 @@ class Planet {
         rotateX(-PI / 2)
         rotateY(-speed)
 
-        noLights()
+        //noLights()
         //ambientLight(127);
         lichtMode[0]()
-        pointLight(255, 0, 255, -1, 0.5, 0)
-        texture(tex[this.moonTex])
+        //pointLight(255, 0, 255, -1, 0.5, 0)
+        //texture(tex[this.moonTex])
         //specularMaterial(255)
         let moonPump = map2(amplitude.getLevel(), 0, 1, 1, 9, 2, 0)
         noStroke();
@@ -1200,11 +1203,12 @@ class Planet {
     else {
       ambientMaterial(col5, 255, planetCol)
     }
-    if (planetAmp) {
+    if (planetTex) {
       noLights()
-      //ambientLight(255);
-      let textures = floor((frameCount * 0.01) % 3)
-      texture(tex[textures])
+      pointLight(planetCol, 250, 250, 0, 0, 50);
+  /*     let textures = floor((frameCount * 0.01) % tex.length)
+      texture(tex[textures]) */
+      texture(tex[this.moonTex])
     }
     sphere(this.planetSize * pump, 24, 24)
     pop()
