@@ -7,21 +7,24 @@
   }
 
   body {
-    background-color: black;
+    background: transparent;
   }
 
+  body>div{
+    background: transparent; 
+  }
+  
   .buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 0.3em;
     grid-auto-rows: auto;
-    /* padding: 0.5em; */
     font-size: 12px;
     text-align: left;
   }
 
   .buttons #server {
-    border: 2px solid ivory;
+   /*  border: 2px solid ivory; */
     border-radius: 5px;
     transition: all 100ms ease;
   }
@@ -56,7 +59,7 @@
     left: 0;
     bottom: auto;
     font-family: 'Audiowide', cursive !important;
-    background-color: #262126;
+    background-color: #262126; 
     overflow-x: hidden;
     -webkit-transition: all 0.3s cubic-bezier(0, 0, .58, 1);
     transition: all .3s cubic-bezier(0, 0, .58, 1);
@@ -74,12 +77,9 @@
     transition: all 100ms ease;
   }
 
-  @media only screen and (max-width: 768px) {
-    /* .sidebar .sliderText {
-      grid-template-columns: 2fr 2.1fr;
-    } */
+ /*  @media only screen and (max-width: 768px) {
 
-  }
+  } */
 
   .openbtn {
     font-family: 'Audiowide', cursive;
@@ -113,7 +113,7 @@
     z-index: 1;
   }
 
-  #box1>div {
+  #box1>p {
     position: absolute;
     bottom: 50%;
     right: 38.2%;
@@ -136,7 +136,7 @@
     z-index: 1;
   }
 
-  #box2>div {
+  #box2>p {
     position: absolute;
     left: 38.2%;
     text-align: center;
@@ -144,12 +144,11 @@
     font-size: 5rem;
     transition: all .01s;
   }
-  input{
+/*   input{
     cursor: pointer;
     background-color: transparent;
     font-family: 'Audiowide', cursive;
     font-size: 16px;
-    background-color: #262126;
     border: 2px solid ivory;
     border-radius: 5px;
     transition: all 100ms ease;
@@ -157,4 +156,4 @@
   input:hover {
     border-radius: 10px;
     background-color: rgb(128, 255, 212, 0.1);
-  }
+  } */
