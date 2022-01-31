@@ -20,7 +20,7 @@
 </head>
 
 <body>
- 
+
   <div id="box1" onclick="">
     <div id="txt1">Addicted</div>
   </div>
@@ -28,11 +28,15 @@
     <div id="txt2">2Random</div>
   </div>
 
-  <div id="leftSidebar" class="sidebar">
+  <div id="leftSidebar">
+    <div>
+      <button id="arrow" onclick="openNav()">
+        -> </button>
+    </div>
     <div class="container">
       <h1><u class="schrift">Addicted2Random</u></h1>
 
-      <div id="canvasid"></div>   <!-- Audio Visualisation -->
+      <div id="canvasid"></div> <!-- Audio Visualisation -->
       <input class="button" onchange="readFile(this)" type="file">
 
       <div class="row">
@@ -303,12 +307,8 @@
     </div>
   </div>
 
-  <div>
-    <button class="openbtn" id="arrow" onclick="openNav()">
-      -> </button>
-  </div>
-
   <main>
   </main>
 </body>
+
 </html>

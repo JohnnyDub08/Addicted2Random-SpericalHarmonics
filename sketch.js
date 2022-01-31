@@ -1249,6 +1249,11 @@ class PeakCounter {
   }
 }
 
+function setMillis() {
+  mil = millis();
+  return;
+}
+
 // Audiostart an in manchen Browsern, Handys etc
 function touchStarted() {
   getAudioContext().resume()
