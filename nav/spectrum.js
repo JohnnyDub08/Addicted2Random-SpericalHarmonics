@@ -11,7 +11,7 @@ let sketch = function (p) {
         p.noFill()
         p.strokeWeight(1)
         p.beginShape()
-        for (let i = 0; i < spectrum.length / 1.1; i++) {
+        for (let i = 0; i < spectrum.length; i++) {
           //let x = map(log(i), 0, log(spectrum.length)/1.1, 0, p.width);
           p.vertex(i, map(spectrum[i], 0, 255, p.height, p.height / 2 + 7))
         }

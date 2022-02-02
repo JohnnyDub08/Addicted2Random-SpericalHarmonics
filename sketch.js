@@ -2,12 +2,14 @@
 
 let cnv, mic, audio, fft, spectrum, peakDetect, amplitude, filter;
 let easycam;
-let shape = [];
-let rotateShape = 0;
+/* let shape = []; */
+let figur;
+
 let total = 50;
 let sterne;
-let lerpSpace; // SternOffset
+//let lerpSpace; // SternOffset
 let planet;
+let aA;
 let m0Slider, m0, m1Slider, m1, m2Slider, m2, m3Slider, m3, m4Slider, m4, m5Slider,
   m5, m6Slider, m6, m7Slider, m7, smoothSlider, smoothValue, smoothSliderM0, smoothValueM0,
   smoothSliderM2, smoothValueM2, smoothSliderM4, smoothValueM4, smoothSliderM6, smoothValueM6,
@@ -25,7 +27,8 @@ let ampHistory = []; // Lautstärke Analyse
 let planetMode = false;
 let maxDistCam = 3000;
 
-let shapeRot = 0 // Rotation um Planeten
+/* let rotateShape = 0;
+let shapeRot = 0 // Rotation um Planeten */
 let mil //millis()
 let col = 0
 let col5 = 0 // Globale Farben
@@ -45,10 +48,10 @@ let state2;
 
 // SoundStuff
 let reverb;
-let mov0 = 0;
+/* let mov0 = 0;
 let mov2 = 0;
 let mov4 = 0;
-let mov6 = 0;
+let mov6 = 0; */
 
 // Dev Debug Helfer
 let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetTexCheckBox, autoCamCheckBox
@@ -122,6 +125,7 @@ function setup() {
   cnv.style('z-index', -1)
   colorMode(HSB)
   centerCanvas()
+  //frameRate(30)
 
   // Audio Analyse
   audio = createAudio('https://ice2.somafm.com/defcon-128-aac', loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
@@ -136,7 +140,7 @@ function setup() {
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
   amplitude.setInput(audio);
-  amplitude.smooth(0.7)
+  amplitude.smooth(0.9)
 
   // get GUI/Slider ids
   htmlEvents()
@@ -164,8 +168,7 @@ function setup() {
 
   document.getElementById('spaceCheck').checked = true
 
-  //Sterne
-  lerpSpace = createVector(0, 0, 0) // LightShow
+ // LightShow
   lightVec = createVector(1, -1, 1)
   lightVecTemp = createVector(0, 0, 0)
 
@@ -207,7 +210,9 @@ function setup() {
   distSlider.position(width - 150, 260);
 
   planet = new Planet(floor(random(3000, 8000)));
-  sterne = new Stars(377)
+  sterne = new Stars(377);
+  aA = new AudioAnalysis();
+  figur = new Figur();
   sterne.setStars()
 
   //console.log(mic.getSources());
@@ -244,31 +249,8 @@ function draw() {
     sSize = lerp(sSize, 1, 0.1)
   }
 
-  /*   let oBands = fft.getOctaveBands(1, 33);
-    let bands = fft.logAverages(oBands); */
-  //console.log(bands)
-  /*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
-    mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
-    mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
-    mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
-
-  //Bänder
-  let bass = [20, 250];
-  let lowMid = [250, 800];
-  let mid = [800, 5000];
-  let treble = [5000, 14000];
-
-  mov0 = lerp(mov0, map(fft.getEnergy(bass[0], bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
-  mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0], lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
-  mov4 = lerp(mov4, map(fft.getEnergy(mid[0], mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
-  mov6 = lerp(mov6, map(fft.getEnergy(treble[0], treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
-  let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7];
-
-  /*     mov0 = lerp(mov0, map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0), smoothValueM0);
-      mov2 = lerp(mov2, map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2), smoothValueM2);
-      mov4 = lerp(mov4, map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4), smoothValueM4);
-      mov6 = lerp(mov6, map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem6), smoothValueM6);
-      let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
+  // AudioAnalyse
+  aA.update();
 
   // Kamera
   if (rotateCheck.checked) {
@@ -297,50 +279,18 @@ function draw() {
   // Szene
   background(0)
 
+/*      texture(deepField);
+    //noStroke();
+    noLights();
+    //fill(col5, 100, 100)
+    sphere(90000,6,6)   */
+
   // Lichter
   lichtMode[l]()
   lightShows[ls]()
 
   // Figur
-  push()
-  let centerVec = createVector(1, 0, 0)
-  let planetVec = createVector(planet.planetX, planet.planetY, 0);
-  shapeRot = centerVec.angleBetween(planetVec)
-  //console.log(easycam.getPosition())
-  if (isNaN(shapeRot)) {  // Hack wegen verschwinden der Figur
-    shapeRot = 1;
-  }
-
-  // Drehung zum Planeten
-  if (planetMode) {
-    if (stopFuncAfter(3000)) {
-      rotateShape = lerp(rotateShape, shapeRot, 0.03)
-    } else {
-      rotateShape = shapeRot
-    }
-  } else {
-    rotateShape = lerp(rotateShape, 0, 0.01)
-  }
-
-  rotateZ(rotateShape) //rotationState
-
-  sphaere(m, sSize)
-  pop()
-
-  if (!planetMode) {
-    if (spaceCheck.checked) {
-      push()
-      rotateZ(rotateShape)
-      showTrail()
-      pop()
-    }
-  }
-
-  /*   texture(deepField);
-    //noStroke();
-    //noLights();
-    //fill(col5, 100, 100)
-    sphere(90000) */
+  figur.show();
 
   //Sterne
   sterne.show()
@@ -351,49 +301,7 @@ function draw() {
 
 }
 
-function sphaere(m, sSize) {
-  noStroke()
-  total = resCheck.checked ? 100 : 50
-  /*  stroke(255)
-  strokeWeight(0.5) */
 
-  for (let i = 0; i < total + 1; i++) {
-    shape[i] = []
-    let phi = map(i, 0, total, 0, PI)
-    for (let j = 0; j < total + 1; j++) {
-      let theta = map(j, 0, total, 0, TWO_PI)
-      let r = 0
-
-      r += pow(sin(m[0] * phi), m[1])
-      r += pow(cos(m[2] * phi), m[3])
-      r += pow(sin(m[4] * theta), m[5])
-      r += pow(cos(m[6] * theta), m[7])
-
-      let x = r * sin(phi) * cos(theta)
-      let y = r * cos(phi)
-      let z = r * sin(phi) * sin(theta)
-
-      shape[i][j] = createVector(x, y, z).mult(60 * sSize)
-    }
-  }
-  specularMaterial(190, 0.96)
-
-  for (let i = 0; i < total; i++) {
-    let v1, v2
-    beginShape(TRIANGLE_STRIP)
-    /*     noFill();
-        strokeWeight(0.7)   // WireframeMode?
-        stroke(255) */
-    for (let j = 0; j < total + 1; j++) {
-      v1 = shape[i][j % total]
-      normal(v1)
-      vertex(v1.x, v1.y, v1.z)
-      v2 = shape[i + 1][j % total]
-      vertex(v2.x, v2.y, v2.z)
-    }
-    endShape()
-  }
-}
 
 function changePlanetMode() {
   mil = millis()
@@ -428,44 +336,6 @@ function changeLightShow() {
   ls++
   ls %= 2
   mil = millis()
-}
-
-function showTrail() {
-  ampHistory.push(amplitude.getLevel())
-
-  let maxArray = 50
-  let dis = 50 + spaceSlider.value / 1000
-  let offSet = 450
-
-  noStroke()
-  specularMaterial(100, 0.3)
-
-  beginShape() //TRIANGLE_FAN
-
-  vertex(1, offSet - 200, 0)
-  vertex(0, offSet - 200, 1)
-  vertex(-1, offSet - 200, 0)
-  vertex(0, offSet - 200, -1)
-  for (let i = 0; i < ampHistory.length; i++) {
-    let amp = floor(
-      map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
-    )
-    /*     let al = map(i, 0, ampHistory.length, 1, 1);
-    specularMaterial(100,al) */
-    normal(0, offSet + maxArray * dis - i * dis, amp)
-    vertex(0, offSet + maxArray * dis - i * dis, amp)
-    normal(amp, offSet + maxArray * dis - i * dis, 0)
-    vertex(amp, offSet + maxArray * dis - i * dis, 0)
-    normal(0, offSet + maxArray * dis - i * dis, -amp)
-    vertex(0, offSet + maxArray * dis - i * dis, -amp)
-    normal(-amp, offSet + maxArray * dis - i * dis, 0)
-    vertex(-amp, offSet + maxArray * dis - i * dis, 0)
-  }
-  //vertex(0, offSet + maxArray * dis, 0);
-  endShape()
-  if (ampHistory.length > maxArray) {
-    ampHistory.splice(0, 1)
-  }
 }
 
 let lightShows = [
@@ -654,18 +524,18 @@ let lichtMode = [
 ]
 
 function htmlHandler() {
-  document.getElementById('m0').innerHTML = 'm0=' + Math.floor(m0*10)/10
+  document.getElementById('m0').innerHTML = 'm0=' + Math.floor(m0 * 10) / 10
   document.getElementById('m1').innerHTML = 'm1=' + m1
-  document.getElementById('m2').innerHTML = 'm2=' + Math.floor(m2*10)/10
+  document.getElementById('m2').innerHTML = 'm2=' + Math.floor(m2 * 10) / 10
   document.getElementById('m3').innerHTML = 'm3=' + m3
-  document.getElementById('m4').innerHTML = 'm4=' + Math.floor(m4*10)/10
+  document.getElementById('m4').innerHTML = 'm4=' + Math.floor(m4 * 10) / 10
   document.getElementById('m5').innerHTML = 'm5=' + m5
-  document.getElementById('m6').innerHTML = 'm6=' + Math.floor(m4*10)/10
+  document.getElementById('m6').innerHTML = 'm6=' + Math.floor(m6 * 10) / 10
   document.getElementById('m7').innerHTML = 'm7=' + m7
-  document.getElementById('sM0').innerHTML = 'm0S=' + Math.floor(strenghtValuem0*10)/10
-  document.getElementById('sM2').innerHTML = 'm2S=' + Math.floor(strenghtValuem2*10)/10
-  document.getElementById('sM4').innerHTML = 'm4S=' + Math.floor(strenghtValuem4*10)/10
-  document.getElementById('sM6').innerHTML = 'm6S=' + Math.floor(strenghtValuem6*10)/10
+  document.getElementById('sM0').innerHTML = 'm0S=' + Math.floor(strenghtValuem0 * 10) / 10
+  document.getElementById('sM2').innerHTML = 'm2S=' + Math.floor(strenghtValuem2 * 10) / 10
+  document.getElementById('sM4').innerHTML = 'm4S=' + Math.floor(strenghtValuem4 * 10) / 10
+  document.getElementById('sM6').innerHTML = 'm6S=' + Math.floor(strenghtValuem6 * 10) / 10
   document.getElementById('speed').innerHTML = morphSlider.value / 1000
   document.getElementById('travelSpeed').innerHTML =
     'Warp' + floor(spaceSlider.value / 1000)
@@ -843,43 +713,6 @@ function htmlEvents() {
   })
 }
 
-function sliderLogic() {
-  morphSpeed = !morphCheck.checked
-    ? morphSpeed
-    : (morphSpeed += morphSlider.value / 100000)
-  m0 = !morphCheck.checked
-    ? m0Slider.value / 100
-    : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000
-  m1 = m1Slider.value
-  m2 = !morphCheck.checked
-    ? m2Slider.value / 100
-    : floor(
-      map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
-    ) / 1000
-  m3 = m3Slider.value
-  m4 = !morphCheck.checked
-    ? m4Slider.value / 100
-    : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
-    1000
-  m5 = m5Slider.value
-  m6 = !morphCheck.checked
-    ? m6Slider.value / 100
-    : floor(
-      map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
-      1000
-    ) / 1000
-  m7 = m7Slider.value
-  smoothValue = smoothSlider.value / 100
-  smoothValueM0 = map(smoothSliderM0.value, 1, 100, 1, 0);
-  smoothValueM2 = map(smoothSliderM2.value, 1, 100, 1, 0);
-  smoothValueM4 = map(smoothSliderM4.value, 1, 100, 1, 0);
-  smoothValueM6 = map(smoothSliderM6.value, 1, 100, 1, 0);
-  strenghtValuem0 = strenghtSliderm0.value / 100
-  strenghtValuem2 = strenghtSliderm2.value / 100
-  strenghtValuem4 = strenghtSliderm4.value / 100
-  strenghtValuem6 = strenghtSliderm6.value / 100
-}
-
 function switchSource() {
   if (sourceIsStream) {
     audioSourceBtn.innerHTML = 'Mic/External'
@@ -1001,6 +834,199 @@ function rampUp(value, t) {
   return value;
 }
 
+
+function sliderLogic() {
+  morphSpeed = !morphCheck.checked
+    ? morphSpeed
+    : (morphSpeed += morphSlider.value / 100000)
+  m0 = !morphCheck.checked
+    ? m0Slider.value / 100
+    : floor(map(sin(morphSpeed), -1, 1, 0, m0Slider.value / 100) * 1000) / 1000
+  m1 = m1Slider.value
+  m2 = !morphCheck.checked
+    ? m2Slider.value / 100
+    : floor(
+      map(sin(morphSpeed + PI / 2), -1, 1, 0, m2Slider.value / 100) * 1000
+    ) / 1000
+  m3 = m3Slider.value
+  m4 = !morphCheck.checked
+    ? m4Slider.value / 100
+    : floor(map(sin(morphSpeed + PI), -1, 1, 0, m4Slider.value / 100) * 1000) /
+    1000
+  m5 = m5Slider.value
+  m6 = !morphCheck.checked
+    ? m6Slider.value / 100
+    : floor(
+      map(sin(morphSpeed + TWO_PI - PI / 2), -1, 1, 0, m6Slider.value / 100) *
+      1000
+    ) / 1000
+  m7 = m7Slider.value
+  smoothValue = smoothSlider.value / 100
+  smoothValueM0 = map(smoothSliderM0.value, 1, 100, 1, 0);
+  smoothValueM2 = map(smoothSliderM2.value, 1, 100, 1, 0);
+  smoothValueM4 = map(smoothSliderM4.value, 1, 100, 1, 0);
+  smoothValueM6 = map(smoothSliderM6.value, 1, 100, 1, 0);
+  strenghtValuem0 = strenghtSliderm0.value / 100
+  strenghtValuem2 = strenghtSliderm2.value / 100
+  strenghtValuem4 = strenghtSliderm4.value / 100
+  strenghtValuem6 = strenghtSliderm6.value / 100
+}
+
+class Figur {
+  constructor() {
+    this.shape = [];
+    this.rotateShape = 0;
+    this.shapeRot = 0 // Rotation um Planeten
+  }
+  sphaere(m, sSize) {
+    noStroke()
+    total = resCheck.checked ? 100 : 50;
+
+    for (let i = 0; i < total + 1; i++) {
+      this.shape[i] = []
+      let phi = map(i, 0, total, 0, PI)
+      for (let j = 0; j < total + 1; j++) {
+        let theta = map(j, 0, total, 0, TWO_PI)
+        let r = 0
+
+        r += pow(sin(m[0] * phi), m[1])
+        r += pow(cos(m[2] * phi), m[3])
+        r += pow(sin(m[4] * theta), m[5])
+        r += pow(cos(m[6] * theta), m[7])
+
+        let x = r * sin(phi) * cos(theta)
+        let y = r * cos(phi)
+        let z = r * sin(phi) * sin(theta)
+
+        this.shape[i][j] = createVector(x, y, z).mult(60 * sSize)
+      }
+    }
+    specularMaterial(190, 0.96)
+
+    for (let i = 0; i < total; i++) {
+      let v1, v2
+      beginShape(TRIANGLE_STRIP)
+      //    noFill();
+      //    strokeWeight(0.7)   // WireframeMode?
+      //    stroke(255)
+      for (let j = 0; j < total + 1; j++) {
+        v1 = this.shape[i][j % total]
+        normal(v1)
+        vertex(v1.x, v1.y, v1.z)
+        v2 = this.shape[i + 1][j % total]
+        vertex(v2.x, v2.y, v2.z)
+      }
+      endShape()
+    }
+  }
+
+  show() {
+    push()
+    let centerVec = createVector(1, 0, 0)
+    let planetVec = createVector(planet.planetX, planet.planetY, 0);
+    this.shapeRot = centerVec.angleBetween(planetVec)
+    if (isNaN(this.shapeRot)) {  // Hack wegen verschwinden der Figur
+      this.shapeRot = 1;
+    }
+    // Drehung zum Planeten
+    if (planetMode) {
+      if (stopFuncAfter(3000)) {
+        this.rotateShape = lerp(this.rotateShape, this.shapeRot, 0.03)
+      } else {
+        this.rotateShape = this.shapeRot
+      }
+    } else {
+      this.rotateShape = lerp(this.rotateShape, 0, 0.01)
+    }
+    rotateZ(this.rotateShape) //rotationState
+    this.sphaere(aA.m, sSize)
+    pop();
+
+    if (!planetMode) {
+      if (spaceCheck.checked) {
+        push()
+        rotateZ(this.rotateShape)
+        this.showTrail()
+        pop()
+      }
+    }
+  }
+  showTrail() {
+    ampHistory.push(amplitude.getLevel())
+
+    let maxArray = 50
+    let dis = 50 + spaceSlider.value / 1000
+    let offSet = 450
+
+    noStroke()
+    specularMaterial(100, 0.3)
+
+    beginShape() //TRIANGLE_FAN
+
+    vertex(1, offSet - 200, 0)
+    vertex(0, offSet - 200, 1)
+    vertex(-1, offSet - 200, 0)
+    vertex(0, offSet - 200, -1)
+    for (let i = 0; i < ampHistory.length; i++) {
+      let amp = floor(
+        map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
+      )
+      //    let al = map(i, 0, ampHistory.length, 1, 1);
+      //    specularMaterial(100,al) 
+      normal(0, offSet + maxArray * dis - i * dis, amp)
+      vertex(0, offSet + maxArray * dis - i * dis, amp)
+      normal(amp, offSet + maxArray * dis - i * dis, 0)
+      vertex(amp, offSet + maxArray * dis - i * dis, 0)
+      normal(0, offSet + maxArray * dis - i * dis, -amp)
+      vertex(0, offSet + maxArray * dis - i * dis, -amp)
+      normal(-amp, offSet + maxArray * dis - i * dis, 0)
+      vertex(-amp, offSet + maxArray * dis - i * dis, 0)
+    }
+    //vertex(0, offSet + maxArray * dis, 0);
+    endShape()
+    if (ampHistory.length > maxArray) {
+      ampHistory.splice(0, 1)
+    }
+  }
+}
+
+class AudioAnalysis {
+  constructor() {
+    this.mov0 = 0;
+    this.mov2 = 0;
+    this.mov4 = 0;
+    this.mov6 = 0;
+  }
+  update() {
+  /*   let oBands = fft.getOctaveBands(1, 33);
+    let bands = fft.logAverages(oBands); */
+  //console.log(bands)
+  /*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
+    mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
+    mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
+    mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
+
+  //Bänder
+  /*  let bass = [20, 250];
+   let lowMid = [250, 800];
+   let mid = [800, 5000];
+   let treble = [5000, 14000];
+   mov0 = lerp(mov0, map(fft.getEnergy(bass[0], bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
+   mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0], lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
+   mov4 = lerp(mov4, map(fft.getEnergy(mid[0], mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
+   mov6 = lerp(mov6, map(fft.getEnergy(treble[0], treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
+   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
+    this.mov0 = lerp(this.mov0, map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0), smoothValueM0);
+    this.mov2 = lerp(this.mov2, map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2), smoothValueM2);
+    this.mov4 = lerp(this.mov4, map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4), smoothValueM4);
+    this.mov6 = lerp(this.mov6, map(fft.getEnergy("highMid"), 0, 255, 0, strenghtValuem6), smoothValueM6);
+  }
+  get m() {
+    return [m0 + this.mov0, m1, m2 + this.mov2, m3, m4 + this.mov4, m5, m6 + this.mov6, m7];
+  }
+
+}
+
 class Stars {
   constructor(amount) {
     this.amount = amount
@@ -1008,6 +1034,7 @@ class Stars {
     this.lerpSpace = createVector(0, 0, 0)
     this.alSterne = 0
     this.tempParticles = this.particlesPlanetTemp(this.amount);
+    //console.log("Part Arr" + this.tempParticles);
   }
   setStars() {
     this.particles.splice(0, this.particles.length)
@@ -1056,14 +1083,12 @@ class Stars {
 
         // Warte mit Sternanimation
         let interpolBool = (floor(this.particles[0].x) !== floor(this.tempParticles[0].x));  // Interpolation nötig?
-        if (waitFuncFor(10000) && interpolBool) {
-          p.x = lerp(p.x, this.tempParticles[i].x, rampUp(0.01, 0.07));   // Hier BUG Scheisse nochmal!!!!!!!!
-          p.y = lerp(p.y, this.tempParticles[i].y, rampUp(0.01, 0.07));
-          p.z = lerp(p.z, this.tempParticles[i].z, rampUp(0.01, 0.07));
+        if (waitFuncFor(9000) && interpolBool) {
+          p.x = lerp(p.x, this.tempParticles[i].x, 0.1);   // Hier BUG Scheisse nochmal!!!!!!!! rampUp(0.01, 0.07) statt 0.01
+          p.y = lerp(p.y, this.tempParticles[i].y, 0.1);
+          p.z = lerp(p.z, this.tempParticles[i].z, 0.1);
           i++;
         }
-        
-
       } else {
         // WarpBremse
         if (spaceCheck.checked) {
@@ -1136,7 +1161,7 @@ class Planet {
       this.maxDistCam = lerp(this.maxDistCam, this.maxCam, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
     } else {
-      this.planetDist = lerp(this.planetDist, 0, 0.05)   
+      this.planetDist = lerp(this.planetDist, 0, 0.05)
       this.planetSize = lerp(this.planetSize, 0, 0.1)
       this.maxDistCam = lerp(this.maxDistCam, 3000, 0.01)
       easycam.setDistanceMax(this.maxDistCam)
@@ -1149,14 +1174,15 @@ class Planet {
     push()
     translate(this.planetX, this.planetY, 0)
     //rotateY(frameCount * 0.0001) // Drehung um eigene Achse
-    //rotateZ(frameCount * 0.001); //WegenTextur
+    //rotateZ(frameCount * 0.01); //WegenTextur
 
     let dark = 0;
     let planetCol = map2(this.rotationState, 0, TWO_PI, 50, 200, 2, 2);
 
-    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.3, 1, 0)
+    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.1, 7, 1);
+    pump = lerp(pump,pump,0.03);
     if (planetMode && this.planetDist >= this.planetSize) {
-      
+
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
       planetCol = map2(amplitude.getLevel(), 0, 1, 50, 150, 3, 2)
     } else {
@@ -1165,6 +1191,7 @@ class Planet {
     if (planetMode) {
       push()
       rotateX(PI / 2)
+      rotateY(PI / 4)
       stroke(col, 255, 255)
       let ringDistance = planet.size * 0.618;
       let wave = fft.waveform(); // analyze the waveform for circleWave
@@ -1205,9 +1232,9 @@ class Planet {
     }
     if (planetTex) {
       noLights()
-      pointLight(planetCol, 250, 250, 0, 0, 50);
-  /*     let textures = floor((frameCount * 0.01) % tex.length)
-      texture(tex[textures]) */
+      pointLight(col5, 0, planetCol+50, 0, 0, 255);
+      /*     let textures = floor((frameCount * 0.01) % tex.length)
+          texture(tex[textures]) */
       texture(tex[this.moonTex])
     }
     sphere(this.planetSize * pump, 24, 24)
