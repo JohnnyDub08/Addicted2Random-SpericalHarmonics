@@ -5,6 +5,7 @@ function openNav() {
   let widthRight = "333px";
   switch (bar) {
     case 0:
+      sweep();
       document.getElementById("leftSidebar").style.width = widthRight;
       document.getElementById("arrow").style.marginLeft = widthRight;
       document.getElementById("leftSidebar").style.opacity = "85%";

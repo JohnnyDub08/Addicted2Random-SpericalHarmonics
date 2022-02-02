@@ -41,6 +41,7 @@ let scheinW = false
 let planetTex = true
 let tex;
 let deepField;
+let bg;
 
 // Kamera Stuff
 let autoCam = false;
@@ -84,6 +85,7 @@ function preload() {
     loadImage('textures/moon15.png')
   ]
   deepField = loadImage("textures/Nebula.png");
+  bg = loadImage("textures/Nebula.png");
 }
 
 function centerCanvas() {
@@ -277,7 +279,7 @@ function draw() {
   }
 
   // Szene
-  background(0)
+  background(0);
 
 /*      texture(deepField);
     //noStroke();
@@ -954,7 +956,7 @@ class Figur {
   showTrail() {
     ampHistory.push(amplitude.getLevel())
 
-    let maxArray = 50
+    let maxArray = 150
     let dis = 50 + spaceSlider.value / 1000
     let offSet = 450
 
@@ -1179,8 +1181,8 @@ class Planet {
     let dark = 0;
     let planetCol = map2(this.rotationState, 0, TWO_PI, 50, 200, 2, 2);
 
-    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.1, 7, 1);
-    pump = lerp(pump,pump,0.03);
+    let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.1, 7, 0);
+    pump = lerp(pump,pump,0.01);
     if (planetMode && this.planetDist >= this.planetSize) {
 
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
@@ -1285,4 +1287,5 @@ function setMillis() {
 function touchStarted() {
   getAudioContext().resume()
 }
+
 //Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit

@@ -7,7 +7,8 @@ let sketch = function (p) {
     p.draw = function () {
       if (sidebar) {
         //let spectrum = fft.analyze(512)
-        p.background('#262126')
+        //p.background('#262126')
+        p.clear();
         p.noFill()
         p.strokeWeight(1)
         p.beginShape()

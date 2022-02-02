@@ -90,17 +90,6 @@ body {
   border: none;
   /* box-sizing: content-box; */
   transition: all 0.3s cubic-bezier(0, 0, 0.58, 1);
- 
-
-/*   outline: none;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-left: 3.8em;
-  margin-top: 1em;
-  transform: rotate(45deg);
-  cursor: pointer;
-  transition: 0.5s; */
 }
 
 .slider {
