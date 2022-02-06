@@ -8,7 +8,7 @@ function sweep() {
     anime({
         targets: [elements5, elements, elements2, elements3, elements4],
         translateX: [-233, 0],
-        rotate: [45, 0],
-        delay: anime.stagger(15, { grid: [42, 1], easing: 'easeOutInElastic', from: 'center' })
+        rotate: [90, 0],
+        //delay: anime.stagger(50, { grid: [42, 2], easing: 'easeOutInElastic', from: 'center' })
     });
 }
