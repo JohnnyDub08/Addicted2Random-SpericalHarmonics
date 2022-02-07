@@ -2,12 +2,10 @@
 
 let cnv, mic, audio, fft, spectrum, peakDetect, amplitude, filter;
 let easycam;
-/* let shape = []; */
 let figur;
 
 let total = 50;
 let sterne;
-//let lerpSpace; // SternOffset
 let planet;
 let aA;
 let m0Slider, m0, m1Slider, m1, m2Slider, m2, m3Slider, m3, m4Slider, m4, m5Slider,
@@ -23,12 +21,10 @@ let sSize = 0.2;
 let offSet = 50;
 let morphSpeed = 0;
 let streamAdress;
-let ampHistory = []; // Lautstärke Analyse
+let ampHistory = []; // Lautstärke Analyse Array
 let planetMode = false;
 let maxDistCam = 3000;
 
-/* let rotateShape = 0;
-let shapeRot = 0 // Rotation um Planeten */
 let mil //millis()
 let col = 0
 let col5 = 0 // Globale Farben
@@ -37,11 +33,10 @@ let lightVec  // Licht
 let lightVecTemp
 let l = 0 // LichtArray
 let ls = 0 // LichtShowArray
-let scheinW = false
+let scheinW = true;
 let planetTex = true
 let tex;
 let deepField;
-let bg;
 
 // Kamera Stuff
 let autoCam = false;
@@ -49,16 +44,12 @@ let state2;
 
 // SoundStuff
 let reverb;
-/* let mov0 = 0;
-let mov2 = 0;
-let mov4 = 0;
-let mov6 = 0; */
 
 // Dev Debug Helfer
 let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetTexCheckBox, autoCamCheckBox
 
 // Counter
-let peakCounter1, peakCounter2;
+let peakCounter1, peakCounter2, peakCounter3;
 
 // Landing SoundEffekt
 let soundFx;
@@ -84,10 +75,8 @@ function preload() {
     loadImage('textures/moon14.png'),
     loadImage('textures/moon15.png')
   ]
-  deepField = loadImage("textures/Nebula.png");
-  bg = loadImage("textures/Nebula.png");
+  //deepField = loadImage("textures/Nebula.png");
 }
-
 function centerCanvas() {
   let x = (windowWidth - width) / 2
   let y = (windowHeight - height) / 2
@@ -115,7 +104,6 @@ function windowResized() {
   saveBtn.position(width - 150, 210)
   distSlider.position(width - 150, 260);
 }
-
 function loaded() {
   //console.log(audio)
   setTimeout(() => audio.play(), 4500);
@@ -153,29 +141,26 @@ function setup() {
     center: [0, 0, 0],
     rotation: [0.5, -0.5, 0, 0]
   }
-
   easycam = new Dw.EasyCam(this._renderer, state)
-  // RightClick aus
-  document.oncontextmenu = function () {
-    return false
-  }
-  //easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] });
   easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
   easycam.setRotation([-1, -0.5, 0.5, -0.5], 10000)
   easycam.setDistance(1000, 10000)
-
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
+  // RightClick aus
+  document.oncontextmenu = function () {
+    return false
+  }
 
   document.getElementById('spaceCheck').checked = true
 
- // LightShow
+  // LightShow
   lightVec = createVector(1, -1, 1)
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
-  reverb = new p5.Reverb();   //reverb.drywet(0.33);
+  reverb = new p5.Reverb(); 
   reverb.process(filter, 2, 1.0);
   reverb.amp(1)
   //reverb.set(7,0.00) 
@@ -187,7 +172,7 @@ function setup() {
   lichtCheckBox = createCheckbox('Licht', false)
   lichtCheckBox.position(width - 150, 60)
   lichtCheckBox.changed(changeLichtMode)
-  scheinWCheckBox = createCheckbox('ScheinW', false)
+  scheinWCheckBox = createCheckbox('ScheinW', true)
   scheinWCheckBox.position(width - 150, 90)
   scheinWCheckBox.changed(() => {
     scheinW = !scheinW
@@ -222,12 +207,12 @@ function setup() {
 
   peakCounter1 = new PeakCounter();
   peakCounter2 = new PeakCounter();
+  peakCounter3 = new PeakCounter();
 }
 
 function draw() {
   //console.log(getFrameRate())
-  // Disco Mode auf Peak legen
-  //l = floor(frameCount*0.02 % 2);
+
   sliderLogic();
   htmlHandler();
 
@@ -281,14 +266,20 @@ function draw() {
   // Szene
   background(0);
 
-/*      texture(deepField);
-    //noStroke();
-    noLights();
-    //fill(col5, 100, 100)
-    sphere(90000,6,6)   */
+  /*      texture(deepField);
+      //noStroke();
+      noLights();
+      //fill(col5, 100, 100)
+      sphere(90000,6,6)   */
 
   // Lichter
   lichtMode[l]()
+
+  if (peakCounter3.countMe(2)) {
+    console.log("Baam!")
+    l = (l < 1) ? ++l : 0;
+  }
+
   lightShows[ls]()
 
   // Figur
@@ -299,11 +290,7 @@ function draw() {
 
   //Planet
   planet.show()
-
-
 }
-
-
 
 function changePlanetMode() {
   mil = millis()
@@ -526,29 +513,28 @@ let lichtMode = [
 ]
 
 function htmlHandler() {
-  document.getElementById('m0').innerHTML = 'm0=' + Math.floor(m0 * 10) / 10
-  document.getElementById('m1').innerHTML = 'm1=' + m1
-  document.getElementById('m2').innerHTML = 'm2=' + Math.floor(m2 * 10) / 10
-  document.getElementById('m3').innerHTML = 'm3=' + m3
-  document.getElementById('m4').innerHTML = 'm4=' + Math.floor(m4 * 10) / 10
-  document.getElementById('m5').innerHTML = 'm5=' + m5
-  document.getElementById('m6').innerHTML = 'm6=' + Math.floor(m6 * 10) / 10
-  document.getElementById('m7').innerHTML = 'm7=' + m7
-  document.getElementById('sM0').innerHTML = 'm0S=' + Math.floor(strenghtValuem0 * 10) / 10
-  document.getElementById('sM2').innerHTML = 'm2S=' + Math.floor(strenghtValuem2 * 10) / 10
-  document.getElementById('sM4').innerHTML = 'm4S=' + Math.floor(strenghtValuem4 * 10) / 10
-  document.getElementById('sM6').innerHTML = 'm6S=' + Math.floor(strenghtValuem6 * 10) / 10
-  document.getElementById('speed').innerHTML = morphSlider.value / 1000
-  document.getElementById('travelSpeed').innerHTML =
-    'Warp' + floor(spaceSlider.value / 1000)
-  document.getElementById('smth').innerHTML = "All" + smoothValue
+  document.getElementById('m0').innerHTML = 'm0=' + Math.floor(m0 * 10) / 10;
+  document.getElementById('m1').innerHTML = 'm1=' + m1;
+  document.getElementById('m2').innerHTML = 'm2=' + Math.floor(m2 * 10) / 10;
+  document.getElementById('m3').innerHTML = 'm3=' + m3;
+  document.getElementById('m4').innerHTML = 'm4=' + Math.floor(m4 * 10) / 10;
+  document.getElementById('m5').innerHTML = 'm5=' + m5;
+  document.getElementById('m6').innerHTML = 'm6=' + Math.floor(m6 * 10) / 10;
+  document.getElementById('m7').innerHTML = 'm7=' + m7;
+  document.getElementById('sM0').innerHTML = 'm0S=' + Math.floor(strenghtValuem0 * 10) / 10;
+  document.getElementById('sM2').innerHTML = 'm2S=' + Math.floor(strenghtValuem2 * 10) / 10;
+  document.getElementById('sM4').innerHTML = 'm4S=' + Math.floor(strenghtValuem4 * 10) / 10;
+  document.getElementById('sM6').innerHTML = 'm6S=' + Math.floor(strenghtValuem6 * 10) / 10;
+  document.getElementById('speed').innerHTML = morphSlider.value / 1000;
+  document.getElementById('travelSpeed').innerHTML = 'Warp' + floor(spaceSlider.value / 1000);
+  document.getElementById('smth').innerHTML = "All" + smoothValue;
   document.getElementById('smthM0').innerHTML = "m0=" + smoothSliderM0.value / 100;
   document.getElementById('smthM2').innerHTML = "m2=" + smoothSliderM2.value / 100;
   document.getElementById('smthM4').innerHTML = "m4=" + smoothSliderM4.value / 100;
   document.getElementById('smthM6').innerHTML = "m6=" + smoothSliderM6.value / 100;
-  document.getElementById('x').innerHTML = 'X=' + rotateSliderX.value / 1000
-  document.getElementById('y').innerHTML = 'Y=' + rotateSliderY.value / 1000
-  document.getElementById('z').innerHTML = 'Z=' + rotateSliderZ.value / 1000
+  document.getElementById('x').innerHTML = 'X=' + rotateSliderX.value / 1000;
+  document.getElementById('y').innerHTML = 'Y=' + rotateSliderY.value / 1000;
+  document.getElementById('z').innerHTML = 'Z=' + rotateSliderZ.value / 1000;
 }
 
 function getAudioFile(file) {
@@ -560,7 +546,8 @@ function getAudioFile(file) {
   fft.setInput(audio)
   //amplitude = new p5.Amplitude();
   //amplitude.setInput(audio)
-  audioSourceBtn.innerHTML = file.name;
+  audioSourceBtn.innerHTML = file.name.substring(file.name.length-4,file.name.length-12);
+  console.log(file.name.length);
 }
 
 function htmlEvents() {
@@ -598,9 +585,7 @@ function htmlEvents() {
   morphBtn = document.getElementById('morphCheck')
   serverAdress = document.getElementById('server')
   dropZone = select('#dropZone')
-  dropZone.drop(getAudioFile, () => {
-    console.log('waiting for file...')
-  })
+  dropZone.drop(getAudioFile, () => { console.log('waiting for file...') });
   serverAdress.addEventListener('keydown', x => {
     /*   if (!x) { var x = window.event; }
     x.preventDefault();  */
@@ -608,10 +593,9 @@ function htmlEvents() {
       audioSourceBtn.innerHTML = 'CustomServer'
       mic.stop()
       audio.stop()
-      audio = createAudio(serverAdress.value) //("https://ice6.somafm.com/vaporwaves-128-aac")//("http://a2r.twenty4seven.cc:8000/puredata.ogg");//("https://ice6.somafm.com/defcon-128-mp3")//("https://ice4.somafm.com/dronezone-128-aac")
+      audio = createAudio(serverAdress.value);
       audio.play()
       fft.setInput(audio)
-      //amplitude = new p5.Amplitude();
       amplitude.setInput(audio)
     }
   })
@@ -653,9 +637,7 @@ function htmlEvents() {
     resCheck.checked = false
     spaceCheck.checked = false
   })
-  document.getElementById('m0').addEventListener('click', () => {
-    m0Slider.value = 0
-  })
+  document.getElementById('m0').addEventListener('click', () => { m0Slider.value = 0 })
   document.getElementById('m1').addEventListener('click', () => {
     m1Slider.value = 0
   })
@@ -933,15 +915,15 @@ class Figur {
     // Drehung zum Planeten
     if (planetMode) {
       if (stopFuncAfter(3000)) {
-        this.rotateShape = lerp(this.rotateShape, this.shapeRot, 0.03)
+        this.rotateShape = lerp(this.rotateShape, this.shapeRot, 0.03);
       } else {
-        this.rotateShape = this.shapeRot
+        this.rotateShape = this.shapeRot;
       }
     } else {
-      this.rotateShape = lerp(this.rotateShape, 0, 0.01)
+      this.rotateShape = lerp(this.rotateShape, 0, 0.01);
     }
-    rotateZ(this.rotateShape) //rotationState
-    this.sphaere(aA.m, sSize)
+    rotateZ(this.rotateShape); //rotationState
+    this.sphaere(aA.m, sSize);
     pop();
 
     if (!planetMode) {
@@ -957,34 +939,24 @@ class Figur {
     ampHistory.push(amplitude.getLevel())
 
     let maxArray = 150
-    let dis = 50 + spaceSlider.value / 1000
+    let dis =  50 + spaceSlider.value / 1000;
     let offSet = 450
 
-    noStroke()
-    specularMaterial(100, 0.3)
-
-    beginShape() //TRIANGLE_FAN
-
-    vertex(1, offSet - 200, 0)
-    vertex(0, offSet - 200, 1)
-    vertex(-1, offSet - 200, 0)
-    vertex(0, offSet - 200, -1)
+    noStroke();
+    specularMaterial(100, 0.3);
+    beginShape(LINES);
+    vertex(0, offSet - 200, 0)
     for (let i = 0; i < ampHistory.length; i++) {
-      let amp = floor(
-        map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
-      )
-      //    let al = map(i, 0, ampHistory.length, 1, 1);
-      //    specularMaterial(100,al) 
-      normal(0, offSet + maxArray * dis - i * dis, amp)
-      vertex(0, offSet + maxArray * dis - i * dis, amp)
-      normal(amp, offSet + maxArray * dis - i * dis, 0)
-      vertex(amp, offSet + maxArray * dis - i * dis, 0)
-      normal(0, offSet + maxArray * dis - i * dis, -amp)
-      vertex(0, offSet + maxArray * dis - i * dis, -amp)
-      normal(-amp, offSet + maxArray * dis - i * dis, 0)
-      vertex(-amp, offSet + maxArray * dis - i * dis, 0)
+      let amp = floor(map(ampHistory[i], 0, 1, 1, (5 * spaceSlider.value) / 1000) );
+
+      for (let j = 0; j <= TWO_PI; j += PI/6) {     // Kreisförmiger Trail
+        let x = amp * cos(j);
+        let y = offSet + maxArray * dis - i * dis;
+        let z = amp * sin(j);
+        normal(x, y, z);
+        vertex(x, y, z);
+      }
     }
-    //vertex(0, offSet + maxArray * dis, 0);
     endShape()
     if (ampHistory.length > maxArray) {
       ampHistory.splice(0, 1)
@@ -1000,24 +972,24 @@ class AudioAnalysis {
     this.mov6 = 0;
   }
   update() {
-  /*   let oBands = fft.getOctaveBands(1, 33);
-    let bands = fft.logAverages(oBands); */
-  //console.log(bands)
-  /*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
-    mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
-    mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
-    mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
+    /*   let oBands = fft.getOctaveBands(1, 33);
+      let bands = fft.logAverages(oBands); */
+    //console.log(bands)
+    /*   mov0 = lerp(mov0, map(bands[0] + bands[1], 0, 512, 0, strenghtValuem0), smoothValueM0);
+      mov2 = lerp(mov2, map(bands[2] + bands[3], 0, 512, 0, strenghtValuem2), smoothValueM2);
+      mov4 = lerp(mov4, map(bands[4] + bands[5], 0, 255, 0, strenghtValuem4), smoothValueM4);
+      mov6 = lerp(mov6, map(bands[6] + bands[7] + bands[8], 0, 385, 0, strenghtValuem6), smoothValueM6); */
 
-  //Bänder
-  /*  let bass = [20, 250];
-   let lowMid = [250, 800];
-   let mid = [800, 5000];
-   let treble = [5000, 14000];
-   mov0 = lerp(mov0, map(fft.getEnergy(bass[0], bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
-   mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0], lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
-   mov4 = lerp(mov4, map(fft.getEnergy(mid[0], mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
-   mov6 = lerp(mov6, map(fft.getEnergy(treble[0], treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
-   let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
+    //Bänder
+    /*  let bass = [20, 250];
+     let lowMid = [250, 800];
+     let mid = [800, 5000];
+     let treble = [5000, 14000];
+     mov0 = lerp(mov0, map(fft.getEnergy(bass[0], bass[1]), 0, 255, 0, strenghtValuem0), smoothValueM0);
+     mov2 = lerp(mov2, map(fft.getEnergy(lowMid[0], lowMid[1]), 0, 255, 0, strenghtValuem2), smoothValueM2);
+     mov4 = lerp(mov4, map(fft.getEnergy(mid[0], mid[1]), 0, 255, 0, strenghtValuem4), smoothValueM4);
+     mov6 = lerp(mov6, map(fft.getEnergy(treble[0], treble[1]), 0, 255, 0, strenghtValuem6), smoothValueM6);
+     let m = [m0 + mov0, m1, m2 + mov2, m3, m4 + mov4, m5, m6 + mov6, m7]; */
     this.mov0 = lerp(this.mov0, map(fft.getEnergy("bass"), 0, 255, 0, strenghtValuem0), smoothValueM0);
     this.mov2 = lerp(this.mov2, map(fft.getEnergy("lowMid"), 0, 255, 0, strenghtValuem2), smoothValueM2);
     this.mov4 = lerp(this.mov4, map(fft.getEnergy("mid"), 0, 255, 0, strenghtValuem4), smoothValueM4);
@@ -1182,7 +1154,7 @@ class Planet {
     let planetCol = map2(this.rotationState, 0, TWO_PI, 50, 200, 2, 2);
 
     let pump = map2(amplitude.getLevel(), 0, 1, 1, 1.1, 7, 0);
-    pump = lerp(pump,pump,0.01);
+    pump = lerp(pump, pump, 0.01);
     if (planetMode && this.planetDist >= this.planetSize) {
 
       dark = map(this.rotationState, 0, TWO_PI, 0, 200)
@@ -1234,7 +1206,7 @@ class Planet {
     }
     if (planetTex) {
       noLights()
-      pointLight(col5, 0, planetCol+50, 0, 0, 255);
+      pointLight(col5, 0, planetCol + 50, 0, 0, 255);
       /*     let textures = floor((frameCount * 0.01) % tex.length)
           texture(tex[textures]) */
       texture(tex[this.moonTex])
@@ -1269,7 +1241,7 @@ class PeakCounter {
   countMe(peaks) {
     if (peakDetect.isDetected) {
       this.count++;
-      if (this.count % peaks == 0) {
+      if (this.count % peaks === 0) {
         this.count = 0;
         return true;
       }

@@ -2,7 +2,7 @@
 let box1, box2, text1, text2;
 let htmlText1 = 'Addicted';
 let htmlText2 = ' 2Random';
-
+let startTime = 5200;
 let temp;
 let temp2;
 let temp3 = [];
@@ -20,7 +20,7 @@ function customIterator() {
   let n = 45;
   return {
     next: function () {
-      n *= 1.02;
+      n *= 1.05;
       return { value: n, done: false };
     }
   };
@@ -30,7 +30,7 @@ let n = customIterator();
 let j = 0;
 function textGlitch(timeStamp) {
 
-  if (timeStamp < 4200) {
+  if (timeStamp < startTime) {
     let ran01 = Math.random() * 70 + 10;
     let ran02 = Math.random() * 70 + 10;
     text1.style.fontSize = Math.floor(ran01).toString() + "px";
@@ -88,7 +88,7 @@ function textGlitch(timeStamp) {
     soundFx.play();
   }
 }
-setTimeout(() => startSide(), 5500);
+setTimeout(() => startSide(), startTime+1000);
 function startSide() {
   box1.style.width = "0%";
   box1.style.height = "0%";
