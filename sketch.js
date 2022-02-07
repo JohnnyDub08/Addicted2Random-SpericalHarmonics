@@ -21,7 +21,7 @@ let sSize = 0.2;
 let offSet = 50;
 let morphSpeed = 0;
 let streamAdress;
-let ampHistory = []; // Lautstärke Analyse
+let ampHistory = []; // Lautstärke Analyse Array
 let planetMode = false;
 let maxDistCam = 3000;
 
@@ -37,7 +37,6 @@ let scheinW = true;
 let planetTex = true
 let tex;
 let deepField;
-let bg;
 
 // Kamera Stuff
 let autoCam = false;
@@ -45,10 +44,6 @@ let state2;
 
 // SoundStuff
 let reverb;
-/* let mov0 = 0;
-let mov2 = 0;
-let mov4 = 0;
-let mov6 = 0; */
 
 // Dev Debug Helfer
 let planetCheckBox, lichtCheckBox, scheinWCheckBox, lightShowCheckBox, planetTexCheckBox, autoCamCheckBox
@@ -80,10 +75,8 @@ function preload() {
     loadImage('textures/moon14.png'),
     loadImage('textures/moon15.png')
   ]
-  deepField = loadImage("textures/Nebula.png");
-  bg = loadImage("textures/Nebula.png");
+  //deepField = loadImage("textures/Nebula.png");
 }
-
 function centerCanvas() {
   let x = (windowWidth - width) / 2
   let y = (windowHeight - height) / 2
@@ -111,7 +104,6 @@ function windowResized() {
   saveBtn.position(width - 150, 210)
   distSlider.position(width - 150, 260);
 }
-
 function loaded() {
   //console.log(audio)
   setTimeout(() => audio.play(), 4500);
@@ -923,15 +915,15 @@ class Figur {
     // Drehung zum Planeten
     if (planetMode) {
       if (stopFuncAfter(3000)) {
-        this.rotateShape = lerp(this.rotateShape, this.shapeRot, 0.03)
+        this.rotateShape = lerp(this.rotateShape, this.shapeRot, 0.03);
       } else {
-        this.rotateShape = this.shapeRot
+        this.rotateShape = this.shapeRot;
       }
     } else {
-      this.rotateShape = lerp(this.rotateShape, 0, 0.01)
+      this.rotateShape = lerp(this.rotateShape, 0, 0.01);
     }
-    rotateZ(this.rotateShape) //rotationState
-    this.sphaere(aA.m, sSize)
+    rotateZ(this.rotateShape); //rotationState
+    this.sphaere(aA.m, sSize);
     pop();
 
     if (!planetMode) {
@@ -947,34 +939,24 @@ class Figur {
     ampHistory.push(amplitude.getLevel())
 
     let maxArray = 150
-    let dis = 50 + spaceSlider.value / 1000
+    let dis =  50 + spaceSlider.value / 1000;
     let offSet = 450
 
-    noStroke()
-    specularMaterial(100, 0.3)
-
-    beginShape() //TRIANGLE_FAN
-
-    vertex(1, offSet - 200, 0)
-    vertex(0, offSet - 200, 1)
-    vertex(-1, offSet - 200, 0)
-    vertex(0, offSet - 200, -1)
+    noStroke();
+    specularMaterial(100, 0.3);
+    beginShape(LINES);
+    vertex(0, offSet - 200, 0)
     for (let i = 0; i < ampHistory.length; i++) {
-      let amp = floor(
-        map(ampHistory[i], 0, 1, 1, (10 * spaceSlider.value) / 1000) // Hier map2 function!
-      )
-      //    let al = map(i, 0, ampHistory.length, 1, 1);
-      //    specularMaterial(100,al) 
-      normal(0, offSet + maxArray * dis - i * dis, amp)
-      vertex(0, offSet + maxArray * dis - i * dis, amp)
-      normal(amp, offSet + maxArray * dis - i * dis, 0)
-      vertex(amp, offSet + maxArray * dis - i * dis, 0)
-      normal(0, offSet + maxArray * dis - i * dis, -amp)
-      vertex(0, offSet + maxArray * dis - i * dis, -amp)
-      normal(-amp, offSet + maxArray * dis - i * dis, 0)
-      vertex(-amp, offSet + maxArray * dis - i * dis, 0)
+      let amp = floor(map(ampHistory[i], 0, 1, 1, (5 * spaceSlider.value) / 1000) );
+
+      for (let j = 0; j <= TWO_PI; j += PI/6) {     // Kreisförmiger Trail
+        let x = amp * cos(j);
+        let y = offSet + maxArray * dis - i * dis;
+        let z = amp * sin(j);
+        normal(x, y, z);
+        vertex(x, y, z);
+      }
     }
-    //vertex(0, offSet + maxArray * dis, 0);
     endShape()
     if (ampHistory.length > maxArray) {
       ampHistory.splice(0, 1)
