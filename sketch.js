@@ -88,10 +88,10 @@ function windowResized() {
   if (!planetMode) sterne.setStars()
 
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
-  easycam.setDistanceMin(300)
+  easycam.setDistanceMin(30)
   easycam.setDistanceMax(3000)
   easycam.setRotation([0, -0.5, 0, 0], 6000)
-  easycam.setDistance(2000, 3000)
+  easycam.setDistance(30, 3000)
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
 
@@ -109,8 +109,8 @@ function loaded() {
   setTimeout(() => audio.play(), 4500);
 }
 function setup() {
-  setAttributes("antialias", true);
-  setAttributes('alpha', false);
+  //setAttributes("antialias", true);
+  //setAttributes('alpha', false);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL)
   cnv.style('z-index', -1)
   colorMode(HSB)
@@ -142,7 +142,7 @@ function setup() {
     rotation: [0.5, -0.5, 0, 0]
   }
   easycam = new Dw.EasyCam(this._renderer, state)
-  easycam.setDistanceMin(300)
+  easycam.setDistanceMin(30)
   easycam.setDistanceMax(3000)
   easycam.setRotation([-1, -0.5, 0.5, -0.5], 10000)
   easycam.setDistance(1000, 10000)
@@ -938,7 +938,7 @@ class Figur {
   showTrail() {
     ampHistory.push(amplitude.getLevel())
 
-    let maxArray = 150
+    let maxArray = 50
     let dis =  50 + spaceSlider.value / 1000;
     let offSet = 450
 
