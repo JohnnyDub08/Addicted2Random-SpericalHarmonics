@@ -101,7 +101,7 @@ function setup() {
   fft.setInput(audio);
   amplitude.setInput(audio);
   amplitude.smooth(0.9)
-  window.addEventListener('click', (event) => { setTimeout(() => audio.play(), 5500)  });
+  audio.play();
 
   // get GUI/Slider ids
   htmlEvents()

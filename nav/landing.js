@@ -64,14 +64,14 @@ function textGlitch(timeStamp) {
       j++;
     }
 
-    if (j < 33) {
-    /*   let filterFreq = map(ran01, 10, 80, 33, 2500);
+  /*   if (j < 33) {
+      let filterFreq = map(ran01, 10, 80, 33, 2500);
       let filterWidth = map2(ran02, 10, 80, 50, 90, 3, 2);
       filter.set(filterFreq, filterWidth);
       soundFx.rate(Math.random() * 3.33 + 0.33);
       soundFx.amp(8);
-      soundFx.play(); */
-    }
+      soundFx.play(); 
+    }*/
     setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
   } else {
     text1.innerHTML = temp3.join('');
