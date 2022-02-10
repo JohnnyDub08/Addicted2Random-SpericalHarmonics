@@ -1,4 +1,4 @@
-'use strict';
+/* 'use strict';
 let box1, box2, text1, text2, text3;
 let htmlText1 = 'Addicted';
 let htmlText2 = ' 2Random';
@@ -100,3 +100,4 @@ function startSide() {
   box2.style.width = "0%";
   box2.style.height = "0%";
 }
+ */
