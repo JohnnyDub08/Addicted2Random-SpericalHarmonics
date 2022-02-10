@@ -101,6 +101,14 @@ body {
   transition: all 0.5s cubic-bezier(0, 0, 0.58, 1);
   z-index: 1;
 }
+#box1>#txt3 {
+  position: absolute;
+  bottom: 70%;
+  right: 38.2%;
+  text-align: center;
+  font-family: 'Audiowide', cursive !important;
+  font-size: 2rem;
+}
 
 #box1 > div {
   position: absolute;

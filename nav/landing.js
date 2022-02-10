@@ -1,19 +1,23 @@
 'use strict';
-let box1, box2, text1, text2;
+let box1, box2, text1, text2, text3;
 let htmlText1 = 'Addicted';
 let htmlText2 = ' 2Random';
-let startTime = 5200;
+let start = false;
 let temp;
 let temp2;
 let temp3 = [];
 let temp4 = [];
-window.addEventListener('load', (event) => { setTimeout(() => init(), 1000) });
+
+window.addEventListener('click', (event) => { if(!start) {init(); start = true} ; setTimeout(() => audio.play(), 5500); });
+
 function init() {
-  text1 = document.getElementById("txt1");
-  text2 = document.getElementById("txt2");
-  box1 = document.getElementById("box1");
-  box2 = document.getElementById("box2");
-  window.requestAnimationFrame(textGlitch);
+    text1 = document.getElementById("txt1");
+    text2 = document.getElementById("txt2");
+    text3 = document.getElementById("txt3");
+    text3.innerHTML = '';
+    box1 = document.getElementById("box1");
+    box2 = document.getElementById("box2");
+    window.requestAnimationFrame(textGlitch); 
 }
 
 function customIterator() {
@@ -30,14 +34,15 @@ let n = customIterator();
 let j = 0;
 function textGlitch(timeStamp) {
 
-  if (timeStamp < startTime) {
+  if (j < 34) {
+    console.log("j: " + j)
     let ran01 = Math.random() * 70 + 10;
     let ran02 = Math.random() * 70 + 10;
     text1.style.fontSize = Math.floor(ran01).toString() + "px";
     text2.style.fontSize = Math.floor(ran02).toString() + "px";
     text1.style.width = Math.floor(ran02 * 0.5).toString() + "%";
     text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
-    
+
     if (j < 8) {
       temp = (j % Math.floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase();
       temp3.push(temp)
@@ -67,7 +72,6 @@ function textGlitch(timeStamp) {
       soundFx.amp(8);
       soundFx.play();
     }
-
     setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
   } else {
     text1.innerHTML = temp3.join('');
@@ -86,9 +90,10 @@ function textGlitch(timeStamp) {
     soundFx.connect();
     soundFx.rate(0.5);
     soundFx.play();
+    setTimeout(() => startSide(), 1000);
   }
 }
-setTimeout(() => startSide(), startTime+1000);
+
 function startSide() {
   box1.style.width = "0%";
   box1.style.height = "0%";

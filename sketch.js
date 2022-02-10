@@ -104,12 +104,11 @@ function windowResized() {
   saveBtn.position(width - 150, 210)
   distSlider.position(width - 150, 260);
 }
-function loaded() {
-  //console.log(audio)
+/* function loaded() {
   setTimeout(() => audio.play(), 4500);
-}
+} */
 function setup() {
-  //setAttributes("antialias", true);
+  setAttributes("antialias", true);
   //setAttributes('alpha', false);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL)
   cnv.style('z-index', -1)
@@ -118,7 +117,7 @@ function setup() {
   //frameRate(30)
 
   // Audio Analyse
-  audio = createAudio('https://ice2.somafm.com/defcon-128-aac', loaded); //("http://a2r.twenty4seven.cc:8000/puredata.ogg"); 
+  audio = createAudio('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");  ,loaded 
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
