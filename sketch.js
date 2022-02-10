@@ -278,10 +278,10 @@ function draw() {
   // Lichter
   lichtMode[l]()
 
-  if (peakCounter3.countMe(2)) {
+ /*  if (peakCounter3.countMe(2)) {
     console.log("Baam!")
     l = (l < 1) ? ++l : 0;
-  }
+  } */
 
   lightShows[ls]()
 
@@ -1191,7 +1191,7 @@ class Planet {
 
         //noLights()
         //ambientLight(127);
-        lichtMode[0]()
+        //lichtMode[0]()
         //pointLight(255, 0, 255, -1, 0.5, 0)
         //texture(tex[this.moonTex])
         //specularMaterial(255)
@@ -1208,8 +1208,8 @@ class Planet {
       ambientMaterial(col5, 255, planetCol)
     }
     if (planetTex) {
-      noLights()
-      pointLight(col5, 0, planetCol + 50, 0, 0, 255);
+      //noLights()
+      //pointLight(col5, 0, planetCol + 50, 0, 0, 255);
       /*     let textures = floor((frameCount * 0.01) % tex.length)
           texture(tex[textures]) */
       //texture(tex[this.moonTex])
