@@ -1,8 +1,7 @@
-
-
 // P5 Sketch
 
-let cnv, mic, audio, fft, spectrum, peakDetect, amplitude, filter;
+let cnv, mic, audio, fft, spectrum, peakDetect, amplitude; 
+let filter; // = new p5.Filter('bandpass');
 let easycam;
 let figur;
 
