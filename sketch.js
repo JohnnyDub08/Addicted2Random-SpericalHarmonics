@@ -92,15 +92,16 @@ function setup() {
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
-  filter = new p5.Filter('bandpass');
+ /*  filter = new p5.Filter('bandpass');
   filter.amp(3)
   soundFx.disconnect();
-  soundFx.connect(filter)
+  soundFx.connect(filter) */
   amplitude = new p5.Amplitude()
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
   amplitude.setInput(audio);
   amplitude.smooth(0.9)
+  window.addEventListener('click', (event) => { setTimeout(() => audio.play(), 5500)  });
 
   // get GUI/Slider ids
   htmlEvents()
@@ -130,9 +131,9 @@ function setup() {
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
-  reverb = new p5.Reverb(); 
+ /*  reverb = new p5.Reverb(); 
   reverb.process(filter, 2, 1.0);
-  reverb.amp(1)
+  reverb.amp(1) */
   //reverb.set(7,0.00) 
 
   // PlanetDebug
@@ -1261,7 +1262,7 @@ function touchStarted() {
   getAudioContext().resume()
 }
 
-// SiteStarter
+/* // SiteStarter
 'use strict';
 let box1, box2, text1, text2, text3;
 let htmlText1 = 'Addicted';
@@ -1364,6 +1365,6 @@ function startSide() {
   box2.style.width = "0%";
   box2.style.height = "0%";
 }
-//  SiteStarter End
+//  SiteStarter End */
 
 //Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit
