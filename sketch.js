@@ -88,7 +88,7 @@ function windowResized() {
   if (!planetMode) sterne.setStars()
 
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
-  easycam.setDistanceMin(30)
+  easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
   easycam.setRotation([0, -0.5, 0, 0], 6000)
   easycam.setDistance(30, 3000)
@@ -141,7 +141,7 @@ function setup() {
     rotation: [0.5, -0.5, 0, 0]
   }
   easycam = new Dw.EasyCam(this._renderer, state)
-  easycam.setDistanceMin(30)
+  easycam.setDistanceMin(300)
   easycam.setDistanceMax(3000)
   easycam.setRotation([-1, -0.5, 0.5, -0.5], 10000)
   easycam.setDistance(1000, 10000)
