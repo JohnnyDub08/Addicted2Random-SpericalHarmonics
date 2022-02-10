@@ -55,7 +55,7 @@ let peakCounter1, peakCounter2, peakCounter3;
 // Landing SoundEffekt
 let soundFx;
 
-function preload() {
+/* function preload() {
   soundFormats('mp3', 'ogg');
   soundFx = loadSound('audio/sFx');
   tex = [
@@ -77,7 +77,7 @@ function preload() {
     loadImage('textures/moon15.png')
   ]
   //deepField = loadImage("textures/Nebula.png");
-}
+} */
 function setup() {
   setAttributes("antialias", true);
   //setAttributes('alpha', false);
@@ -100,8 +100,9 @@ function setup() {
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
   amplitude.setInput(audio);
-  amplitude.smooth(0.9)
-  audio.play();
+  amplitude.smooth(0.9);
+  window.addEventListener('click', () => {audio.play()})
+  
 
   // get GUI/Slider ids
   htmlEvents()
@@ -1127,7 +1128,7 @@ class Planet {
     this.moonZ = random(3, 8);
     this.moonSize = this.size * random(0.1, 0.33)
     this.moonSpeed = random(0.005, 0.01);
-    this.moonTex = floor(random(tex.length))
+    //this.moonTex = floor(random(tex.length))
   }
 
   show() {
@@ -1211,7 +1212,7 @@ class Planet {
       pointLight(col5, 0, planetCol + 50, 0, 0, 255);
       /*     let textures = floor((frameCount * 0.01) % tex.length)
           texture(tex[textures]) */
-      texture(tex[this.moonTex])
+      //texture(tex[this.moonTex])
     }
     sphere(this.planetSize * pump, 24, 24)
     pop()
