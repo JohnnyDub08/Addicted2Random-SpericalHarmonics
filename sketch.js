@@ -77,36 +77,6 @@ function preload() {
   ]
   //deepField = loadImage("textures/Nebula.png");
 }
-function centerCanvas() {
-  let x = (windowWidth - width) / 2
-  let y = (windowHeight - height) / 2
-  cnv.position(x, y)
-}
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight)
-  centerCanvas()
-  if (!planetMode) sterne.setStars()
-
-  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
-  easycam.setDistanceMin(300);
-  easycam.setDistanceMax(3000);
-  easycam.setRotation([0, -0.5, 0, 0], 6000)
-  easycam.setDistance(300, 3000)
-  let eyeZ = height / 2 / tan(PI / 6)
-  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
-
-  planetCheckBox.position(width - 150, 30)
-  lichtCheckBox.position(width - 150, 60)
-  scheinWCheckBox.position(width - 150, 90)
-  lightShowCheckBox.position(width - 150, 120)
-  planetTexCheckBox.position(width - 150, 150)
-  autoCamCheckBox.position(width - 150, 180)
-  saveBtn.position(width - 150, 210)
-  distSlider.position(width - 150, 260);
-}
-/* function loaded() {
-  setTimeout(() => audio.play(), 4500);
-} */
 function setup() {
   setAttributes("antialias", true);
   //setAttributes('alpha', false);
@@ -121,7 +91,7 @@ function setup() {
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
-  filter = new p5.Filter('bandpass')
+  filter = new p5.Filter('bandpass');
   filter.amp(3)
   soundFx.disconnect();
   soundFx.connect(filter)
@@ -208,6 +178,37 @@ function setup() {
   peakCounter2 = new PeakCounter();
   peakCounter3 = new PeakCounter();
 }
+
+function centerCanvas() {
+  let x = (windowWidth - width) / 2
+  let y = (windowHeight - height) / 2
+  cnv.position(x, y)
+}
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight)
+  centerCanvas()
+  if (!planetMode) sterne.setStars()
+
+  easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
+  easycam.setDistanceMin(300);
+  easycam.setDistanceMax(3000);
+  easycam.setRotation([0, -0.5, 0, 0], 6000)
+  easycam.setDistance(300, 3000)
+  let eyeZ = height / 2 / tan(PI / 6)
+  perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
+
+  planetCheckBox.position(width - 150, 30)
+  lichtCheckBox.position(width - 150, 60)
+  scheinWCheckBox.position(width - 150, 90)
+  lightShowCheckBox.position(width - 150, 120)
+  planetTexCheckBox.position(width - 150, 150)
+  autoCamCheckBox.position(width - 150, 180)
+  saveBtn.position(width - 150, 210)
+  distSlider.position(width - 150, 260);
+}
+/* function loaded() {
+  setTimeout(() => audio.play(), 4500);
+} */
 
 function draw() {
   //console.log(getFrameRate())

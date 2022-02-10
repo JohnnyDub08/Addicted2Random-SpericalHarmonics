@@ -35,7 +35,7 @@ let j = 0;
 function textGlitch(timeStamp) {
 
   if (j < 34) {
-    console.log("j: " + j)
+    //console.log("j: " + j)
     let ran01 = Math.random() * 70 + 10;
     let ran02 = Math.random() * 70 + 10;
     text1.style.fontSize = Math.floor(ran01).toString() + "px";
