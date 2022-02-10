@@ -88,10 +88,10 @@ function windowResized() {
   if (!planetMode) sterne.setStars()
 
   easycam = createEasyCam(this._renderer, { distance: 600, center: [0, 0, 0] })
-  easycam.setDistanceMin(300)
-  easycam.setDistanceMax(3000)
+  easycam.setDistanceMin(300);
+  easycam.setDistanceMax(3000);
   easycam.setRotation([0, -0.5, 0, 0], 6000)
-  easycam.setDistance(30, 3000)
+  easycam.setDistance(300, 3000)
   let eyeZ = height / 2 / tan(PI / 6)
   perspective(PI / 3, width / height, eyeZ / 10, eyeZ * 200) // Frustum Far Clip eyeZ*50
 
