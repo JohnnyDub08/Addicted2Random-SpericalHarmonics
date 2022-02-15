@@ -1,6 +1,6 @@
 // P5 Sketch
-
-let cnv, mic, audio, fft, spectrum, peakDetect, amplitude; 
+let spectrum;
+let cnv, mic, audio, fft, peakDetect, amplitude; 
 let filter; // = new p5.Filter('bandpass');
 let easycam;
 let figur;
@@ -55,10 +55,10 @@ let peakCounter1, peakCounter2, peakCounter3;
 // Landing SoundEffekt
 let soundFx;
 
-/* function preload() {
+  window.preload = function () {
   soundFormats('mp3', 'ogg');
   soundFx = loadSound('audio/sFx');
-  tex = [
+/*   tex = [
     loadImage('textures/moon0.jpeg'),
     loadImage('textures/moon1.jpeg'),
     loadImage('textures/moon2.jpeg'),
@@ -75,10 +75,11 @@ let soundFx;
     loadImage('textures/moon13.png'),
     loadImage('textures/moon14.png'),
     loadImage('textures/moon15.png')
-  ]
+  ] */
   //deepField = loadImage("textures/Nebula.png");
-} */
-function setup() {
+} 
+
+window.setup = function () {
   setAttributes("antialias", true);
   //setAttributes('alpha', false);
   cnv = createCanvas(windowWidth, windowHeight, WEBGL)
@@ -92,16 +93,18 @@ function setup() {
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
- /*  filter = new p5.Filter('bandpass');
+
+  filter = new p5.Filter('bandpass');
   filter.amp(3)
   soundFx.disconnect();
-  soundFx.connect(filter) */
+  soundFx.connect(filter);
+
   amplitude = new p5.Amplitude()
   peakDetect = new p5.PeakDetect(45, 100, 0.86, 45)
   fft.setInput(audio);
   amplitude.setInput(audio);
   amplitude.smooth(0.9);
-  window.addEventListener('click', () => {audio.play()})
+  window.addEventListener('click', () => { setTimeout( () => audio.play(), 5000) })
   
 
   // get GUI/Slider ids
@@ -132,9 +135,9 @@ function setup() {
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
- /*  reverb = new p5.Reverb(); 
+  reverb = new p5.Reverb(); 
   reverb.process(filter, 2, 1.0);
-  reverb.amp(1) */
+  reverb.amp(1)
   //reverb.set(7,0.00) 
 
   // PlanetDebug
@@ -170,9 +173,10 @@ function setup() {
 
   planet = new Planet(floor(random(3000, 8000)));
   sterne = new Stars(377);
+  sterne.setStars();
   aA = new AudioAnalysis();
   figur = new Figur();
-  sterne.setStars()
+  
 
   //console.log(mic.getSources());
   //mic.start();
@@ -187,7 +191,8 @@ function centerCanvas() {
   let y = (windowHeight - height) / 2
   cnv.position(x, y)
 }
-function windowResized() {
+
+window.windowResized = function () {
   resizeCanvas(windowWidth, windowHeight)
   centerCanvas()
   if (!planetMode) sterne.setStars()
@@ -213,7 +218,7 @@ function windowResized() {
   setTimeout(() => audio.play(), 4500);
 } */
 
-function draw() {
+window.draw = function () {
   //console.log(getFrameRate())
 
   sliderLogic();
@@ -1207,13 +1212,13 @@ class Planet {
     else {
       ambientMaterial(col5, 255, planetCol)
     }
-    if (planetTex) {
-      //noLights()
-      //pointLight(col5, 0, planetCol + 50, 0, 0, 255);
-      /*     let textures = floor((frameCount * 0.01) % tex.length)
-          texture(tex[textures]) */
-      //texture(tex[this.moonTex])
-    }
+    // if (planetTex) {
+      //  noLights()
+      // pointLight(col5, 0, planetCol + 50, 0, 0, 255);
+      // let textures = floor((frameCount * 0.01) % tex.length)
+      // texture(tex[textures]) 
+      // texture(tex[this.moonTex])
+    // }
     sphere(this.planetSize * pump, 24, 24)
     pop()
   }
@@ -1253,119 +1258,14 @@ class PeakCounter {
   }
 }
 
-function setMillis() {
-  mil = millis();
-  return;
-}
-
 // Audiostart an in manchen Browsern, Handys etc
 function touchStarted() {
   getAudioContext().resume()
 }
 
-/* // SiteStarter
-'use strict';
-let box1, box2, text1, text2, text3;
-let htmlText1 = 'Addicted';
-let htmlText2 = ' 2Random';
-let start = false;
-let temp;
-let temp2;
-let temp3 = [];
-let temp4 = [];
 
-window.addEventListener('click', (event) => { if(!start) {init(); start = true} ; setTimeout(() => audio.play(), 5500); });
-
-function init() {
-    text1 = document.getElementById("txt1");
-    text2 = document.getElementById("txt2");
-    text3 = document.getElementById("txt3");
-    text3.innerHTML = '';
-    box1 = document.getElementById("box1");
-    box2 = document.getElementById("box2");
-    window.requestAnimationFrame(textGlitch); 
+export {
+  spectrum, fft, filter, soundFx, reverb
 }
-
-function customIterator() {
-  let n = 45;
-  return {
-    next: function () {
-      n *= 1.05;
-      return { value: n, done: false };
-    }
-  };
-}
-let n = customIterator();
-
-let j = 0;
-function textGlitch(timeStamp) {
-
-  if (j < 34) {
-    //console.log("j: " + j)
-    let ran01 = Math.random() * 70 + 10;
-    let ran02 = Math.random() * 70 + 10;
-    text1.style.fontSize = Math.floor(ran01).toString() + "px";
-    text2.style.fontSize = Math.floor(ran02).toString() + "px";
-    text1.style.width = Math.floor(ran02 * 0.5).toString() + "%";
-    text2.style.width = Math.floor(ran01 * 0.5).toString() + "%";
-
-    if (j < 8) {
-      temp = (j % Math.floor(Math.random() * 2) == 0) ? htmlText1.charAt(j % htmlText1.length).toUpperCase() : htmlText1.charAt(j % htmlText1.length).toLowerCase();
-      temp3.push(temp)
-      text1.innerHTML = temp3.join('').toString();
-      text2.innerHTML = " ";
-      j++;
-    }
-    else if (j < 16) {
-      temp2 = (j % Math.floor(Math.random() * 2) == 0) ? htmlText2.charAt(j % htmlText2.length).toUpperCase() : htmlText2.charAt(j % htmlText2.length).toLowerCase();
-      temp4.push(temp2)
-      text2.innerHTML = temp4.join('').toString();
-      j++;
-    } else if (j < 24) {
-      text1.innerHTML = temp3.slice(j - 15).join('').toLowerCase();
-      j++;
-    }
-    else {
-      text2.innerHTML = temp4.slice(j - 23).join('').toLowerCase();
-      j++;
-    }
-
-    if (j < 33) {
-      let filterFreq = map(ran01, 10, 80, 33, 2500);
-      let filterWidth = map2(ran02, 10, 80, 50, 90, 3, 2);
-      filter.set(filterFreq, filterWidth);
-      soundFx.rate(Math.random() * 3.33 + 0.33);
-      soundFx.amp(8);
-      soundFx.play();
-    }
-    setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
-  } else {
-    text1.innerHTML = temp3.join('');
-    text1.style.transition = "all .12s";
-    text1.style.fontSize = "5rem";
-    text1.style.width = "50%";
-    text1.style.padding = "15px";
-    text2.innerHTML = temp4.join('');
-    text2.style.transition = "all .12s";
-    text2.style.fontSize = "5rem";
-    text2.style.width = "50%";
-    //filter.set(1200, 10);
-    filter.disconnect();
-    reverb.process(soundFx, 2, 1.0);
-    reverb.set(5, 1.00)
-    soundFx.connect();
-    soundFx.rate(0.5);
-    soundFx.play();
-    setTimeout(() => startSide(), 1000);
-  }
-}
-
-function startSide() {
-  box1.style.width = "0%";
-  box1.style.height = "0%";
-  box2.style.width = "0%";
-  box2.style.height = "0%";
-}
-//  SiteStarter End */
 
 //Hilfe, Liebe, Hoffnung, Dankbar, Dankbarkeit

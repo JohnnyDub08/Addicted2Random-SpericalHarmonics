@@ -1,3 +1,5 @@
+import { filter, soundFx, reverb } from "../sketch.js";
+
 'use strict';
 let box1, box2, text1, text2, text3;
 let htmlText1 = 'Addicted';
@@ -24,7 +26,7 @@ function customIterator() {
   let n = 45;
   return {
     next: function () {
-      n *= 1.05;
+      n *= 1.04;
       return { value: n, done: false };
     }
   };
@@ -64,14 +66,14 @@ function textGlitch(timeStamp) {
       j++;
     }
 
-  /*   if (j < 33) {
+    if (j < 33) {
       let filterFreq = map(ran01, 10, 80, 33, 2500);
       let filterWidth = map2(ran02, 10, 80, 50, 90, 3, 2);
       filter.set(filterFreq, filterWidth);
       soundFx.rate(Math.random() * 3.33 + 0.33);
       soundFx.amp(8);
       soundFx.play(); 
-    }*/
+    }
     setTimeout(() => window.requestAnimationFrame(textGlitch), n.next().value);
   } else {
     text1.innerHTML = temp3.join('');
@@ -84,12 +86,12 @@ function textGlitch(timeStamp) {
     text2.style.fontSize = "5rem";
     text2.style.width = "50%";
     //filter.set(1200, 10);
-   /*  filter.disconnect();
+    filter.disconnect();
     reverb.process(soundFx, 2, 1.0);
     reverb.set(5, 1.00)
     soundFx.connect();
     soundFx.rate(0.5);
-    soundFx.play(); */
+    soundFx.play();
     setTimeout(() => startSide(), 1000);
   }
 }

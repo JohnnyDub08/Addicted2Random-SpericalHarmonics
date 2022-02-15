@@ -1,7 +1,9 @@
+import sweep from "./anim.js";
+
 'use strict';
-var sidebar = false; // Für Audio Visual P5 an aus
+export var sidebar = false; // Für Audio Visual P5 an aus
 let bar = 0;
-function openNav() {
+window.openNav = function () {
   let widthRight = "333px";
   switch (bar) {
     case 0:

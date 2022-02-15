@@ -1,3 +1,5 @@
+import { sidebar } from "./sidebar.js";
+import { spectrum, fft } from "../sketch.js"
 'use strict';
 let sketch = function (p) {
     p.setup = function () {
