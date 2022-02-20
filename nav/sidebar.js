@@ -1,7 +1,7 @@
 import sweep from "./anim.js";
 
 'use strict';
-export var sidebar = false; // Für Audio Visual P5 an aus
+var sidebar = false; // Für Audio Visual P5 an aus
 let bar = 0;
 window.openNav = function () {
   let widthRight = "333px";
@@ -24,3 +24,5 @@ window.openNav = function () {
       bar = 0;
   }
 }
+
+export {sidebar};

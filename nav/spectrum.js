@@ -37,3 +37,5 @@ let sketch = function (p) {
   
   let node = document.createElement('div')
   new p5(sketch, node)
+
+  export {sketch};

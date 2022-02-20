@@ -1,9 +1,23 @@
+import {map2 , map3} from "./utils/map2.js";
+import { saveFile } from "./nav/save.js";
+import { sketch } from "./nav/spectrum.js";
+import {dummy} from "./nav/load.js"
+
+
+
+
+// State
+const PLANETMODE = 0;
+const STARSYSTEM = 1;
+let state = 1;
+
 // P5 Sketch
 let spectrum;
-let cnv, mic, audio, fft, peakDetect, amplitude; 
+let cnv, mic, audio, fft, peakDetect, amplitude;
 let filter; // = new p5.Filter('bandpass');
 let easycam;
 let figur;
+let sun, mercury, venus, terra, mars, jupiter, saturn, uranus, neptun;
 
 let total = 50;
 let sterne;
@@ -14,7 +28,7 @@ let m0Slider, m0, m1Slider, m1, m2Slider, m2, m3Slider, m3, m4Slider, m4, m5Slid
   smoothSliderM2, smoothValueM2, smoothSliderM4, smoothValueM4, smoothSliderM6, smoothValueM6,
   strenghtSliderm0, strenghtValuem0, strenghtSliderm2, strenghtValuem2,
   strenghtSliderm4, strenghtValuem4, strenghtSliderm6, strenghtValuem6,
-  peakCheck, rotateCheck, spaceCheck, resCheck, audioSourceBtn, saveBtn, loadBtn, distSlider,
+  peakCheck, rotateCheck, spaceCheck, resCheck, audioSourceBtn, saveBtn, loadBtn, distSlider, stateSlider,
   lightCheck, morphBtn, resetBtn, morphSlider, spaceSlider, rotateSliderX,
   rotateSliderY, rotateSliderZ, dropZone, serverAdress;
 let sourceIsStream = true;
@@ -55,29 +69,29 @@ let peakCounter1, peakCounter2, peakCounter3;
 // Landing SoundEffekt
 let soundFx;
 
-  window.preload = function () {
+window.preload = function () {
   soundFormats('mp3', 'ogg');
   soundFx = loadSound('audio/sFx');
-/*   tex = [
-    loadImage('textures/moon0.jpeg'),
-    loadImage('textures/moon1.jpeg'),
-    loadImage('textures/moon2.jpeg'),
-    loadImage('textures/moon3.jpeg'),
-    loadImage('textures/moon4.jpeg'),
-    loadImage('textures/moon5.jpeg'),
-    loadImage('textures/moon6.jpeg'),
-    loadImage('textures/moon7.jpeg'),
-    loadImage('textures/moon8.jpeg'),
-    loadImage('textures/moon9.jpeg'),
-    loadImage('textures/moon10.png'),
-    loadImage('textures/moon11.png'),
-    loadImage('textures/moon12.png'),
-    loadImage('textures/moon13.png'),
-    loadImage('textures/moon14.png'),
-    loadImage('textures/moon15.png')
-  ] */
+  /*   tex = [
+      loadImage('textures/moon0.jpeg'),
+      loadImage('textures/moon1.jpeg'),
+      loadImage('textures/moon2.jpeg'),
+      loadImage('textures/moon3.jpeg'),
+      loadImage('textures/moon4.jpeg'),
+      loadImage('textures/moon5.jpeg'),
+      loadImage('textures/moon6.jpeg'),
+      loadImage('textures/moon7.jpeg'),
+      loadImage('textures/moon8.jpeg'),
+      loadImage('textures/moon9.jpeg'),
+      loadImage('textures/moon10.png'),
+      loadImage('textures/moon11.png'),
+      loadImage('textures/moon12.png'),
+      loadImage('textures/moon13.png'),
+      loadImage('textures/moon14.png'),
+      loadImage('textures/moon15.png')
+    ] */
   //deepField = loadImage("textures/Nebula.png");
-} 
+}
 
 window.setup = function () {
   setAttributes("antialias", true);
@@ -104,8 +118,8 @@ window.setup = function () {
   fft.setInput(audio);
   amplitude.setInput(audio);
   amplitude.smooth(0.9);
-  window.addEventListener('click', () => { setTimeout( () => audio.play(), 5000) })
-  
+  window.addEventListener('click', () => { setTimeout(() => audio.play(), 5000) })
+
 
   // get GUI/Slider ids
   htmlEvents()
@@ -135,7 +149,7 @@ window.setup = function () {
   lightVecTemp = createVector(0, 0, 0)
 
   // Audio Effekte
-  reverb = new p5.Reverb(); 
+  reverb = new p5.Reverb();
   reverb.process(filter, 2, 1.0);
   reverb.amp(1)
   //reverb.set(7,0.00) 
@@ -170,13 +184,16 @@ window.setup = function () {
   saveBtn.mousePressed(saveFile);
   distSlider = createSlider(0, 200, 0);
   distSlider.position(width - 150, 260);
+  stateSlider = createSlider(0, 1, 0);
+  stateSlider.position(width - 150, 290);
 
   planet = new Planet(floor(random(3000, 8000)));
   sterne = new Stars(377);
   sterne.setStars();
   aA = new AudioAnalysis();
   figur = new Figur();
-  
+  createStarsystem(figur);
+
 
   //console.log(mic.getSources());
   //mic.start();
@@ -213,6 +230,7 @@ window.windowResized = function () {
   autoCamCheckBox.position(width - 150, 180)
   saveBtn.position(width - 150, 210)
   distSlider.position(width - 150, 260);
+  stateSlider.position(width - 150, 290);
 }
 /* function loaded() {
   setTimeout(() => audio.play(), 4500);
@@ -249,15 +267,14 @@ window.draw = function () {
 
   // Kamera
   if (rotateCheck.checked) {
-    easycam.rotateX(rotateSliderX.value / 100000)
-    easycam.rotateY(rotateSliderY.value / 100000)
-    easycam.rotateZ(rotateSliderZ.value / 100000)
+    easycam.rotateX(rotateSliderX.value / 100000);
+    easycam.rotateY(rotateSliderY.value / 100000);
+    easycam.rotateZ(rotateSliderZ.value / 100000);
   }
 
   if (autoCam) {
     let count8 = peakCounter1.countMe(12);
     if (count8) {
-      //console.log("Camera Neu")
       if (!planetMode)
         state2 = {
           distance: random(400, 1500), center: [0, 0, 0], rotation: [random(-1, 1), random(-1, 1), random(-1, 1), random(-1, 1)]
@@ -280,24 +297,30 @@ window.draw = function () {
       //fill(col5, 100, 100)
       sphere(90000,6,6)   */
 
-  // Lichter
-  lichtMode[l]()
 
- /*  if (peakCounter3.countMe(2)) {
-    console.log("Baam!")
-    l = (l < 1) ? ++l : 0;
-  } */
+  switch (stateSlider.value()) {
+    case PLANETMODE:
+      lichtMode[l]()
+      lightShows[ls]()
+      figur.show(createVector(0,0,0));
+      sterne.show();
+      planet.show();
+      break;
+    case STARSYSTEM:
+      lichtMode[l]()
+      lightShows[ls]()
+      sterne.show();
+      planet.show();
+      sun.show();
+      sSize = 0.05
+      for (let i = 0; i < sun.orbiters.length; i++) {
+        sun.orbiters[i].show(figur);
+        sun.orbiters[i].move();
+        //console.log(sun.orbiters[i].getPos);
+      }
+      break;
+  }
 
-  lightShows[ls]()
-
-  // Figur
-  figur.show();
-
-  //Sterne
-  sterne.show()
-
-  //Planet
-  planet.show()
 }
 
 function changePlanetMode() {
@@ -305,21 +328,18 @@ function changePlanetMode() {
   planetMode = !planetMode
 
   if (!planetMode) {
-    sterne.setStars()
-    spaceSlider.value = 50000
+    sterne.setStars();
+    spaceSlider.value = 50000;
+    easycam.setDistance(1500, 3000);
+    easycam.setRotation([-0.5, 1, -1, 0], 3000);
   } else {
     planet = new Planet(random(1500, 15000));
     sterne.setStarsPlanet()
-  }
-  if (planetMode) {
     easycam.setRotation([-0.5, 0, -0.5, 0], 6000)
     rotateSliderX.value = 1000000 / planet.size
     rotateCheck.checked = true
     easycam.setDistance(950, 3000)
     spaceCheck.checked = true
-  } else {
-    easycam.setDistance(1500, 3000)
-    easycam.setRotation([-0.5, 1, -1, 0], 3000)
   }
 }
 
@@ -554,7 +574,7 @@ function getAudioFile(file) {
   fft.setInput(audio)
   //amplitude = new p5.Amplitude();
   //amplitude.setInput(audio)
-  audioSourceBtn.innerHTML = file.name.substring(file.name.length-4,file.name.length-12);
+  audioSourceBtn.innerHTML = file.name.substring(file.name.length - 4, file.name.length - 12);
   console.log(file.name.length);
 }
 
@@ -893,8 +913,14 @@ class Figur {
         this.shape[i][j] = createVector(x, y, z).mult(60 * sSize)
       }
     }
+  }
+
+  build(pos) {
+    fill(255);
     specularMaterial(190, 0.96)
 
+    //push();
+    //translate(pos.x,pos.y,pos.z);
     for (let i = 0; i < total; i++) {
       let v1, v2
       beginShape(TRIANGLE_STRIP)
@@ -910,9 +936,10 @@ class Figur {
       }
       endShape()
     }
+    //pop();
   }
 
-  show() {
+  show(pos) {
     push()
     let centerVec = createVector(1, 0, 0)
     let planetVec = createVector(planet.planetX, planet.planetY, 0);
@@ -932,6 +959,10 @@ class Figur {
     }
     rotateZ(this.rotateShape); //rotationState
     this.sphaere(aA.m, sSize);
+   
+      this.build(pos);
+    
+    
     pop();
 
     if (!planetMode) {
@@ -947,7 +978,7 @@ class Figur {
     ampHistory.push(amplitude.getLevel())
 
     let maxArray = 50
-    let dis =  50 + spaceSlider.value / 1000;
+    let dis = 50 + spaceSlider.value / 1000;
     let offSet = 450
 
     noStroke();
@@ -955,9 +986,9 @@ class Figur {
     beginShape(LINES);
     vertex(0, offSet - 200, 0)
     for (let i = 0; i < ampHistory.length; i++) {
-      let amp = floor(map(ampHistory[i], 0, 1, 1, (5 * spaceSlider.value) / 1000) );
+      let amp = floor(map(ampHistory[i], 0, 1, 1, (5 * spaceSlider.value) / 1000));
 
-      for (let j = 0; j <= TWO_PI; j += PI/6) {     // Kreisförmiger Trail
+      for (let j = 0; j <= TWO_PI; j += PI / 6) {     // Kreisförmiger Trail
         let x = amp * cos(j);
         let y = offSet + maxArray * dis - i * dis;
         let z = amp * sin(j);
@@ -1202,23 +1233,25 @@ class Planet {
         //specularMaterial(255)
         let moonPump = map2(amplitude.getLevel(), 0, 1, 1, 9, 2, 0)
         noStroke();
+        fill(255);
         sphere(this.moonSize * moonPump)
         pop()
       }
     }
     noStroke()
-    fill(255)
+   
     if (l == 1) specularMaterial(col5, 255, planetCol)
     else {
       ambientMaterial(col5, 255, planetCol)
     }
     // if (planetTex) {
-      //  noLights()
-      // pointLight(col5, 0, planetCol + 50, 0, 0, 255);
-      // let textures = floor((frameCount * 0.01) % tex.length)
-      // texture(tex[textures]) 
-      // texture(tex[this.moonTex])
+    //  noLights()
+    // pointLight(col5, 0, planetCol + 50, 0, 0, 255);
+    // let textures = floor((frameCount * 0.01) % tex.length)
+    // texture(tex[textures]) 
+    // texture(tex[this.moonTex])
     // }
+    //fill(255)
     sphere(this.planetSize * pump, 24, 24)
     pop()
   }
@@ -1241,6 +1274,101 @@ class Planet {
     pop()
   }
 }
+
+class Sun {
+  constructor(pos, size, col) {
+    this.pos = pos;
+    this.size = size;
+    this.col = col;
+    this.orbiters = [];
+  }
+  show() {
+    //emissiveMaterial(255, 255, 255, 0.1);
+    fill(this.col);
+    push();
+    stroke(this.col);
+    strokeWeight(5);
+    line(this.pos.x, this.pos.y, this.pos.z, this.pos.x, this.pos.y + 1000, this.pos.z)
+    translate(this.pos.x, this.pos.y, this.pos.z);
+    noStroke();
+    sphere(this.size);
+    pop();
+  }
+  set setPos(p) {
+    this.pos = p;
+  }
+  get getPos() {
+    return this.pos;
+  }
+}
+
+class Orbiter extends Sun {
+  constructor({figur},pos, size, col, radius, speed) {
+    super(pos, size, col)
+    this.figur = figur;
+    this.radius = radius;
+    this.speed = speed;
+    this.lastPos = [];
+    this.angle = 0;
+  }
+  show() {
+    noStroke();
+    //fill(this.col);
+    push();
+    translate(this.pos.x, this.pos.y, this.pos.z);
+    //directionalLight(255, 255, 255, this.pos); //createVector(0,0,0).add(this.pos).normalize()
+    //ambientMaterial(this.col)
+    //sphere(this.size);
+    this.figur.show(this.pos.x, this.pos.y, this.pos.z);
+    pop();
+  }
+  move() {
+    this.angle += 0.001 + this.speed * spaceSlider.value / 100000; 
+    this.pos.x = this.radius * cos(this.angle);
+    this.pos.y = cos(this.angle) * this.size * 5;
+    this.pos.z = this.radius * sin(this.angle);
+    this.lastPos.push(createVector(this.pos.x, this.pos.y, this.pos.z));
+    if (this.lastPos.length > 200) {
+      this.lastPos.splice(0, 1);
+    }
+    strokeWeight(0.9);
+    beginShape();
+    noFill();
+    for (let i = 1; i < this.lastPos.length - 1; i++) {
+      stroke(this.col);
+      vertex(this.lastPos[i].x, this.lastPos[i].y + (this.lastPos.length - i) * 5, this.lastPos[i].z);
+    }
+    endShape();
+  }
+  set setPos(p) {
+    this.pos = p;
+  }
+  get getPos() {
+    return this.pos;
+  }
+}
+
+function createStarsystem(figur) {
+  sun = new Sun(createVector(0, 0, 0), 100, '#ffcc00', 0, 0);
+  mercury = new Orbiter({figur},createVector(0, 0, 0), 5, '#80a080', 150, 0.3);
+  venus =   new Orbiter({figur},createVector(0, 0, 0), 6, '#aacc00', 180, 0.26);
+  terra =   new Orbiter({figur},createVector(0, 0, 0), 7, '#0000ff', 210, 0.23);
+  mars =    new Orbiter({figur},createVector(0, 0, 0), 8, '#ff0000', 250, 0.2);
+  jupiter = new Orbiter({figur},createVector(0, 0, 0), 10, '#ffff00', 300, 0.17);
+  saturn =  new Orbiter({figur},createVector(0, 0, 0), 12, '#ffffff', 350, 0.14);
+  uranus =  new Orbiter({figur},createVector(0, 0, 0), 7, '#0000ff', 420, 0.13);
+  neptun =  new Orbiter({figur},createVector(0, 0, 0), 5, '#0000ff', 450, 0.11);
+
+  sun.orbiters.push(mercury);
+  sun.orbiters.push(venus);
+  sun.orbiters.push(terra);
+  sun.orbiters.push(mars);
+  sun.orbiters.push(jupiter);
+  sun.orbiters.push(saturn);
+  sun.orbiters.push(uranus);
+  sun.orbiters.push(neptun);
+}
+
 
 class PeakCounter {
   constructor() {

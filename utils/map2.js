@@ -224,6 +224,4 @@ function map3(value, start1, stop1, start2, stop2, v, when) {
   return out;
 }
 
-
-
-
+export {map2 , map3};

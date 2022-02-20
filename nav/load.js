@@ -1,4 +1,5 @@
-function readFile(input) {
+var dummy = 0;
+window.readFile = function(input) {
     let file = input.files[0];
     let fileReader = new FileReader();
     fileReader.readAsText(file);
@@ -12,7 +13,7 @@ function readFile(input) {
     };
 }
 
-function loadFromFile(preset) {
+window.loadFromFile = function (preset) {
     m0Slider.value = preset.m0Slider;
     m1Slider.value = preset.m1Slider;
     m2Slider.value = preset.m2Slider;
@@ -42,3 +43,5 @@ function loadFromFile(preset) {
     strenghtSliderm4.value = preset.strenghtSliderm4;
     strenghtSliderm6.value = preset.strenghtSliderm6;
 }
+
+export {dummy};

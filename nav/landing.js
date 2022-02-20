@@ -1,4 +1,5 @@
 import { filter, soundFx, reverb } from "../sketch.js";
+import {map2 , map3} from "../utils/map2.js";
 
 'use strict';
 let box1, box2, text1, text2, text3;

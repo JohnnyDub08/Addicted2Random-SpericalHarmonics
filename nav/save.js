@@ -49,3 +49,5 @@ let saveFile = () => {
 
     newLink.click();
 }
+
+export {saveFile};
