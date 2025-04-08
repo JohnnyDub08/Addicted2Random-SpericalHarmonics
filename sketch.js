@@ -88,7 +88,7 @@ function setup() {
   //frameRate(30)
 
   // Audio Analyse
-  audio = createAudio('https://ice2.somafm.com/defcon-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");  ,loaded 
+  audio = createAudio('https://ice2.somafm.com/tikitime-128-aac'); //("http://a2r.twenty4seven.cc:8000/puredata.ogg");  ,loaded 
 
   fft = new p5.FFT()
   mic = new p5.AudioIn()
